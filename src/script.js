@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 const config = {
     joints: 4,
@@ -25,10 +27,7 @@ const delta = config.width / config.resolution;
 const pos = new THREE.Vector2(0, 0);
 let groundShader = null;
 
-// Initialize
 const canvas = document.getElementById('canvas');
-
-// Scenes
 const scene = new THREE.Scene();
 const backgroundScene = new THREE.Scene();
 
@@ -38,26 +37,161 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.autoClear = false;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.3;
 
 // Camera
 const FOV = 45;
 const camera = new THREE.PerspectiveCamera(FOV, window.innerWidth / window.innerHeight, 1, 20000);
-camera.position.set(-1, 4, 35);
-camera.lookAt(new THREE.Vector3(0, 3, 0));
+camera.position.set(-2, 3, 55);
 scene.add(camera);
 backgroundScene.add(camera);
 
+const controls = new OrbitControls(camera, canvas);
+controls.target.set(0, 5, 10);
+controls.enableDamping = false;
+controls.minDistance = 40;
+controls.maxDistance = 50;
+controls.enablePan = false;
+controls.enableRotate = false;
+controls.update();
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const clickableMeshes = [];
+const hoverState = new Map();
+const hoverEase = 0.15;
+
+canvas.addEventListener('mousemove', (event) => {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(clickableMeshes);
+
+    const intersectedNames = new Set(intersects.map(i => i.object.name));
+
+    clickableMeshes.forEach(mesh => {
+        if (mesh.name && mesh.name !== 'floatingText') {
+            if (intersectedNames.has(mesh.name)) {
+                if (!hoverState.has(mesh.uuid)) {
+                    hoverState.set(mesh.uuid, { target: 1.15, current: mesh.scale.x });
+                } else {
+                    hoverState.get(mesh.uuid).target = 1.15;
+                }
+            } else {
+                const state = hoverState.get(mesh.uuid);
+                if (state) {
+                    state.target = 1;
+                }
+            }
+        }
+    });
+
+    document.body.style.cursor = intersectedNames.size > 0 ? 'pointer' : 'default';
+});
+
+canvas.addEventListener('click', (event) => {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(clickableMeshes);
+
+    if (intersects.length > 0) {
+        const clickedMesh = intersects[0].object;
+        const url = clickedMesh.userData.url;
+        if (url) {
+            window.open(url, '_blank');
+        }
+    }
+});
+
+canvas.addEventListener('touchstart', (event) => {
+    event.preventDefault();
+    const touch = event.touches[0];
+    mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(clickableMeshes);
+
+    const intersectedNames = new Set(intersects.map(i => i.object.name));
+
+    clickableMeshes.forEach(mesh => {
+        if (mesh.name && mesh.name !== 'floatingText') {
+            if (intersectedNames.has(mesh.name)) {
+                if (!hoverState.has(mesh.uuid)) {
+                    hoverState.set(mesh.uuid, { target: 1.15, current: mesh.scale.x });
+                } else {
+                    hoverState.get(mesh.uuid).target = 1.15;
+                }
+            } else {
+                const state = hoverState.get(mesh.uuid);
+                if (state) {
+                    state.target = 1;
+                }
+            }
+        }
+    });
+}, { passive: false });
+
+canvas.addEventListener('touchend', (event) => {
+    mouse.x = (event.changedTouches[0].clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.changedTouches[0].clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(clickableMeshes);
+
+    if (intersects.length > 0) {
+        const clickedMesh = intersects[0].object;
+        const url = clickedMesh.userData.url;
+        if (url) {
+            window.open(url, '_blank');
+        }
+    }
+
+    hoverState.forEach((state, uuid) => {
+        state.target = 1;
+    });
+});
+
 // Lights
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
 scene.add(ambientLight);
 
-const pointLight = new THREE.PointLight(0xffffff, 1, 50);
-pointLight.position.set(0, 6, 8);
+const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.4);
+scene.add(hemisphereLight);
+
+const pointLight = new THREE.PointLight(0xffffff, 1.5, 50);
+pointLight.position.set(0, 8, 10);
+pointLight.castShadow = true;
+pointLight.shadow.radius = 4;
+pointLight.shadow.bias = -0.001;
 scene.add(pointLight);
 
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
-dirLight.position.set(5, 10, 5);
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+dirLight.position.set(5, 10, 7);
+dirLight.castShadow = true;
+dirLight.shadow.camera.near = 0.5;
+dirLight.shadow.camera.far = 50;
+dirLight.shadow.camera.left = -20;
+dirLight.shadow.camera.right = 20;
+dirLight.shadow.camera.top = 20;
+dirLight.shadow.camera.bottom = -20;
+dirLight.shadow.radius = 3;
+dirLight.shadow.bias = -0.0005;
 scene.add(dirLight);
+
+const textLight = new THREE.PointLight(0xffffff, 2, 30);
+textLight.position.set(0, 8, 15);
+scene.add(textLight);
+
+const rimLight = new THREE.PointLight(0xffffff, 1.5, 30);
+rimLight.position.set(0, 5, 5);
+scene.add(rimLight);
 
 // Textures
 const loader = new THREE.TextureLoader();
@@ -73,7 +207,8 @@ const backgroundMaterial = new THREE.ShaderMaterial({
         sunDirection: { type: 'vec3', value: new THREE.Vector3(Math.sin(config.azimuth), Math.sin(config.elevation), -Math.cos(config.azimuth)) },
         resolution: { type: 'vec2', value: new THREE.Vector2(canvas.width, canvas.height) },
         fogFade: { type: 'float', value: config.fogFade },
-        fov: { type: 'float', value: FOV }
+        fov: { type: 'float', value: FOV },
+        time: { type: 'float', value: 0 }
     },
     vertexShader: `
         varying vec2 vUv;
@@ -88,6 +223,7 @@ const backgroundMaterial = new THREE.ShaderMaterial({
         uniform vec3 sunDirection;
         uniform float fogFade;
         uniform float fov;
+        uniform float time;
 
         const vec3 skyColour = 0.6 * vec3(0.02, 0.2, 0.9);
         vec3 getSkyColour(vec3 rayDir) {
@@ -130,6 +266,55 @@ const backgroundMaterial = new THREE.ShaderMaterial({
             return pow(radius / dist, intensity);
         }
 
+        float hash(vec2 p, float seed) {
+            return fract(sin(dot(p + seed * 13.5, vec2(127.1, 311.7))) * 43758.5453123);
+        }
+
+        float noise(vec2 p, float seed) {
+            vec2 i = floor(p);
+            vec2 f = fract(p);
+            f = f * f * (3.0 - 2.0 * f);
+            float a = hash(i, seed);
+            float b = hash(i + vec2(1.0, 0.0), seed);
+            float c = hash(i + vec2(0.0, 1.0), seed);
+            float d = hash(i + vec2(1.0, 1.0), seed);
+            return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+        }
+
+        float fbm(vec2 p, float seed) {
+            float sum = 0.0;
+            float amp = 0.5;
+            float freq = 1.0;
+            for (int i = 0; i < 4; i++) {
+                sum += noise(p * freq, seed + float(i) * 7.3) * amp;
+                amp *= 0.5;
+                freq *= 2.0;
+            }
+            return sum;
+        }
+
+        float cloudNoise(vec2 p, float time, float seed) {
+            vec2 offset = vec2(time * 0.07 + seed, seed * 23.7);
+            float n = fbm(p * 1.2 + offset, seed);
+            n += fbm(p * 2.5 + offset * 1.2, seed + 100.0) * 0.35;
+            return n;
+        }
+
+        float getCloudLayer(vec3 rayDir, float time, float seed, float height) {
+            if (rayDir.y < 0.15) return 0.0;
+            float heightFactor = smoothstep(0.15, height, rayDir.y) * (1.0 - smoothstep(height, 0.6, rayDir.y));
+            vec2 cloudPos = vec2(rayDir.x, rayDir.z) / rayDir.y * (height * 4.0);
+            float density = cloudNoise(cloudPos, time, seed);
+            density = smoothstep(0.6, 0.9, density);
+            return density * heightFactor;
+        }
+
+        float getCloudDensity(vec3 rayDir, float time) {
+            float layer1 = getCloudLayer(rayDir, time, 0.0, 0.25);
+            float layer2 = getCloudLayer(rayDir, time, 42.0, 0.4) * 0.5;
+            return min(layer1 + layer2, 1.0);
+        }
+
         void main() {
             vec3 target = vec3(0.0, 0.0, 0.0);
             vec3 up = vec3(0.0, 1.0, 0.0);
@@ -139,6 +324,16 @@ const backgroundMaterial = new THREE.ShaderMaterial({
             vec3 col = getSkyColour(rayDir);
             vec3 sunDir = normalize(sunDirection);
             float mu = dot(sunDir, rayDir);
+
+            float cloudDensity = getCloudDensity(rayDir, time);
+            float sunAmount = max(mu, 0.0);
+            vec3 cloudBase = vec3(1.0, 0.98, 0.95);
+            vec3 cloudShadow = vec3(0.65, 0.7, 0.8);
+            vec3 cloudColor = mix(cloudShadow, cloudBase, 0.4 + sunAmount * 0.6);
+
+            float edgeFade = smoothstep(0.0, 0.3, rayDir.y);
+            col = mix(col, cloudColor, cloudDensity * 0.6 * edgeFade);
+
             col += vec3(1.0, 1.0, 0.8) * getGlow(1.0 - mu, 0.00005, 0.9);
             col += applyFog(col, vec3(0, 1000, 0), rayDir, sunDir);
             col = ACESFilm(col);
@@ -162,7 +357,7 @@ groundGeometry.setAttribute('basePosition', groundBaseGeometry.getAttribute('pos
 groundGeometry.lookAt(new THREE.Vector3(0, 1, 0));
 groundGeometry.verticesNeedUpdate = true;
 
-const groundMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color('rgb(10%, 25%, 2%)') });
+const groundMaterial = new THREE.MeshPhongMaterial({ color: new THREE.Color('rgb(10%, 25%, 2%)'), shininess: 10 });
 
 const sharedPrefix = `
 uniform sampler2D noiseTexture;
@@ -237,6 +432,7 @@ groundMaterial.onBeforeCompile = function(shader) {
 };
 
 const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+ground.receiveShadow = true;
 ground.geometry.computeVertexNormals();
 scene.add(ground);
 
@@ -312,9 +508,9 @@ void main() {
     vec2 fractionalPos = 0.5 + offset.xz / width;
     fractionalPos *= TWO_PI;
 
-    float noise = 0.5 + 0.5 * sin(fractionalPos.x + time);
+    float noise = 0.5 + 0.5 * sin(fractionalPos.x + time * 1.5);
     float halfAngle = -noise * 0.1;
-    noise = 0.5 + 0.5 * cos(fractionalPos.y + time);
+    noise = 0.5 + 0.5 * cos(fractionalPos.y + time * 1.5);
     halfAngle -= noise * 0.05;
 
     direction = normalize(vec4(sin(halfAngle), 0.0, -sin(halfAngle), cos(halfAngle)));
@@ -504,25 +700,106 @@ const fontLoader = new FontLoader();
 fontLoader.load('/fonts/helvetiker_regular.typeface.json', function(font) {
     const textGeometry = new TextGeometry('kate', {
         font: font,
-        size: 1.5,
-        height: 0.3,
-        curveSegments: 12,
+        depth: 100,
+        size: 4,
+        height: 2,
+        curveSegments: 32,
         bevelEnabled: true,
-        bevelThickness: 0.02,
-        bevelSize: 0.01,
+        bevelThickness: 0.08,
+        bevelSize: 0.1,
         bevelOffset: 0,
-        bevelSegments: 3
+        bevelSegments: 8
     });
 
     textGeometry.computeBoundingBox();
     const xOffset = -0.5 * (textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x);
     textGeometry.translate(xOffset, 0, 0);
 
-    const textMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
+    const textMaterial = new THREE.MeshPhongMaterial({
+        color: 0xAAB927,
+        specular: 0xaaaaaa,
+        shininess: 30,
+        emissive: 0x333333,
+        emissiveIntensity: 0.3
+    });
     const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-    textMesh.position.set(0, 3, 0);
+    textMesh.castShadow = true;
+    textMesh.receiveShadow = true;
+    textMesh.position.set(0, 5, 10);
     textMesh.name = 'floatingText';
     scene.add(textMesh);
+
+    const textBox = textGeometry.boundingBox;
+    const textWidth = textBox.max.x - textBox.min.x;
+    const textHeight = textBox.max.y - textBox.min.y;
+    const textHitbox = new THREE.Mesh(
+        new THREE.PlaneGeometry(textWidth + 2, textHeight + 1.5),
+        new THREE.MeshBasicMaterial({ visible: false })
+    );
+    textHitbox.position.set(0, 5, 10);
+    textHitbox.name = 'floatingText';
+    textHitbox.userData.url = null;
+    textMesh.add(textHitbox);
+    clickableMeshes.push(textHitbox);
+
+    const linkData = [
+        { label: 'github', url: 'https://github.com/kate-jiang' },
+        { label: 'resume', url: '/Kate_Resume.pdf' },
+        { label: 'twitter', url: 'https://twitter.com/jazzkitten' }
+    ];
+    const linkSize = 1;
+    const linkSpacing = 6;
+    const linkStartX = -((linkData.length - 1) * linkSpacing) / 2;
+
+    let maxDescender = 0;
+
+    linkData.forEach((item) => {
+        const geometry = new TextGeometry(item.label, {
+            font: font,
+            size: linkSize,
+            height: .5,
+            curveSegments: 12,
+            bevelEnabled: true,
+            bevelThickness: 0.02,
+            bevelSize: 0.02,
+            bevelOffset: 0,
+            bevelSegments: 3
+        });
+
+        geometry.computeBoundingBox();
+        const xOffset = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+        if (geometry.boundingBox.min.y < maxDescender) {
+            maxDescender = geometry.boundingBox.min.y;
+        }
+        item.geometry = geometry;
+        item.xOffset = xOffset;
+    });
+
+    linkData.forEach((item, i) => {
+        item.geometry.translate(item.xOffset, -maxDescender, 0);
+
+        const linkMesh = new THREE.Mesh(item.geometry, textMaterial);
+        linkMesh.castShadow = true;
+        linkMesh.receiveShadow = true;
+        linkMesh.name = item.label;
+        linkMesh.userData.url = item.url;
+        linkMesh.position.set(linkStartX + i * linkSpacing, -2.5, 1);
+        textMesh.add(linkMesh);
+        clickableMeshes.push(linkMesh);
+
+        const linkBox = item.geometry.boundingBox;
+        const linkW = linkBox.max.x - linkBox.min.x;
+        const linkH = linkBox.max.y - linkBox.min.y;
+        const linkHitbox = new THREE.Mesh(
+            new THREE.PlaneGeometry(linkW + 1, linkH + 0.8),
+            new THREE.MeshBasicMaterial({ visible: false })
+        );
+        linkHitbox.position.set(linkStartX + i * linkSpacing, -2.5, 0.5);
+        linkHitbox.name = item.label;
+        linkHitbox.userData.url = item.url;
+        textMesh.add(linkHitbox);
+        clickableMeshes.push(linkHitbox);
+    });
 });
 
 // Handle window resize
@@ -532,6 +809,7 @@ window.addEventListener('resize', () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     backgroundMaterial.uniforms.resolution.value = new THREE.Vector2(canvas.width, canvas.height);
     backgroundMaterial.uniforms.fov.value = FOV;
+    controls.update();
 });
 
 // Animation loop
@@ -540,15 +818,27 @@ let lastFrame = performance.now();
 
 function animate() {
     const now = performance.now();
-    const dt = (now - lastFrame) / 1000;
+    let dt = (now - lastFrame) / 1000;
+    dt = Math.min(dt, 0.1);
     lastFrame = now;
     time += dt;
 
     grassMaterial.uniforms.time.value = time;
+    backgroundMaterial.uniforms.time.value = time;
+
+    hoverState.forEach((state, uuid) => {
+        const mesh = clickableMeshes.find(m => m.uuid === uuid);
+        if (mesh) {
+            state.current += (state.target - state.current) * hoverEase;
+            mesh.scale.setScalar(state.current);
+        }
+    });
+
+    controls.update();
 
     const text = scene.getObjectByName('floatingText');
     if (text) {
-        text.position.y = 3 + Math.sin(time * 1.5) * 0.15;
+        text.position.y = 5 + Math.sin(time * 1.5) * 0.3;
         text.rotation.y = Math.sin(time * 0.8) * 0.1;
     }
 
