@@ -90,7 +90,8 @@ canvas.addEventListener('mousemove', (event) => {
         }
     });
 
-    document.body.style.cursor = intersectedNames.size > 0 ? 'pointer' : 'default';
+    const hasUrlIntersect = intersects.some(i => i.object.userData.url);
+    document.body.style.cursor = hasUrlIntersect ? 'pointer' : 'default';
 });
 
 canvas.addEventListener('click', (event) => {
