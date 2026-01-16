@@ -253,6 +253,10 @@ canvas {
     font-size: 18px;
   }
 
+  #about-content strong {
+    font-weight: 500;
+  }
+
   #resume-link {
     display: block;
     text-align: center;
