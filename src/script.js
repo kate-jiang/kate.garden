@@ -37,7 +37,7 @@ const config = {
     cameraTarget: { x: 0, y: 5, z: 10 },
     minDistance: 35,
     maxDistance: 50,
-    minPolarAngle: 1,
+    minPolarAngle: 1.55,
     maxPolarAngle: 1.70,
     autoRotateSpeed: -0.06,
 
@@ -110,7 +110,7 @@ let groundShader = null;
 // RENDERER SETUP
 // =============================================================================
 
-const canvas = document.getElementById('canvas');
+const canvas = document.getElementById('webgl');
 const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -345,10 +345,24 @@ rimLight.position.set(0, 5, 5);
 scene.add(rimLight);
 
 // =============================================================================
+// LOADING MANAGER
+// =============================================================================
+
+const loadingOverlay = document.getElementById('loading-overlay');
+const loadingManager = new THREE.LoadingManager();
+
+loadingManager.onLoad = () => {
+    // Small delay to ensure first frame renders completely
+    requestAnimationFrame(() => {
+        loadingOverlay.classList.add('fade-out');
+    });
+};
+
+// =============================================================================
 // TEXTURES
 // =============================================================================
 
-const loader = new THREE.TextureLoader();
+const loader = new THREE.TextureLoader(loadingManager);
 const grassTexture = loader.load('/textures/blade_diffuse.jpg');
 const alphaMap = loader.load('/textures/blade_alpha.jpg');
 const noiseTexture = loader.load('/textures/perlinFbm.jpg');
@@ -573,7 +587,7 @@ const groundMaterial = new THREE.MeshPhongMaterial({
     shininess: 10
 });
 
-groundMaterial.onBeforeCompile = function(shader) {
+groundMaterial.onBeforeCompile = function (shader) {
     shader.uniforms.delta = { value: delta };
     shader.uniforms.posX = { value: pos.x };
     shader.uniforms.posZ = { value: pos.y };
@@ -953,15 +967,15 @@ scene.add(particles);
 // FLOATING TEXT
 // =============================================================================
 
-const fontLoader = new FontLoader();
+const fontLoader = new FontLoader(loadingManager);
 
 function createTextMaterial() {
     return new THREE.MeshPhongMaterial({
-        color: 0xAAB927,
-        specular: 0xaaaaaa,
-        shininess: 30,
-        emissive: 0x333333,
-        emissiveIntensity: 0.3
+        color: 'rgb(207, 113, 202)',
+        specular: 0xffffff,
+        shininess: 60,
+        emissive: 'rgb(160, 172, 96)',
+        emissiveIntensity: 0.25
     });
 }
 
@@ -973,13 +987,13 @@ function createLinkMeshes(font, textMesh, textMaterial) {
         const geometry = new TextGeometry(item.label, {
             font: font,
             size: config.linkTextSize,
-            height: 1,
+            height: 0.25,
             curveSegments: 12,
             bevelEnabled: true,
-            bevelThickness: 0.02,
-            bevelSize: 0.02,
+            bevelThickness: 0.14,
+            bevelSize: 0.05,
             bevelOffset: 0,
-            bevelSegments: 3
+            bevelSegments: 6
         });
 
         geometry.computeBoundingBox();
@@ -1034,7 +1048,7 @@ function createLinkMeshes(font, textMesh, textMaterial) {
     });
 }
 
-fontLoader.load('/fonts/helvetiker_regular.typeface.json', function(font) {
+fontLoader.load('/fonts/helvetiker_regular.typeface.json', function (font) {
     // Create a group to hold everything - this handles position and camera-facing
     const textGroup = new THREE.Group();
     textGroup.position.set(0, config.textYPosition, config.textZPosition);
