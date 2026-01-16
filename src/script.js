@@ -301,6 +301,12 @@ canvas.addEventListener("pointerdown", e => {
   pointerStartPos = { x: e.clientX, y: e.clientY };
   pointerMoved = false;
 
+  // Auto-play audio on first interaction
+  if (!hasAutoPlayed) {
+    hasAutoPlayed = true;
+    startAudioPlayback();
+  }
+
   // Show hover state on touch tap
   if (e.pointerType === "touch") {
     updateMouseFromEvent(e);
@@ -380,12 +386,27 @@ const nowPlaying = document.getElementById("now-playing");
 
 let backgroundMusic = null;
 let isAudioPlaying = false;
+let hasAutoPlayed = false;
 
-function lazyLoadAudio() {
+async function lazyLoadAudio() {
   if (backgroundMusic) return;
   backgroundMusic = new Audio("/arabesque.mp3");
   backgroundMusic.loop = true;
   backgroundMusic.preload = "auto";
+}
+
+async function startAudioPlayback() {
+  if (!backgroundMusic) await lazyLoadAudio();
+
+  try {
+    await backgroundMusic.play();
+    isAudioPlaying = true;
+    audioIconOn.style.display = "block";
+    audioIconOff.style.display = "none";
+    nowPlaying.classList.add("visible");
+  } catch (error) {
+    console.log("Audio playback failed:", error);
+  }
 }
 
 audioToggle.addEventListener("click", () => {
@@ -457,8 +478,6 @@ loadingManager.onLoad = () => {
   // Small delay to ensure first frame renders completely
   requestAnimationFrame(() => {
     loadingOverlay.classList.add("fade-out");
-    // Start loading audio in background after page is ready
-    lazyLoadAudio();
   });
 };
 
