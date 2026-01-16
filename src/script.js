@@ -304,6 +304,43 @@ canvas.addEventListener('touchend', (event) => {
 });
 
 // =============================================================================
+// AUDIO CONTROL
+// =============================================================================
+
+const audioToggle = document.getElementById('audio-toggle');
+const audioIconOn = document.getElementById('audio-icon-on');
+const audioIconOff = document.getElementById('audio-icon-off');
+const nowPlaying = document.getElementById('now-playing');
+
+let backgroundMusic = null;
+let isAudioPlaying = false;
+
+function lazyLoadAudio() {
+    if (backgroundMusic) return;
+    backgroundMusic = new Audio('/arabesque.mp3');
+    backgroundMusic.loop = true;
+    backgroundMusic.volume = 0.5;
+    backgroundMusic.preload = 'auto';
+}
+
+audioToggle.addEventListener('click', () => {
+    if (!backgroundMusic) lazyLoadAudio();
+
+    if (isAudioPlaying) {
+        backgroundMusic.pause();
+        audioIconOn.style.display = 'none';
+        audioIconOff.style.display = 'block';
+        nowPlaying.classList.remove('visible');
+    } else {
+        backgroundMusic.play();
+        audioIconOn.style.display = 'block';
+        audioIconOff.style.display = 'none';
+        nowPlaying.classList.add('visible');
+    }
+    isAudioPlaying = !isAudioPlaying;
+});
+
+// =============================================================================
 // LIGHTING
 // =============================================================================
 
@@ -355,6 +392,8 @@ loadingManager.onLoad = () => {
     // Small delay to ensure first frame renders completely
     requestAnimationFrame(() => {
         loadingOverlay.classList.add('fade-out');
+        // Start loading audio in background after page is ready
+        lazyLoadAudio();
     });
 };
 
@@ -971,7 +1010,7 @@ const fontLoader = new FontLoader(loadingManager);
 
 function createTextMaterial() {
     return new THREE.MeshPhongMaterial({
-        color: 'rgb(207, 113, 202)',
+        color: 'rgb(221, 97, 192))',
         specular: 0xffffff,
         shininess: 60,
         emissive: 'rgb(160, 172, 96)',
