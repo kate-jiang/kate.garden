@@ -45,17 +45,21 @@ renderer.toneMappingExposure = 1.3;
 // Camera
 const FOV = 45;
 const camera = new THREE.PerspectiveCamera(FOV, window.innerWidth / window.innerHeight, 1, 20000);
-camera.position.set(-2, 3, 55);
+camera.position.set(-15, 1, 55);
 scene.add(camera);
 backgroundScene.add(camera);
 
 const controls = new OrbitControls(camera, canvas);
 controls.target.set(0, 5, 10);
-controls.enableDamping = false;
-controls.minDistance = 40;
+controls.enableDamping = true;
+controls.minDistance = 35;
 controls.maxDistance = 50;
 controls.enablePan = false;
-controls.enableRotate = false;
+controls.enableRotate = true;
+controls.autoRotate = true;
+controls.autoRotateSpeed = -.05;
+controls.minPolarAngle = 1;
+controls.maxPolarAngle = 1.70;
 controls.update();
 
 const raycaster = new THREE.Raycaster();
@@ -63,6 +67,7 @@ const mouse = new THREE.Vector2();
 const clickableMeshes = [];
 const hoverState = new Map();
 const hoverEase = 0.15;
+let clickStartCameraPos = new THREE.Vector3();
 
 canvas.addEventListener('mousemove', (event) => {
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -94,7 +99,12 @@ canvas.addEventListener('mousemove', (event) => {
     document.body.style.cursor = hasUrlIntersect ? 'pointer' : 'default';
 });
 
+canvas.addEventListener('mousedown', () => {
+    clickStartCameraPos.copy(camera.position);
+});
+
 canvas.addEventListener('click', (event) => {
+    if (camera.position.distanceToSquared(clickStartCameraPos) > 1) return;
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -113,6 +123,7 @@ canvas.addEventListener('click', (event) => {
 canvas.addEventListener('touchstart', (event) => {
     event.preventDefault();
     const touch = event.touches[0];
+    clickStartCameraPos.copy(camera.position);
     mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
 
@@ -139,7 +150,23 @@ canvas.addEventListener('touchstart', (event) => {
     });
 }, { passive: false });
 
+canvas.addEventListener('touchmove', (event) => {
+    event.preventDefault();
+    const touch = event.touches[0];
+    const dx = touch.clientX - dragStartX;
+    const dy = touch.clientY - dragStartY;
+    if (Math.abs(dx) > dragThreshold || Math.abs(dy) > dragThreshold) {
+        isDragging = true;
+    }
+}, { passive: false });
+
 canvas.addEventListener('touchend', (event) => {
+    if (camera.position.distanceToSquared(clickStartCameraPos) > 0.1) {
+        hoverState.forEach((state, uuid) => {
+            state.target = 1;
+        });
+        return;
+    }
     mouse.x = (event.changedTouches[0].clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.changedTouches[0].clientY / window.innerHeight) * 2 + 1;
 
@@ -734,7 +761,7 @@ fontLoader.load('/fonts/helvetiker_regular.typeface.json', function(font) {
     const textWidth = textBox.max.x - textBox.min.x;
     const textHeight = textBox.max.y - textBox.min.y;
     const textHitbox = new THREE.Mesh(
-        new THREE.PlaneGeometry(textWidth + 2, textHeight + 1.5),
+        new THREE.PlaneGeometry(textWidth, textHeight),
         new THREE.MeshBasicMaterial({ visible: false })
     );
     textHitbox.position.set(0, 5, 10);
@@ -758,7 +785,7 @@ fontLoader.load('/fonts/helvetiker_regular.typeface.json', function(font) {
         const geometry = new TextGeometry(item.label, {
             font: font,
             size: linkSize,
-            height: .5,
+            height: 1,
             curveSegments: 12,
             bevelEnabled: true,
             bevelThickness: 0.02,
@@ -840,7 +867,6 @@ function animate() {
     const text = scene.getObjectByName('floatingText');
     if (text) {
         text.position.y = 5 + Math.sin(time * 1.5) * 0.3;
-        text.rotation.y = Math.sin(time * 0.8) * 0.1;
     }
 
     renderer.clear();
