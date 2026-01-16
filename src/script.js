@@ -4,72 +4,71 @@ import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 // =============================================================================
-// CONFIGURATION
+// CONFIG
 // =============================================================================
 
 const config = {
-    // Grass settings
-    joints: 4,
-    bladeWidth: 0.067,
-    bladeHeight: 0.5,
-    instances: 100000,
+  // Grass 
+  joints: 4,
+  bladeWidth: 0.067,
+  bladeHeight: 0.5,
+  instances: 100000,
 
-    // Terrain settings
-    width: 100,
-    resolution: 64,
-    radius: 240,
+  // Terrain 
+  width: 100,
+  resolution: 64,
+  radius: 240,
 
-    // Lighting settings
-    elevation: 0.2,
-    azimuth: 0.4,
-    fogFade: 0.008,
-    ambientStrength: 0.7,
-    translucencyStrength: 1.5,
-    specularStrength: 0.5,
-    diffuseStrength: 1.5,
-    shininess: 256,
-    sunColour: new THREE.Vector3(1.0, 1.0, 1.0),
-    specularColour: new THREE.Vector3(1.0, 1.0, 1.0),
+  // Lighting 
+  elevation: 0.2,
+  azimuth: 0.4,
+  fogFade: 0.008,
+  ambientStrength: 0.7,
+  translucencyStrength: 1.5,
+  specularStrength: 0.5,
+  diffuseStrength: 1.5,
+  shininess: 256,
+  sunColour: new THREE.Vector3(1.0, 1.0, 1.0),
+  specularColour: new THREE.Vector3(1.0, 1.0, 1.0),
 
-    // Camera settings
-    fov: 45,
-    cameraPosition: { x: -18, y: -1, z: 55 },
-    cameraTarget: { x: 0, y: 5, z: 10 },
-    minDistance: 35,
-    maxDistance: 50,
-    minPolarAngle: 1.55,
-    maxPolarAngle: 1.70,
-    autoRotateSpeed: -0.06,
+  // Camera 
+  fov: 45,
+  cameraPosition: { x: -18, y: -1, z: 55 },
+  cameraTarget: { x: 0, y: 5, z: 10 },
+  minDistance: 40,
+  maxDistance: 50,
+  minPolarAngle: 1.55,
+  maxPolarAngle: 1.70,
+  autoRotateSpeed: -0.07,
 
-    // Interaction settings
-    hoverScale: 1.15,
-    hoverEase: 0.15,
-    clickMoveThreshold: 1,
-    touchMoveThreshold: 0.1,
+  // Interaction 
+  hoverScale: 1.15,
+  hoverEase: 0.15,
+  clickMoveThreshold: 1,
+  touchMoveThreshold: 0.2,
 
-    // Particle settings
-    particleCount: 1400,
-    particleColor: 0xd4c5a0,
-    particleSize: 0.12,
-    particleOpacity: 0.4,
+  // Particle
+  particleCount: 1400,
+  particleColor: 0xd4c5a0,
+  particleSize: 0.14,
+  particleOpacity: 0.4,
 
-    // Text settings
-    mainTextSize: 5,
-    linkTextSize: 1,
-    linkGap: 1.5,
-    textYPosition: 5,
-    textZPosition: 10,
-    textBobAmplitude: 0.3,
-    textBobSpeed: 1.5,
-    textRotationDamping: 0.03
+  // Text 
+  mainTextSize: 4,
+  linkTextSize: .8,
+  linkGap: 1,
+  textYPosition: 4.5,
+  textZPosition: 10,
+  textBobAmplitude: 0.3,
+  textBobSpeed: 1.5,
+  textRotationDamping: 0.03
 };
 
-// Link data configuration
 const linkData = [
-    { label: 'about', action: 'showAbout' },
-    { label: 'github', url: 'https://github.com/kate-jiang' },
-    { label: 'instagram', url: 'https://instagram.com/katejiang__' },
-    { label: 'twitter', url: 'https://twitter.com/chinesefoid' }
+  { label: 'about', action: 'showAbout' },
+  { label: 'github', url: 'https://github.com/kate-jiang' },
+  { label: 'insta', url: 'https://instagram.com/katejiang__' },
+  { label: 'twitter', url: 'https://twitter.com/chinesefoid' }
 ];
 
 // =============================================================================
@@ -79,9 +78,9 @@ const linkData = [
 const delta = config.width / config.resolution;
 const pos = new THREE.Vector2(0, 0);
 const sunDirection = new THREE.Vector3(
-    Math.sin(config.azimuth),
-    Math.sin(config.elevation),
-    -Math.cos(config.azimuth)
+  Math.sin(config.azimuth),
+  Math.sin(config.elevation),
+  -Math.cos(config.azimuth)
 );
 
 // Interaction state
@@ -129,10 +128,8 @@ const scene = new THREE.Scene();
 const backgroundScene = new THREE.Scene();
 
 const camera = new THREE.PerspectiveCamera(
-    config.fov,
-    window.innerWidth / window.innerHeight,
-    1,
-    20000
+  config.fov,
+  window.innerWidth / window.innerHeight,
 );
 camera.position.set(config.cameraPosition.x, config.cameraPosition.y, config.cameraPosition.z);
 scene.add(camera);
@@ -140,11 +137,11 @@ scene.add(camera);
 const controls = new OrbitControls(camera, canvas);
 controls.target.set(config.cameraTarget.x, config.cameraTarget.y, config.cameraTarget.z);
 controls.enableDamping = true;
-controls.minDistance = config.minDistance;
-controls.maxDistance = config.maxDistance;
 controls.enablePan = false;
 controls.enableRotate = true;
 controls.autoRotate = true;
+controls.minDistance = config.minDistance;
+controls.maxDistance = config.maxDistance;
 controls.autoRotateSpeed = config.autoRotateSpeed;
 controls.minPolarAngle = config.minPolarAngle;
 controls.maxPolarAngle = config.maxPolarAngle;
@@ -155,73 +152,74 @@ controls.update();
 // =============================================================================
 
 function updateMouseFromEvent(event) {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
 
 function updateMouseFromTouch(touch) {
-    mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+  mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
 }
 
 function getIntersectedMeshes() {
-    raycaster.setFromCamera(mouse, camera);
-    return raycaster.intersectObjects(clickableMeshes);
+  raycaster.setFromCamera(mouse, camera);
+  return raycaster.intersectObjects(clickableMeshes);
 }
 
 function updateHoverStates(intersects) {
-    const intersectedNames = new Set(intersects.map(i => i.object.name));
+  const intersectedNames = new Set(intersects.map(i => i.object.name));
 
-    clickableMeshes.forEach(mesh => {
-        if (!mesh.name || mesh.name === 'floatingText') return;
+  clickableMeshes.forEach(mesh => {
+    if (!mesh.name) return;
 
-        const state = hoverState.get(mesh.uuid);
-        const isHovered = intersectedNames.has(mesh.name);
+    const state = hoverState.get(mesh.uuid);
+    const isHovered = intersectedNames.has(mesh.name);
+    const targetScale = mesh.name === "floatingText" ? 1.1 : config.hoverScale;
 
-        if (isHovered) {
-            if (!state) {
-                hoverState.set(mesh.uuid, { target: config.hoverScale, current: mesh.scale.x });
-            } else {
-                state.target = config.hoverScale;
-            }
-        } else if (state) {
-            state.target = 1;
-        }
-    });
+    if (isHovered) {
+      if (!state) {
+        hoverState.set(mesh.uuid, { target: targetScale, current: mesh.scale.x });
+      } else {
+        state.target = targetScale;
+      }
+    } else if (state) {
+      state.target = 1;
+    }
+  });
 }
 
 function resetAllHoverStates() {
-    hoverState.forEach(state => {
-        state.target = 1;
-    });
+  hoverState.forEach(state => {
+    state.target = 1;
+  });
 }
 
 function updateCursor(intersects) {
-    const hasClickable = intersects.some(i =>
-        i.object.userData.url || i.object.userData.action || i.object.name === 'floatingText'
-    );
-    document.body.style.cursor = hasClickable ? 'pointer' : 'default';
+  const hasClickable = intersects.some(i =>
+    i.object.userData.url || i.object.userData.action || i.object.name === 'floatingText'
+  );
+  document.body.style.cursor = hasClickable ? 'pointer' : 'default';
 }
 
 function triggerTextClickAnimation() {
-    if (!textClickAnimating) {
-        textClickAnimating = true;
-        textClickAnimationTime = 0;
-    }
+  if (!textClickAnimating) {
+    textClickAnimating = true;
+    textClickAnimationTime = 0;
+  }
 }
 
 function handleClick(intersects) {
-    if (intersects.length > 0) {
-        const clickedObject = intersects[0].object;
-        const userData = clickedObject.userData;
-        if (userData.url) {
-            window.open(userData.url, '_blank');
-        } else if (userData.action === 'showAbout') {
-            showAboutPanel();
-        } else if (clickedObject.name === 'floatingText') {
-            triggerTextClickAnimation();
-        }
+  if (intersects.length > 0) {
+    const clickedObject = intersects[0].object;
+    const userData = clickedObject.userData;
+    if (userData.url) {
+      window.open(userData.url, '_blank');
+    } else if (userData.action === 'showAbout') {
+      showAboutPanel();
+    } else if (clickedObject.name === 'floatingText') {
+      triggerTextClickAnimation();
     }
+  }
 }
 
 // =============================================================================
@@ -232,36 +230,36 @@ const aboutOverlay = document.getElementById('about-overlay');
 const aboutClose = document.getElementById('about-close');
 
 function showAboutPanel() {
-    aboutOverlay.classList.remove('hidden');
-    // Trigger reflow before adding visible class for transition
-    aboutOverlay.offsetHeight;
-    aboutOverlay.classList.add('visible');
-    controls.autoRotate = false;
-    // Reset cursor since overlay is now on top
-    document.body.style.cursor = 'default';
+  aboutOverlay.classList.remove('hidden');
+  // Trigger reflow before adding visible class for transition
+  aboutOverlay.offsetHeight;
+  aboutOverlay.classList.add('visible');
+  controls.autoRotate = false;
+  // Reset cursor since overlay is now on top
+  document.body.style.cursor = 'default';
 }
 
 function hideAboutPanel() {
-    aboutOverlay.classList.remove('visible');
-    aboutOverlay.addEventListener('transitionend', function handler() {
-        if (!aboutOverlay.classList.contains('visible')) {
-            aboutOverlay.classList.add('hidden');
-        }
-        aboutOverlay.removeEventListener('transitionend', handler);
-    });
-    controls.autoRotate = true;
+  aboutOverlay.classList.remove('visible');
+  aboutOverlay.addEventListener('transitionend', function handler() {
+    if (!aboutOverlay.classList.contains('visible')) {
+      aboutOverlay.classList.add('hidden');
+    }
+    aboutOverlay.removeEventListener('transitionend', handler);
+  });
+  controls.autoRotate = true;
 }
 
 aboutClose.addEventListener('click', hideAboutPanel);
 aboutOverlay.addEventListener('click', (e) => {
-    if (e.target === aboutOverlay) {
-        hideAboutPanel();
-    }
+  if (e.target === aboutOverlay) {
+    hideAboutPanel();
+  }
 });
 
 function registerClickableMesh(mesh) {
-    clickableMeshes.push(mesh);
-    meshByUuid.set(mesh.uuid, mesh);
+  clickableMeshes.push(mesh);
+  meshByUuid.set(mesh.uuid, mesh);
 }
 
 // =============================================================================
@@ -269,38 +267,38 @@ function registerClickableMesh(mesh) {
 // =============================================================================
 
 canvas.addEventListener('mousemove', (event) => {
-    updateMouseFromEvent(event);
-    const intersects = getIntersectedMeshes();
-    updateHoverStates(intersects);
-    updateCursor(intersects);
+  updateMouseFromEvent(event);
+  const intersects = getIntersectedMeshes();
+  updateHoverStates(intersects);
+  updateCursor(intersects);
 });
 
 canvas.addEventListener('mousedown', () => {
-    clickStartCameraPos.copy(camera.position);
+  clickStartCameraPos.copy(camera.position);
 });
 
 canvas.addEventListener('click', (event) => {
-    if (camera.position.distanceToSquared(clickStartCameraPos) > config.clickMoveThreshold) return;
-    updateMouseFromEvent(event);
-    handleClick(getIntersectedMeshes());
+  if (camera.position.distanceToSquared(clickStartCameraPos) > config.clickMoveThreshold) return;
+  updateMouseFromEvent(event);
+  handleClick(getIntersectedMeshes());
 });
 
 canvas.addEventListener('touchstart', (event) => {
-    event.preventDefault();
-    clickStartCameraPos.copy(camera.position);
-    updateMouseFromTouch(event.touches[0]);
-    updateHoverStates(getIntersectedMeshes());
+  event.preventDefault();
+  clickStartCameraPos.copy(camera.position);
+  updateMouseFromTouch(event.touches[0]);
+  updateHoverStates(getIntersectedMeshes());
 }, { passive: false });
 
 canvas.addEventListener('touchend', (event) => {
-    if (camera.position.distanceToSquared(clickStartCameraPos) > config.touchMoveThreshold) {
-        resetAllHoverStates();
-        return;
-    }
-
-    updateMouseFromTouch(event.changedTouches[0]);
-    handleClick(getIntersectedMeshes());
+  if (camera.position.distanceToSquared(clickStartCameraPos) > config.touchMoveThreshold) {
     resetAllHoverStates();
+    return;
+  }
+
+  updateMouseFromTouch(event.changedTouches[0]);
+  handleClick(getIntersectedMeshes());
+  resetAllHoverStates();
 });
 
 // =============================================================================
@@ -316,28 +314,27 @@ let backgroundMusic = null;
 let isAudioPlaying = false;
 
 function lazyLoadAudio() {
-    if (backgroundMusic) return;
-    backgroundMusic = new Audio('/arabesque.mp3');
-    backgroundMusic.loop = true;
-    backgroundMusic.volume = 0.5;
-    backgroundMusic.preload = 'auto';
+  if (backgroundMusic) return;
+  backgroundMusic = new Audio('/arabesque.mp3');
+  backgroundMusic.loop = true;
+  backgroundMusic.preload = 'auto';
 }
 
 audioToggle.addEventListener('click', () => {
-    if (!backgroundMusic) lazyLoadAudio();
+  if (!backgroundMusic) lazyLoadAudio();
 
-    if (isAudioPlaying) {
-        backgroundMusic.pause();
-        audioIconOn.style.display = 'none';
-        audioIconOff.style.display = 'block';
-        nowPlaying.classList.remove('visible');
-    } else {
-        backgroundMusic.play();
-        audioIconOn.style.display = 'block';
-        audioIconOff.style.display = 'none';
-        nowPlaying.classList.add('visible');
-    }
-    isAudioPlaying = !isAudioPlaying;
+  if (isAudioPlaying) {
+    backgroundMusic.pause();
+    audioIconOn.style.display = 'none';
+    audioIconOff.style.display = 'block';
+    nowPlaying.classList.remove('visible');
+  } else {
+    backgroundMusic.play();
+    audioIconOn.style.display = 'block';
+    audioIconOff.style.display = 'none';
+    nowPlaying.classList.add('visible');
+  }
+  isAudioPlaying = !isAudioPlaying;
 });
 
 // =============================================================================
@@ -389,12 +386,12 @@ const loadingOverlay = document.getElementById('loading-overlay');
 const loadingManager = new THREE.LoadingManager();
 
 loadingManager.onLoad = () => {
-    // Small delay to ensure first frame renders completely
-    requestAnimationFrame(() => {
-        loadingOverlay.classList.add('fade-out');
-        // Start loading audio in background after page is ready
-        lazyLoadAudio();
-    });
+  // Small delay to ensure first frame renders completely
+  requestAnimationFrame(() => {
+    loadingOverlay.classList.add('fade-out');
+    // Start loading audio in background after page is ready
+    lazyLoadAudio();
+  });
 };
 
 // =============================================================================
@@ -415,7 +412,7 @@ noiseTexture.wrapT = THREE.RepeatWrapping;
 const sharedPrefix = `
 uniform sampler2D noiseTexture;
 float getYPosition(vec2 p) {
-    return 8.0 * (2.0 * texture2D(noiseTexture, p / 800.0).r - 1.0);
+return 8.0 * (2.0 * texture2D(noiseTexture, p / 800.0).r - 1.0);
 }
 `;
 
@@ -434,137 +431,137 @@ uniform float time;
 const vec3 skyColour = 0.6 * vec3(0.02, 0.2, 0.9);
 
 vec3 getSkyColour(vec3 rayDir) {
-    return mix(0.35 * skyColour, skyColour, pow(1.0 - rayDir.y, 4.0));
+return mix(0.35 * skyColour, skyColour, pow(1.0 - rayDir.y, 4.0));
 }
 
 vec3 applyFog(vec3 rgb, vec3 rayOri, vec3 rayDir, vec3 sunDir) {
-    float dist = 4000.0;
-    if (abs(rayDir.y) < 0.0001) rayDir.y = 0.0001;
-    float fogAmount = 1.0 * exp(-rayOri.y * fogFade) * (1.0 - exp(-dist * rayDir.y * fogFade)) / (rayDir.y * fogFade);
-    float sunAmount = max(dot(rayDir, sunDir), 0.0);
-    vec3 fogColor = mix(vec3(0.35, 0.5, 0.9), vec3(1.0, 1.0, 0.75), pow(sunAmount, 16.0));
-    return mix(rgb, fogColor, clamp(fogAmount, 0.0, 1.0));
+float dist = 4000.0;
+if (abs(rayDir.y) < 0.0001) rayDir.y = 0.0001;
+float fogAmount = 1.0 * exp(-rayOri.y * fogFade) * (1.0 - exp(-dist * rayDir.y * fogFade)) / (rayDir.y * fogFade);
+float sunAmount = max(dot(rayDir, sunDir), 0.0);
+vec3 fogColor = mix(vec3(0.35, 0.5, 0.9), vec3(1.0, 1.0, 0.75), pow(sunAmount, 16.0));
+return mix(rgb, fogColor, clamp(fogAmount, 0.0, 1.0));
 }
 
 vec3 ACESFilm(vec3 x) {
-    float a = 2.51;
-    float b = 0.03;
-    float c = 2.43;
-    float d = 0.59;
-    float e = 0.14;
-    return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
+float a = 2.51;
+float b = 0.03;
+float c = 2.43;
+float d = 0.59;
+float e = 0.14;
+return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
 }
 
 vec3 rayDirection(float fieldOfView, vec2 fragCoord) {
-    vec2 xy = fragCoord - resolution.xy / 2.0;
-    float z = (0.5 * resolution.y) / tan(radians(fieldOfView) / 2.0);
-    return normalize(vec3(xy, -z));
+vec2 xy = fragCoord - resolution.xy / 2.0;
+float z = (0.5 * resolution.y) / tan(radians(fieldOfView) / 2.0);
+return normalize(vec3(xy, -z));
 }
 
 mat3 lookAt(vec3 camera, vec3 at, vec3 up) {
-    vec3 zaxis = normalize(at - camera);
-    vec3 xaxis = normalize(cross(zaxis, up));
-    vec3 yaxis = cross(xaxis, zaxis);
-    return mat3(xaxis, yaxis, -zaxis);
+vec3 zaxis = normalize(at - camera);
+vec3 xaxis = normalize(cross(zaxis, up));
+vec3 yaxis = cross(xaxis, zaxis);
+return mat3(xaxis, yaxis, -zaxis);
 }
 
 float getGlow(float dist, float radius, float intensity) {
-    dist = max(dist, 1e-6);
-    return pow(radius / dist, intensity);
+dist = max(dist, 1e-6);
+return pow(radius / dist, intensity);
 }
 
 float hash(vec2 p, float seed) {
-    return fract(sin(dot(p + seed * 13.5, vec2(127.1, 311.7))) * 43758.5453123);
+return fract(sin(dot(p + seed * 13.5, vec2(127.1, 311.7))) * 43758.5453123);
 }
 
 float noise(vec2 p, float seed) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    f = f * f * (3.0 - 2.0 * f);
-    float a = hash(i, seed);
-    float b = hash(i + vec2(1.0, 0.0), seed);
-    float c = hash(i + vec2(0.0, 1.0), seed);
-    float d = hash(i + vec2(1.0, 1.0), seed);
-    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+vec2 i = floor(p);
+vec2 f = fract(p);
+f = f * f * (3.0 - 2.0 * f);
+float a = hash(i, seed);
+float b = hash(i + vec2(1.0, 0.0), seed);
+float c = hash(i + vec2(0.0, 1.0), seed);
+float d = hash(i + vec2(1.0, 1.0), seed);
+return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
 float fbm(vec2 p, float seed) {
-    float sum = 0.0;
-    float amp = 0.5;
-    float freq = 1.0;
-    for (int i = 0; i < 4; i++) {
-        sum += noise(p * freq, seed + float(i) * 7.3) * amp;
-        amp *= 0.5;
-        freq *= 2.0;
-    }
-    return sum;
+float sum = 0.0;
+float amp = 0.5;
+float freq = 1.0;
+for (int i = 0; i < 4; i++) {
+  sum += noise(p * freq, seed + float(i) * 7.3) * amp;
+  amp *= 0.5;
+  freq *= 2.0;
+}
+return sum;
 }
 
 float cloudNoise(vec2 p, float time, float seed) {
-    vec2 offset = vec2(time * 0.07 + seed, seed * 23.7);
-    float n = fbm(p * 1.2 + offset, seed);
-    n += fbm(p * 2.5 + offset * 1.2, seed + 100.0) * 0.35;
-    return n;
+vec2 offset = vec2(time * 0.07 + seed, seed * 23.7);
+float n = fbm(p * 1.2 + offset, seed);
+n += fbm(p * 2.5 + offset * 1.2, seed + 100.0) * 0.35;
+return n;
 }
 
 float getCloudLayer(vec3 rayDir, float time, float seed, float height) {
-    if (rayDir.y < 0.15) return 0.0;
-    float heightFactor = smoothstep(0.15, height, rayDir.y) * (1.0 - smoothstep(height, 0.6, rayDir.y));
-    vec2 cloudPos = vec2(rayDir.x, rayDir.z) / rayDir.y * (height * 4.0);
-    float density = cloudNoise(cloudPos, time, seed);
-    density = smoothstep(0.6, 0.9, density);
-    return density * heightFactor;
+if (rayDir.y < 0.15) return 0.0;
+float heightFactor = smoothstep(0.15, height, rayDir.y) * (1.0 - smoothstep(height, 0.6, rayDir.y));
+vec2 cloudPos = vec2(rayDir.x, rayDir.z) / rayDir.y * (height * 4.0);
+float density = cloudNoise(cloudPos, time, seed);
+density = smoothstep(0.6, 0.9, density);
+return density * heightFactor;
 }
 
 float getCloudDensity(vec3 rayDir, float time) {
-    float layer1 = getCloudLayer(rayDir, time, 0.0, 0.25);
-    float layer2 = getCloudLayer(rayDir, time, 42.0, 0.4) * 0.5;
-    return min(layer1 + layer2, 1.0);
+float layer1 = getCloudLayer(rayDir, time, 0.0, 0.25);
+float layer2 = getCloudLayer(rayDir, time, 42.0, 0.4) * 0.5;
+return min(layer1 + layer2, 1.0);
 }
 
 void main() {
-    vec3 target = vec3(0.0, 0.0, 0.0);
-    vec3 up = vec3(0.0, 1.0, 0.0);
-    vec3 rayDir = rayDirection(fov, gl_FragCoord.xy);
-    mat3 viewMatrix_ = lookAt(cameraPosition, target, up);
-    rayDir = viewMatrix_ * rayDir;
-    vec3 col = getSkyColour(rayDir);
-    vec3 sunDir = normalize(sunDirection);
-    float mu = dot(sunDir, rayDir);
+vec3 target = vec3(0.0, 0.0, 0.0);
+vec3 up = vec3(0.0, 1.0, 0.0);
+vec3 rayDir = rayDirection(fov, gl_FragCoord.xy);
+mat3 viewMatrix_ = lookAt(cameraPosition, target, up);
+rayDir = viewMatrix_ * rayDir;
+vec3 col = getSkyColour(rayDir);
+vec3 sunDir = normalize(sunDirection);
+float mu = dot(sunDir, rayDir);
 
-    float cloudDensity = getCloudDensity(rayDir, time);
-    float sunAmount = max(mu, 0.0);
-    vec3 cloudBase = vec3(1.0, 0.98, 0.95);
-    vec3 cloudShadow = vec3(0.65, 0.7, 0.8);
-    vec3 cloudColor = mix(cloudShadow, cloudBase, 0.4 + sunAmount * 0.6);
+float cloudDensity = getCloudDensity(rayDir, time);
+float sunAmount = max(mu, 0.0);
+vec3 cloudBase = vec3(1.0, 0.98, 0.95);
+vec3 cloudShadow = vec3(0.65, 0.7, 0.8);
+vec3 cloudColor = mix(cloudShadow, cloudBase, 0.4 + sunAmount * 0.6);
 
-    float edgeFade = smoothstep(0.0, 0.3, rayDir.y);
-    col = mix(col, cloudColor, cloudDensity * 0.6 * edgeFade);
+float edgeFade = smoothstep(0.0, 0.3, rayDir.y);
+col = mix(col, cloudColor, cloudDensity * 0.6 * edgeFade);
 
-    col += vec3(1.0, 1.0, 0.8) * getGlow(1.0 - mu, 0.00005, 0.9);
-    col += applyFog(col, vec3(0, 1000, 0), rayDir, sunDir);
-    col = ACESFilm(col);
-    col = pow(col, vec3(0.4545));
-    gl_FragColor = vec4(col, 1.0);
+col += vec3(1.0, 1.0, 0.8) * getGlow(1.0 - mu, 0.00005, 0.9);
+col += applyFog(col, vec3(0, 1000, 0), rayDir, sunDir);
+col = ACESFilm(col);
+col = pow(col, vec3(0.4545));
+gl_FragColor = vec4(col, 1.0);
 }
 `;
 
 const backgroundMaterial = new THREE.ShaderMaterial({
-    uniforms: {
-        sunDirection: { value: sunDirection },
-        resolution: { value: new THREE.Vector2(canvas.width, canvas.height) },
-        fogFade: { value: config.fogFade },
-        fov: { value: config.fov },
-        time: { value: 0 }
-    },
-    vertexShader: `
-        varying vec2 vUv;
-        void main() {
-            vUv = uv;
-            gl_Position = vec4(position, 1.0);
-        }
-    `,
-    fragmentShader: skyFragmentShader
+  uniforms: {
+    sunDirection: { value: sunDirection },
+    resolution: { value: new THREE.Vector2(canvas.width, canvas.height) },
+    fogFade: { value: config.fogFade },
+    fov: { value: config.fov },
+    time: { value: 0 }
+  },
+  vertexShader: `
+  varying vec2 vUv;
+  void main() {
+  vUv = uv;
+  gl_Position = vec4(position, 1.0);
+  }
+`,
+  fragmentShader: skyFragmentShader
 });
 backgroundMaterial.depthWrite = false;
 
@@ -585,32 +582,32 @@ uniform float radius;
 uniform float width;
 
 float placeOnSphere(vec3 v) {
-    float theta = acos(v.z / radius);
-    float phi = acos(v.x / (radius * sin(theta)));
-    float sV = radius * sin(theta) * sin(phi);
-    if (sV != sV) sV = v.y;
-    return sV;
+float theta = acos(v.z / radius);
+float phi = acos(v.x / (radius * sin(theta)));
+float sV = radius * sin(theta) * sin(phi);
+if (sV != sV) sV = v.y;
+return sV;
 }
 
 vec3 getPosition(vec3 pos, float epsX, float epsZ) {
-    vec3 temp;
-    temp.x = pos.x + epsX;
-    temp.z = pos.z + epsZ;
-    temp.y = max(0.0, placeOnSphere(temp)) - radius;
-    temp.y += getYPosition(vec2(basePosition.x + epsX + delta * floor(posX), basePosition.z + epsZ + delta * floor(posZ)));
-    return temp;
+vec3 temp;
+temp.x = pos.x + epsX;
+temp.z = pos.z + epsZ;
+temp.y = max(0.0, placeOnSphere(temp)) - radius;
+temp.y += getYPosition(vec2(basePosition.x + epsX + delta * floor(posX), basePosition.z + epsZ + delta * floor(posZ)));
+return temp;
 }
 
 vec3 getNormal(vec3 pos) {
-    float eps = 1e-1;
-    vec3 tempP = getPosition(pos, eps, 0.0);
-    vec3 tempN = getPosition(pos, -eps, 0.0);
-    vec3 slopeX = tempP - tempN;
-    tempP = getPosition(pos, 0.0, eps);
-    tempN = getPosition(pos, 0.0, -eps);
-    vec3 slopeZ = tempP - tempN;
-    vec3 norm = normalize(cross(slopeZ, slopeX));
-    return norm;
+float eps = 1e-1;
+vec3 tempP = getPosition(pos, eps, 0.0);
+vec3 tempN = getPosition(pos, -eps, 0.0);
+vec3 slopeX = tempP - tempN;
+tempP = getPosition(pos, 0.0, eps);
+tempN = getPosition(pos, 0.0, -eps);
+vec3 slopeZ = tempP - tempN;
+vec3 norm = normalize(cross(slopeZ, slopeX));
+return norm;
 }
 `;
 
@@ -622,35 +619,35 @@ groundGeometry.setAttribute('basePosition', groundBaseGeometry.getAttribute('pos
 groundGeometry.lookAt(new THREE.Vector3(0, 1, 0));
 
 const groundMaterial = new THREE.MeshPhongMaterial({
-    color: new THREE.Color('rgb(10%, 25%, 2%)'),
-    shininess: 10
+  color: new THREE.Color('rgb(10%, 25%, 2%)'),
+  shininess: 10
 });
 
 groundMaterial.onBeforeCompile = function (shader) {
-    shader.uniforms.delta = { value: delta };
-    shader.uniforms.posX = { value: pos.x };
-    shader.uniforms.posZ = { value: pos.y };
-    shader.uniforms.radius = { value: config.radius };
-    shader.uniforms.width = { value: config.width };
-    shader.uniforms.noiseTexture = { value: noiseTexture };
-    shader.vertexShader = groundVertexPrefix + shader.vertexShader;
-    shader.vertexShader = shader.vertexShader.replace(
-        '#include <beginnormal_vertex>',
-        `vec3 pos = vec3(0);
-        pos.x = basePosition.x - mod(mod((delta * posX), delta) + delta, delta);
-        pos.z = basePosition.z - mod(mod((delta * posZ), delta) + delta, delta);
-        pos.y = max(0.0, placeOnSphere(pos)) - radius;
-        pos.y += getYPosition(vec2(basePosition.x + delta * floor(posX), basePosition.z + delta * floor(posZ)));
-        vec3 objectNormal = getNormal(pos);
-        #ifdef USE_TANGENT
-        vec3 objectTangent = vec3(tangent.xyz);
-        #endif`
-    );
-    shader.vertexShader = shader.vertexShader.replace(
-        '#include <begin_vertex>',
-        `vec3 transformed = vec3(pos);`
-    );
-    groundShader = shader;
+  shader.uniforms.delta = { value: delta };
+  shader.uniforms.posX = { value: pos.x };
+  shader.uniforms.posZ = { value: pos.y };
+  shader.uniforms.radius = { value: config.radius };
+  shader.uniforms.width = { value: config.width };
+  shader.uniforms.noiseTexture = { value: noiseTexture };
+  shader.vertexShader = groundVertexPrefix + shader.vertexShader;
+  shader.vertexShader = shader.vertexShader.replace(
+    '#include <beginnormal_vertex>',
+    `vec3 pos = vec3(0);
+  pos.x = basePosition.x - mod(mod((delta * posX), delta) + delta, delta);
+  pos.z = basePosition.z - mod(mod((delta * posZ), delta) + delta, delta);
+  pos.y = max(0.0, placeOnSphere(pos)) - radius;
+  pos.y += getYPosition(vec2(basePosition.x + delta * floor(posX), basePosition.z + delta * floor(posZ)));
+  vec3 objectNormal = getNormal(pos);
+  #ifdef USE_TANGENT
+  vec3 objectTangent = vec3(tangent.xyz);
+  #endif`
+  );
+  shader.vertexShader = shader.vertexShader.replace(
+    '#include <begin_vertex>',
+    `vec3 transformed = vec3(pos);`
+  );
+  groundShader = shader;
 };
 
 const ground = new THREE.Mesh(groundGeometry, groundMaterial);
@@ -692,67 +689,67 @@ const float PI = 3.1415;
 const float TWO_PI = 2.0 * PI;
 
 vec3 rotateVectorByQuaternion(vec3 v, vec4 q) {
-    return 2.0 * cross(q.xyz, v * q.w + cross(q.xyz, v)) + v;
+return 2.0 * cross(q.xyz, v * q.w + cross(q.xyz, v)) + v;
 }
 
 float placeOnSphere(vec3 v) {
-    float theta = acos(v.z / radius);
-    float phi = acos(v.x / (radius * sin(theta)));
-    float sV = radius * sin(theta) * sin(phi);
-    if (sV != sV) sV = v.y;
-    return sV;
+float theta = acos(v.z / radius);
+float phi = acos(v.x / (radius * sin(theta)));
+float sV = radius * sin(theta) * sin(phi);
+if (sV != sV) sV = v.y;
+return sV;
 }
 
 void main() {
-    frc = position.y / float(${config.bladeHeight});
-    vec3 vPosition = position;
-    vPosition.y *= scale;
-    vNormal = normal;
-    vNormal.y /= scale;
-    vec4 direction = vec4(0.0, halfRootAngle.x, 0.0, halfRootAngle.y);
-    vPosition = rotateVectorByQuaternion(vPosition, direction);
-    vNormal = rotateVectorByQuaternion(vNormal, direction);
-    vUv = uv;
+frc = position.y / float(${config.bladeHeight});
+vec3 vPosition = position;
+vPosition.y *= scale;
+vNormal = normal;
+vNormal.y /= scale;
+vec4 direction = vec4(0.0, halfRootAngle.x, 0.0, halfRootAngle.y);
+vPosition = rotateVectorByQuaternion(vPosition, direction);
+vNormal = rotateVectorByQuaternion(vNormal, direction);
+vUv = uv;
 
-    vec3 pos;
-    vec3 globalPos;
-    vec3 tile;
+vec3 pos;
+vec3 globalPos;
+vec3 tile;
 
-    globalPos.x = offset.x - posX * delta;
-    globalPos.z = offset.z - posZ * delta;
+globalPos.x = offset.x - posX * delta;
+globalPos.z = offset.z - posZ * delta;
 
-    tile.x = floor((globalPos.x + 0.5 * width) / width);
-    tile.z = floor((globalPos.z + 0.5 * width) / width);
+tile.x = floor((globalPos.x + 0.5 * width) / width);
+tile.z = floor((globalPos.z + 0.5 * width) / width);
 
-    pos.x = globalPos.x - tile.x * width;
-    pos.z = globalPos.z - tile.z * width;
+pos.x = globalPos.x - tile.x * width;
+pos.z = globalPos.z - tile.z * width;
 
-    pos.y = max(0.0, placeOnSphere(pos)) - radius;
-    pos.y += getYPosition(vec2(pos.x + delta * posX, pos.z + delta * posZ));
+pos.y = max(0.0, placeOnSphere(pos)) - radius;
+pos.y += getYPosition(vec2(pos.x + delta * posX, pos.z + delta * posZ));
 
-    vec2 fractionalPos = 0.5 + offset.xz / width;
-    fractionalPos *= TWO_PI;
+vec2 fractionalPos = 0.5 + offset.xz / width;
+fractionalPos *= TWO_PI;
 
-    // Per-blade variation using index for phase offset and speed variation
-    float bladePhase = index * TWO_PI * 17.0; // pseudo-random phase per blade
-    float speedVar = 0.95 + 0.1 * fract(index * 127.1); // speed varies 0.95-1.05x
+// Per-blade variation using index for phase offset and speed variation
+float bladePhase = index * TWO_PI * 17.0; // pseudo-random phase per blade
+float speedVar = 0.95 + 0.1 * fract(index * 127.1); // speed varies 0.95-1.05x
 
-    // Primary wind wave
-    float noise = 0.5 + 0.5 * sin(fractionalPos.x + time * 2.5 * speedVar + bladePhase);
-    float halfAngle = -noise * 0.1;
+// Primary wind wave
+float noise = 0.5 + 0.5 * sin(fractionalPos.x + time * 2.5 * speedVar + bladePhase);
+float halfAngle = -noise * 0.1;
 
-    // Secondary wave at different frequency for complexity
-    noise = 0.5 + 0.5 * cos(fractionalPos.y + time * 2.5 * speedVar + bladePhase * 0.7);
-    halfAngle -= noise * 0.05;
+// Secondary wave at different frequency for complexity
+noise = 0.5 + 0.5 * cos(fractionalPos.y + time * 2.5 * speedVar + bladePhase * 0.7);
+halfAngle -= noise * 0.05;
 
-    direction = normalize(vec4(sin(halfAngle), 0.0, -sin(halfAngle), cos(halfAngle)));
+direction = normalize(vec4(sin(halfAngle), 0.0, -sin(halfAngle), cos(halfAngle)));
 
-    vPosition = rotateVectorByQuaternion(vPosition, direction);
-    vNormal = rotateVectorByQuaternion(vNormal, direction);
-    vPosition += pos;
+vPosition = rotateVectorByQuaternion(vPosition, direction);
+vNormal = rotateVectorByQuaternion(vNormal, direction);
+vPosition += pos;
 
-    idx = index;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(vPosition, 1.0);
+idx = index;
+gl_Position = projectionMatrix * modelViewMatrix * vec4(vPosition, 1.0);
 }`;
 
 const grassFragmentSource = `
@@ -776,56 +773,56 @@ varying vec3 vNormal;
 varying vec3 vPosition;
 
 vec3 ACESFilm(vec3 x) {
-    float a = 2.51;
-    float b = 0.03;
-    float c = 2.43;
-    float d = 0.59;
-    float e = 0.14;
-    return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
+float a = 2.51;
+float b = 0.03;
+float c = 2.43;
+float d = 0.59;
+float e = 0.14;
+return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
 }
 
 void main() {
-    if (texture2D(alphaMap, vUv).r < 0.15) discard;
+if (texture2D(alphaMap, vUv).r < 0.15) discard;
 
-    vec3 normal;
-    if (gl_FrontFacing) normal = normalize(vNormal);
-    else normal = normalize(-vNormal);
+vec3 normal;
+if (gl_FrontFacing) normal = normalize(vNormal);
+else normal = normalize(-vNormal);
 
-    vec3 textureColour = pow(texture2D(map, vUv).rgb, vec3(2.2));
-    vec3 mixColour = idx > 0.75 ? vec3(0.2, 0.8, 0.06) : vec3(0.5, 0.8, 0.08);
-    textureColour = mix(0.1 * mixColour, textureColour, 0.75);
+vec3 textureColour = pow(texture2D(map, vUv).rgb, vec3(2.2));
+vec3 mixColour = idx > 0.75 ? vec3(0.2, 0.8, 0.06) : vec3(0.5, 0.8, 0.08);
+textureColour = mix(0.1 * mixColour, textureColour, 0.75);
 
-    vec3 lightTimesTexture = lightColour * textureColour;
-    vec3 ambient = textureColour;
-    vec3 lightDir = normalize(sunDirection);
+vec3 lightTimesTexture = lightColour * textureColour;
+vec3 ambient = textureColour;
+vec3 lightDir = normalize(sunDirection);
 
-    float dotNormalLight = dot(normal, lightDir);
-    float diff = max(dotNormalLight, 0.0);
-    vec3 diffuse = diff * lightTimesTexture;
+float dotNormalLight = dot(normal, lightDir);
+float diff = max(dotNormalLight, 0.0);
+vec3 diffuse = diff * lightTimesTexture;
 
-    float sky = max(dot(normal, vec3(0, 1, 0)), 0.0);
-    vec3 skyLight = sky * vec3(0.12, 0.29, 0.55);
+float sky = max(dot(normal, vec3(0, 1, 0)), 0.0);
+vec3 skyLight = sky * vec3(0.12, 0.29, 0.55);
 
-    vec3 viewDirection = normalize(cameraPosition - vPosition);
-    vec3 halfwayDir = normalize(lightDir + viewDirection);
-    float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
-    vec3 specular = spec * specularColour * lightColour;
+vec3 viewDirection = normalize(cameraPosition - vPosition);
+vec3 halfwayDir = normalize(lightDir + viewDirection);
+float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
+vec3 specular = spec * specularColour * lightColour;
 
-    vec3 diffuseTranslucency = vec3(0);
-    vec3 forwardTranslucency = vec3(0);
-    float dotViewLight = dot(-lightDir, viewDirection);
-    if (dotNormalLight <= 0.0) {
-        diffuseTranslucency = lightTimesTexture * translucencyStrength * -dotNormalLight;
-        if (dotViewLight > 0.0) {
-            forwardTranslucency = lightTimesTexture * translucencyStrength * pow(dotViewLight, 16.0);
-        }
-    }
+vec3 diffuseTranslucency = vec3(0);
+vec3 forwardTranslucency = vec3(0);
+float dotViewLight = dot(-lightDir, viewDirection);
+if (dotNormalLight <= 0.0) {
+  diffuseTranslucency = lightTimesTexture * translucencyStrength * -dotNormalLight;
+  if (dotViewLight > 0.0) {
+  forwardTranslucency = lightTimesTexture * translucencyStrength * pow(dotViewLight, 16.0);
+  }
+}
 
-    vec3 col = 0.3 * skyLight * textureColour + ambientStrength * ambient + diffuseStrength * diffuse + specularStrength * specular + diffuseTranslucency + forwardTranslucency;
-    col = mix(0.35 * vec3(0.1, 0.25, 0.02), col, frc);
-    col = ACESFilm(col);
-    col = pow(col, vec3(0.4545));
-    gl_FragColor = vec4(col, 1.0);
+vec3 col = 0.3 * skyLight * textureColour + ambientStrength * ambient + diffuseStrength * diffuse + specularStrength * specular + diffuseTranslucency + forwardTranslucency;
+col = mix(0.35 * vec3(0.1, 0.25, 0.02), col, frc);
+col = ACESFilm(col);
+col = pow(col, vec3(0.4545));
+gl_FragColor = vec4(col, 1.0);
 }`;
 
 // =============================================================================
@@ -845,20 +842,20 @@ let angle = 0.05;
 let sinAngle = Math.sin(angle / 2.0);
 let rotationAxis = new THREE.Vector3(0, 1, 0);
 quaternion0.set(
-    rotationAxis.x * sinAngle,
-    rotationAxis.y * sinAngle,
-    rotationAxis.z * sinAngle,
-    Math.cos(angle / 2.0)
+  rotationAxis.x * sinAngle,
+  rotationAxis.y * sinAngle,
+  rotationAxis.z * sinAngle,
+  Math.cos(angle / 2.0)
 );
 
 angle = 0.3;
 sinAngle = Math.sin(angle / 2.0);
 rotationAxis.set(1, 0, 0);
 quaternion1.set(
-    rotationAxis.x * sinAngle,
-    rotationAxis.y * sinAngle,
-    rotationAxis.z * sinAngle,
-    Math.cos(angle / 2.0)
+  rotationAxis.x * sinAngle,
+  rotationAxis.y * sinAngle,
+  rotationAxis.z * sinAngle,
+  Math.cos(angle / 2.0)
 );
 quaternion0.multiply(quaternion1);
 
@@ -866,24 +863,24 @@ angle = 0.1;
 sinAngle = Math.sin(angle / 2.0);
 rotationAxis.set(0, 0, 1);
 quaternion1.set(
-    rotationAxis.x * sinAngle,
-    rotationAxis.y * sinAngle,
-    rotationAxis.z * sinAngle,
-    Math.cos(angle / 2.0)
+  rotationAxis.x * sinAngle,
+  rotationAxis.y * sinAngle,
+  rotationAxis.z * sinAngle,
+  Math.cos(angle / 2.0)
 );
 quaternion0.multiply(quaternion1);
 
 for (let v = 0; v < grassBaseGeometry.attributes.position.array.length; v += 3) {
-    quaternion2.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2);
-    vertex.x = grassBaseGeometry.attributes.position.array[v];
-    vertex.y = grassBaseGeometry.attributes.position.array[v + 1];
-    vertex.z = grassBaseGeometry.attributes.position.array[v + 2];
-    const frac = vertex.y / config.bladeHeight;
-    quaternion2.slerp(quaternion0, frac);
-    vertex.applyQuaternion(quaternion2);
-    grassBaseGeometry.attributes.position.array[v] = vertex.x;
-    grassBaseGeometry.attributes.position.array[v + 1] = vertex.y;
-    grassBaseGeometry.attributes.position.array[v + 2] = vertex.z;
+  quaternion2.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2);
+  vertex.x = grassBaseGeometry.attributes.position.array[v];
+  vertex.y = grassBaseGeometry.attributes.position.array[v + 1];
+  vertex.z = grassBaseGeometry.attributes.position.array[v + 2];
+  const frac = vertex.y / config.bladeHeight;
+  quaternion2.slerp(quaternion0, frac);
+  vertex.applyQuaternion(quaternion2);
+  grassBaseGeometry.attributes.position.array[v] = vertex.x;
+  grassBaseGeometry.attributes.position.array[v + 1] = vertex.y;
+  grassBaseGeometry.attributes.position.array[v + 2] = vertex.z;
 }
 grassBaseGeometry.computeVertexNormals();
 
@@ -903,13 +900,13 @@ const scales = [];
 const halfRootAngles = [];
 
 for (let i = 0; i < config.instances; i++) {
-    indices.push(i / config.instances);
-    const x = Math.random() * config.width - config.width / 2;
-    const z = Math.random() * config.width - config.width / 2;
-    offsets.push(x, 0, z);
-    const bladeAngle = Math.PI - Math.random() * (2 * Math.PI);
-    halfRootAngles.push(Math.sin(0.5 * bladeAngle), Math.cos(0.5 * bladeAngle));
-    scales.push(i % 3 !== 0 ? 2.0 + Math.random() * 1.25 : 2.0 + Math.random());
+  indices.push(i / config.instances);
+  const x = Math.random() * config.width - config.width / 2;
+  const z = Math.random() * config.width - config.width / 2;
+  offsets.push(x, 0, z);
+  const bladeAngle = Math.PI - Math.random() * (2 * Math.PI);
+  halfRootAngles.push(Math.sin(0.5 * bladeAngle), Math.cos(0.5 * bladeAngle));
+  scales.push(i % 3 !== 0 ? 2.0 + Math.random() * 1.25 : 2.0 + Math.random());
 }
 
 instancedGeometry.setAttribute('offset', new THREE.InstancedBufferAttribute(new Float32Array(offsets), 3));
@@ -922,29 +919,29 @@ instancedGeometry.setAttribute('index', new THREE.InstancedBufferAttribute(new F
 // =============================================================================
 
 const grassMaterial = new THREE.RawShaderMaterial({
-    uniforms: {
-        time: { value: 0 },
-        delta: { value: delta },
-        posX: { value: pos.x },
-        posZ: { value: pos.y },
-        radius: { value: config.radius },
-        width: { value: config.width },
-        map: { value: grassTexture },
-        alphaMap: { value: alphaMap },
-        noiseTexture: { value: noiseTexture },
-        sunDirection: { value: sunDirection },
-        cameraPosition: { value: camera.position },
-        ambientStrength: { value: config.ambientStrength },
-        translucencyStrength: { value: config.translucencyStrength },
-        diffuseStrength: { value: config.diffuseStrength },
-        specularStrength: { value: config.specularStrength },
-        shininess: { value: config.shininess },
-        lightColour: { value: config.sunColour },
-        specularColour: { value: config.specularColour }
-    },
-    vertexShader: grassVertexSource,
-    fragmentShader: grassFragmentSource,
-    side: THREE.DoubleSide
+  uniforms: {
+    time: { value: 0 },
+    delta: { value: delta },
+    posX: { value: pos.x },
+    posZ: { value: pos.y },
+    radius: { value: config.radius },
+    width: { value: config.width },
+    map: { value: grassTexture },
+    alphaMap: { value: alphaMap },
+    noiseTexture: { value: noiseTexture },
+    sunDirection: { value: sunDirection },
+    cameraPosition: { value: camera.position },
+    ambientStrength: { value: config.ambientStrength },
+    translucencyStrength: { value: config.translucencyStrength },
+    diffuseStrength: { value: config.diffuseStrength },
+    specularStrength: { value: config.specularStrength },
+    shininess: { value: config.shininess },
+    lightColour: { value: config.sunColour },
+    specularColour: { value: config.specularColour }
+  },
+  vertexShader: grassVertexSource,
+  fragmentShader: grassFragmentSource,
+  side: THREE.DoubleSide
 });
 
 const grass = new THREE.Mesh(instancedGeometry, grassMaterial);
@@ -960,16 +957,16 @@ const particleVelocities = new Float32Array(config.particleCount * 3);
 const particleSizes = new Float32Array(config.particleCount);
 
 for (let i = 0; i < config.particleCount; i++) {
-    const i3 = i * 3;
-    particlePositions[i3] = Math.random() * 60 - 30;
-    particlePositions[i3 + 1] = Math.random() * 20 - 5;
-    particlePositions[i3 + 2] = Math.random() * 60 - 10;
+  const i3 = i * 3;
+  particlePositions[i3] = Math.random() * 60 - 30;
+  particlePositions[i3 + 1] = Math.random() * 20 - 5;
+  particlePositions[i3 + 2] = Math.random() * 60 - 10;
 
-    particleVelocities[i3] = Math.random() * 0.5 + 0.3;
-    particleVelocities[i3 + 1] = Math.random() * 0.2 - 0.1;
-    particleVelocities[i3 + 2] = Math.random() * 0.4 - 0.15;
+  particleVelocities[i3] = Math.random() * 0.5 + 0.3;
+  particleVelocities[i3 + 1] = Math.random() * 0.2 - 0.1;
+  particleVelocities[i3 + 2] = Math.random() * 0.4 - 0.15;
 
-    particleSizes[i] = Math.random() * 0.15 + 0.5;
+  particleSizes[i] = Math.random() * 0.15 + 0.5;
 }
 
 particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
@@ -989,14 +986,14 @@ ctx.fillRect(0, 0, 32, 32);
 const particleTexture = new THREE.CanvasTexture(particleCanvas);
 
 const particleMaterial = new THREE.PointsMaterial({
-    color: config.particleColor,
-    size: config.particleSize,
-    map: particleTexture,
-    transparent: true,
-    opacity: config.particleOpacity,
-    blending: THREE.AdditiveBlending,
-    sizeAttenuation: true,
-    depthWrite: false
+  color: config.particleColor,
+  size: config.particleSize,
+  map: particleTexture,
+  transparent: true,
+  opacity: config.particleOpacity,
+  blending: THREE.AdditiveBlending,
+  sizeAttenuation: true,
+  depthWrite: false
 });
 
 const particles = new THREE.Points(particleGeometry, particleMaterial);
@@ -1009,132 +1006,134 @@ scene.add(particles);
 const fontLoader = new FontLoader(loadingManager);
 
 function createTextMaterial() {
-    return new THREE.MeshPhongMaterial({
-        color: 'rgb(221, 97, 192))',
-        specular: 0xffffff,
-        shininess: 60,
-        emissive: 'rgb(160, 172, 96)',
-        emissiveIntensity: 0.25
-    });
+  return new THREE.MeshPhongMaterial({
+    color: 'rgb(221, 97, 192))',
+    specular: 0xffffff,
+    shininess: 60,
+    emissive: 'rgb(160, 172, 96)',
+    emissiveIntensity: 0.25
+  });
 }
 
 function createLinkMeshes(font, textMesh, textMaterial) {
-    let maxDescender = 0;
+  let maxDescender = 0;
 
-    // First pass: create geometries, compute widths, find max descender
-    linkData.forEach((item) => {
-        const geometry = new TextGeometry(item.label, {
-            font: font,
-            size: config.linkTextSize,
-            height: 0.25,
-            curveSegments: 12,
-            bevelEnabled: true,
-            bevelThickness: 0.14,
-            bevelSize: 0.05,
-            bevelOffset: 0,
-            bevelSegments: 6
-        });
-
-        geometry.computeBoundingBox();
-        const width = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
-        if (geometry.boundingBox.min.y < maxDescender) {
-            maxDescender = geometry.boundingBox.min.y;
-        }
-        item.geometry = geometry;
-        item.width = width;
+  // First pass: create geometries, compute widths, find max descender
+  linkData.forEach((item) => {
+    const geometry = new TextGeometry(item.label, {
+      font: font,
+      size: config.linkTextSize,
+      height: 0.25,
+      curveSegments: 12,
+      bevelEnabled: true,
+      bevelThickness: 0.14,
+      bevelSize: 0.05,
+      bevelOffset: 0,
+      bevelSegments: 6
     });
 
-    // Compute total row width: sum of all link widths + gaps between them
-    const totalWidth = linkData.reduce((sum, item) => sum + item.width, 0) +
-        (linkData.length - 1) * config.linkGap;
+    geometry.computeBoundingBox();
+    const width = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
+    if (geometry.boundingBox.min.y < maxDescender) {
+      maxDescender = geometry.boundingBox.min.y;
+    }
+    item.geometry = geometry;
+    item.width = width;
+  });
 
-    // Second pass: create meshes and hitboxes with accumulated positioning
-    // currentX tracks the left edge of each link
-    let currentX = -totalWidth / 2;
+  // Compute total row width: sum of all link widths + gaps between them
+  const totalWidth = linkData.reduce((sum, item) => sum + item.width, 0) +
+    (linkData.length - 1) * config.linkGap;
 
-    linkData.forEach((item) => {
-        // Center geometry so it scales from center
-        const centerX = -item.width / 2;
-        item.geometry.translate(centerX - item.geometry.boundingBox.min.x, -maxDescender, 0);
+  // Second pass: create meshes and hitboxes with accumulated positioning
+  // currentX tracks the left edge of each link
+  let currentX = -totalWidth / 2;
 
-        const linkMesh = new THREE.Mesh(item.geometry, textMaterial);
-        linkMesh.castShadow = true;
-        linkMesh.receiveShadow = true;
-        linkMesh.name = item.label;
-        linkMesh.userData.url = item.url;
-        linkMesh.userData.action = item.action;
-        linkMesh.position.set(currentX + item.width / 2, -2.5, 1);
-        textMesh.add(linkMesh);
-        registerClickableMesh(linkMesh);
+  linkData.forEach((item) => {
+    // Center geometry so it scales from center
+    const centerX = -item.width / 2;
+    item.geometry.translate(centerX - item.geometry.boundingBox.min.x, -maxDescender, 0);
 
-        const linkBox = item.geometry.boundingBox;
-        const linkW = linkBox.max.x - linkBox.min.x;
-        const linkH = linkBox.max.y - linkBox.min.y;
-        const linkHitbox = new THREE.Mesh(
-            new THREE.PlaneGeometry(linkW + 1, linkH + 0.8),
-            new THREE.MeshBasicMaterial({ visible: false })
-        );
-        // Center hitbox on the link
-        linkHitbox.position.set(currentX + item.width / 2, -2.5, 0.5);
-        linkHitbox.name = item.label;
-        linkHitbox.userData.url = item.url;
-        linkHitbox.userData.action = item.action;
-        textMesh.add(linkHitbox);
-        registerClickableMesh(linkHitbox);
+    const linkMesh = new THREE.Mesh(item.geometry, textMaterial);
+    linkMesh.castShadow = true;
+    linkMesh.receiveShadow = true;
+    linkMesh.name = item.label;
+    linkMesh.userData.url = item.url;
+    linkMesh.userData.action = item.action;
+    linkMesh.position.set(currentX + item.width / 2, -2.2, 1);
+    textMesh.add(linkMesh);
+    registerClickableMesh(linkMesh);
 
-        // Advance position for next link
-        currentX += item.width + config.linkGap;
-    });
+    const linkBox = item.geometry.boundingBox;
+    const linkW = linkBox.max.x - linkBox.min.x;
+    const linkH = linkBox.max.y - linkBox.min.y;
+    const linkHitbox = new THREE.Mesh(
+      new THREE.PlaneGeometry(linkW + 1, linkH + 0.8),
+      new THREE.MeshBasicMaterial({ visible: false })
+    );
+    // Center hitbox on the link
+    linkHitbox.position.set(currentX + item.width / 2, -2.2, 0.5);
+    linkHitbox.name = item.label;
+    linkHitbox.userData.url = item.url;
+    linkHitbox.userData.action = item.action;
+    textMesh.add(linkHitbox);
+    registerClickableMesh(linkHitbox);
+
+    // Advance position for next link
+    currentX += item.width + config.linkGap;
+  });
 }
 
 fontLoader.load('/fonts/helvetiker_regular.typeface.json', function (font) {
-    // Create a group to hold everything - this handles position and camera-facing
-    const textGroup = new THREE.Group();
-    textGroup.position.set(0, config.textYPosition, config.textZPosition);
-    textGroup.name = 'textGroup';
-    scene.add(textGroup);
+  // Create a group to hold everything - this handles position and camera-facing
+  const textGroup = new THREE.Group();
+  textGroup.position.set(0, config.textYPosition, config.textZPosition);
+  textGroup.name = 'textGroup';
+  scene.add(textGroup);
 
-    const textGeometry = new TextGeometry('kate', {
-        font: font,
-        depth: 100,
-        size: config.mainTextSize,
-        height: 2,
-        curveSegments: 32,
-        bevelEnabled: true,
-        bevelThickness: 0.08,
-        bevelSize: 0.1,
-        bevelOffset: 0,
-        bevelSegments: 8
-    });
+  const textGeometry = new TextGeometry('kate', {
+    font: font,
+    depth: 100,
+    size: config.mainTextSize,
+    height: 2,
+    curveSegments: 32,
+    bevelEnabled: true,
+    bevelThickness: 0.08,
+    bevelSize: 0.1,
+    bevelOffset: 0,
+    bevelSegments: 8
+  });
 
-    textGeometry.computeBoundingBox();
-    const xOffset = -0.5 * (textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x);
-    textGeometry.translate(xOffset, 0, 0);
+  textGeometry.computeBoundingBox();
+  const xOffset = -0.5 * (textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x);
+  textGeometry.translate(xOffset, 0, 0);
 
-    const textMaterial = createTextMaterial();
-    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
-    textMesh.castShadow = true;
-    textMesh.receiveShadow = true;
-    textMesh.name = 'floatingText';
-    textGroup.add(textMesh);
+  const textMaterial = createTextMaterial();
+  const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+  textMesh.castShadow = true;
+  textMesh.receiveShadow = true;
+  textMesh.name = 'floatingText';
+  textMesh.userData.url = null;
+  textGroup.add(textMesh);
+  registerClickableMesh(textMesh);
 
-    // Create hitbox for main text
-    const textBox = textGeometry.boundingBox;
-    const textWidth = textBox.max.x - textBox.min.x;
-    const textHeight = textBox.max.y - textBox.min.y;
-    const textHitbox = new THREE.Mesh(
-        new THREE.PlaneGeometry(textWidth + 1, textHeight + 1),
-        new THREE.MeshBasicMaterial({ visible: false })
-    );
-    // Position in local space: centered on text geometry
-    textHitbox.position.set(0, textHeight / 2, 1.5);
-    textHitbox.name = 'floatingText';
-    textHitbox.userData.url = null;
-    textMesh.add(textHitbox);
-    registerClickableMesh(textHitbox);
+  // Create hitbox for main text
+  const textBox = textGeometry.boundingBox;
+  const textWidth = textBox.max.x - textBox.min.x;
+  const textHeight = textBox.max.y - textBox.min.y;
+  const textHitbox = new THREE.Mesh(
+    new THREE.PlaneGeometry(textWidth + 1, textHeight + 1),
+    new THREE.MeshBasicMaterial({ visible: false })
+  );
+  // Position in local space: centered on text geometry
+  textHitbox.position.set(0, textHeight / 2, 1.5);
+  textHitbox.name = 'floatingText';
+  textHitbox.userData.url = null;
+  textMesh.add(textHitbox);
+  registerClickableMesh(textHitbox);
 
-    // Links are added to the group, not textMesh, so they don't twirl
-    createLinkMeshes(font, textGroup, textMaterial);
+  // Links are added to the group, not textMesh, so they don't twirl
+  createLinkMeshes(font, textGroup, textMaterial);
 });
 
 // =============================================================================
@@ -1142,12 +1141,12 @@ fontLoader.load('/fonts/helvetiker_regular.typeface.json', function (font) {
 // =============================================================================
 
 window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    backgroundMaterial.uniforms.resolution.value.set(canvas.width, canvas.height);
-    backgroundMaterial.uniforms.fov.value = config.fov;
-    controls.update();
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  backgroundMaterial.uniforms.resolution.value.set(canvas.width, canvas.height);
+  backgroundMaterial.uniforms.fov.value = config.fov;
+  controls.update();
 });
 
 // =============================================================================
@@ -1158,141 +1157,142 @@ let time = 0;
 let lastFrame = performance.now();
 
 function updateParticles(dt) {
-    const positions = particleGeometry.attributes.position.array;
+  const positions = particleGeometry.attributes.position.array;
 
-    for (let i = 0; i < config.particleCount; i++) {
-        const i3 = i * 3;
+  for (let i = 0; i < config.particleCount; i++) {
+    const i3 = i * 3;
 
-        const windStrength = 0.5 + 0.3 * Math.sin(time * 0.5 + i * 0.1);
-        positions[i3] += particleVelocities[i3] * dt * windStrength;
-        positions[i3 + 1] += particleVelocities[i3 + 1] * dt + Math.sin(time * 2 + i * 0.5) * dt * 0.2;
-        positions[i3 + 2] += particleVelocities[i3 + 2] * dt;
+    const windStrength = 1.67 + 0.3 * Math.sin(time * 0.5 + i * 0.1);
+    positions[i3] += particleVelocities[i3] * dt * windStrength;
+    positions[i3 + 1] += particleVelocities[i3 + 1] * dt + Math.sin(time * 2 + i * 0.5) * dt * 0.2;
+    positions[i3 + 2] += particleVelocities[i3 + 2] * dt;
 
-        // Wrap particles around boundaries
-        if (positions[i3] > 30) positions[i3] = -30;
-        if (positions[i3] < -30) positions[i3] = 30;
-        if (positions[i3 + 1] > 22) positions[i3 + 1] = 2;
-        if (positions[i3 + 1] < 2) positions[i3 + 1] = 22;
-        if (positions[i3 + 2] > 50) positions[i3 + 2] = -10;
-        if (positions[i3 + 2] < -10) positions[i3 + 2] = 50;
-    }
+    // Wrap particles around boundaries
+    if (positions[i3] > 30) positions[i3] = -30;
+    if (positions[i3] < -30) positions[i3] = 30;
+    if (positions[i3 + 1] > 22) positions[i3 + 1] = 2;
+    if (positions[i3 + 1] < 2) positions[i3 + 1] = 22;
+    if (positions[i3 + 2] > 50) positions[i3 + 2] = -10;
+    if (positions[i3 + 2] < -10) positions[i3 + 2] = 50;
+  }
 
-    particleGeometry.attributes.position.needsUpdate = true;
+  particleGeometry.attributes.position.needsUpdate = true;
 }
 
 function updateHoverAnimations() {
-    hoverState.forEach((state, uuid) => {
-        const mesh = meshByUuid.get(uuid);
-        if (mesh) {
-            state.current += (state.target - state.current) * config.hoverEase;
-            mesh.scale.setScalar(state.current);
-        }
-    });
+  hoverState.forEach((state, uuid) => {
+    const mesh = meshByUuid.get(uuid);
+    if (mesh) {
+      state.current += (state.target - state.current) * config.hoverEase;
+      mesh.scale.setScalar(state.current);
+    }
+  });
 }
 
 function updateFloatingText(dt) {
-    const textGroup = scene.getObjectByName('textGroup');
-    const textMesh = scene.getObjectByName('floatingText');
-    if (!textGroup || !textMesh) return;
+  const textGroup = scene.getObjectByName('textGroup');
+  const textMesh = scene.getObjectByName('floatingText');
+  if (!textGroup || !textMesh) return;
 
-    // Base bobbing animation for the whole group
-    const yOffset = Math.sin(time * config.textBobSpeed) * config.textBobAmplitude;
-    textGroup.position.y = config.textYPosition + yOffset;
+  // Base bobbing animation for the whole group
+  const yOffset = Math.sin(time * config.textBobSpeed) * config.textBobAmplitude;
+  textGroup.position.y = config.textYPosition + yOffset;
 
-    // Calculate target rotation to face camera (Y-axis only) - applied to group
-    const direction = new THREE.Vector3();
-    direction.subVectors(camera.position, textGroup.position);
-    direction.y = 0;
-    direction.normalize();
+  // Calculate target rotation to face camera (Y-axis only) - applied to group
+  const direction = new THREE.Vector3();
+  direction.subVectors(camera.position, textGroup.position);
+  direction.y = 0;
+  direction.normalize();
 
-    const targetMatrix = new THREE.Matrix4();
-    targetMatrix.lookAt(direction, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 1, 0));
-    textTargetQuaternion.setFromRotationMatrix(targetMatrix);
+  const targetMatrix = new THREE.Matrix4();
+  targetMatrix.lookAt(direction, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 1, 0));
+  textTargetQuaternion.setFromRotationMatrix(targetMatrix);
 
-    textCurrentQuaternion.slerp(textTargetQuaternion, config.textRotationDamping);
-    textGroup.quaternion.copy(textCurrentQuaternion);
+  textCurrentQuaternion.slerp(textTargetQuaternion, config.textRotationDamping);
+  textGroup.quaternion.copy(textCurrentQuaternion);
 
-    // Click animation: twirl and jump - applied only to main text mesh
-    if (textClickAnimating) {
-        textClickAnimationTime += dt;
-        const progress = Math.min(textClickAnimationTime / textClickAnimationDuration, 1);
+  // Click animation: twirl and jump - applied only to main text mesh
+  if (textClickAnimating) {
+    textClickAnimationTime += dt;
+    const progress = Math.min(textClickAnimationTime / textClickAnimationDuration, 1);
 
-        // Jump: parabolic arc (up and down)
-        const jumpProgress = Math.sin(progress * Math.PI);
-        textMesh.position.y = jumpProgress * textJumpHeight;
+    const easeOut = 1 - Math.pow(1 - progress, 4);
 
-        // Twirl: full rotation with ease-out
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        textMesh.rotation.y = easeOut * Math.PI * 2 * textTwirlRotations;
+    // Jump: parabolic arc (up and down)
+    const jumpProgress = Math.sin(progress * Math.PI);
+    textMesh.position.y = easeOut * jumpProgress * textJumpHeight;
 
-        // End animation
-        if (progress >= 1) {
-            textClickAnimating = false;
-            textClickAnimationTime = 0;
-            textMesh.position.y = 0;
-            textMesh.rotation.y = 0;
-        }
+    // Twirl: full rotation with ease-out
+    textMesh.rotation.y = easeOut * Math.PI * 2 * textTwirlRotations;
+
+    // End animation
+    if (progress >= 1) {
+      textClickAnimating = false;
+      textClickAnimationTime = 0;
+      textMesh.position.y = 0;
+      textMesh.rotation.y = 0;
     }
+  }
 
-    // Position all text-affecting lights relative to camera for consistent illumination
-    const toCamera = direction.clone();
-    const perpendicular = new THREE.Vector3(-toCamera.z, 0, toCamera.x); // perpendicular on XZ plane
+  // Position all text-affecting lights relative to camera for consistent illumination
+  const toCamera = direction.clone();
+  const perpendicular = new THREE.Vector3(-toCamera.z, 0, toCamera.x); // perpendicular on XZ plane
 
-    // Main front light - between camera and text
-    textLight.position.set(
-        textGroup.position.x + toCamera.x * 8,
-        textGroup.position.y + 3,
-        textGroup.position.z + toCamera.z * 8
-    );
+  // Main front light - between camera and text
+  textLight.position.set(
+    textGroup.position.x + toCamera.x * 8,
+    textGroup.position.y + 3,
+    textGroup.position.z + toCamera.z * 8
+  );
 
-    // Point light - slightly offset to the side for depth
-    pointLight.position.set(
-        textGroup.position.x + toCamera.x * 6 + perpendicular.x * 3,
-        textGroup.position.y + 3,
-        textGroup.position.z + toCamera.z * 6 + perpendicular.z * 3
-    );
+  // Point light - slightly offset to the side for depth
+  pointLight.position.set(
+    textGroup.position.x + toCamera.x * 6 + perpendicular.x * 3,
+    textGroup.position.y + 3,
+    textGroup.position.z + toCamera.z * 6 + perpendicular.z * 3
+  );
 
-    // Directional light - from above and front
-    dirLight.position.set(
-        textGroup.position.x + toCamera.x * 5,
-        textGroup.position.y + 8,
-        textGroup.position.z + toCamera.z * 5
-    );
-    dirLight.target.position.copy(textGroup.position);
+  // Directional light - from above and front
+  dirLight.position.set(
+    textGroup.position.x + toCamera.x * 5,
+    textGroup.position.y + 8,
+    textGroup.position.z + toCamera.z * 5
+  );
+  dirLight.target.position.copy(textGroup.position);
 
-    // Rim light - behind text for edge highlights
-    rimLight.position.set(
-        textGroup.position.x - toCamera.x * 5,
-        textGroup.position.y + 2,
-        textGroup.position.z - toCamera.z * 5
-    );
+  // Rim light - behind text for edge highlights
+  rimLight.position.set(
+    textGroup.position.x - toCamera.x * 5,
+    textGroup.position.y + 2,
+    textGroup.position.z - toCamera.z * 5
+  );
 }
 
 function animate() {
-    const now = performance.now();
-    let dt = (now - lastFrame) / 1000;
-    dt = Math.min(dt, 0.1);
-    lastFrame = now;
-    time += dt;
+  const now = performance.now();
+  let dt = (now - lastFrame) / 1000;
+  dt = Math.min(dt, 0.1);
+  lastFrame = now;
+  time += dt;
 
-    // Update uniforms
-    grassMaterial.uniforms.time.value = time;
-    backgroundMaterial.uniforms.time.value = time;
+  // Update uniforms
+  grassMaterial.uniforms.time.value = time;
+  backgroundMaterial.uniforms.time.value = time;
 
-    // Update animations
-    updateHoverAnimations();
-    updateFloatingText(dt);
-    updateParticles(dt);
+  // Update animations
+  updateHoverAnimations();
+  updateFloatingText(dt);
+  updateParticles(dt);
 
-    // Update controls
-    controls.update();
+  // Update controls
+  controls.update();
 
-    // Render
-    renderer.clear();
-    renderer.render(backgroundScene, camera);
-    renderer.render(scene, camera);
+  // Render
+  renderer.clear();
+  renderer.render(backgroundScene, camera);
+  renderer.render(scene, camera);
 
-    requestAnimationFrame(animate);
+  requestAnimationFrame(animate);
 }
 
 animate();
