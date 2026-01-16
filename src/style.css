@@ -28,7 +28,7 @@ canvas {
 #audio-toggle {
   width: 44px;
   height: 44px;
-  background: rgba(40, 40, 40, 0.2);
+  background: rgba(40, 40, 40, 0.25);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 50%;
@@ -41,6 +41,17 @@ canvas {
   flex-shrink: 0;
   position: relative;
   z-index: 2;
+  opacity: 0;
+  animation: fadeInAudio 0.5s ease 0.6s forwards;
+}
+
+@keyframes fadeInAudio {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 #audio-toggle:hover {
@@ -49,9 +60,9 @@ canvas {
 }
 
 #audio-toggle svg {
-  width: 22px;
-  height: 22px;
-  color: rgba(255, 255, 255, .7);
+  width: 24px;
+  height: 24px;
+  color: rgba(255, 255, 255, .85);
 }
 
 #audio-toggle:hover svg {
@@ -69,14 +80,16 @@ canvas {
   margin-left: -18px;
   padding-left: 24px;
   padding-right: 16px;
-  max-width: 0;
   overflow: hidden;
   opacity: 0;
-  transition: max-width 0.4s ease, opacity 0.3s ease, padding 0.4s ease;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  will-change: transform, opacity;
 }
 
 #now-playing.visible {
-  max-width: 200px;
+  transform: scaleX(1);
   opacity: 1;
 }
 
