@@ -237,6 +237,8 @@ function showAboutPanel() {
     aboutOverlay.offsetHeight;
     aboutOverlay.classList.add('visible');
     controls.autoRotate = false;
+    // Reset cursor since overlay is now on top
+    document.body.style.cursor = 'default';
 }
 
 function hideAboutPanel() {
