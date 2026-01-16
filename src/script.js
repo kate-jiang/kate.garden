@@ -1,25 +1,25 @@
-import * as THREE from 'three';
-import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
-import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry.js';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import * as THREE from "three";
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 // =============================================================================
 // CONFIG
 // =============================================================================
 
 const config = {
-  // Grass 
+  // Grass
   joints: 4,
   bladeWidth: 0.067,
   bladeHeight: 0.5,
   instances: 100000,
 
-  // Terrain 
+  // Terrain
   width: 100,
   resolution: 64,
   radius: 240,
 
-  // Lighting 
+  // Lighting
   elevation: 0.2,
   azimuth: 0.4,
   fogFade: 0.008,
@@ -31,17 +31,17 @@ const config = {
   sunColour: new THREE.Vector3(1.0, 1.0, 1.0),
   specularColour: new THREE.Vector3(1.0, 1.0, 1.0),
 
-  // Camera 
+  // Camera
   fov: 45,
   cameraPosition: { x: -18, y: -1, z: 55 },
   cameraTarget: { x: 0, y: 5, z: 10 },
   minDistance: 40,
   maxDistance: 50,
-  minPolarAngle: 1.55,
-  maxPolarAngle: 1.70,
+  minPolarAngle: 1.61,
+  maxPolarAngle: 1.7,
   autoRotateSpeed: -0.07,
 
-  // Interaction 
+  // Interaction
   hoverScale: 1.15,
   hoverEase: 0.15,
   clickMoveThreshold: 1,
@@ -53,22 +53,22 @@ const config = {
   particleSize: 0.14,
   particleOpacity: 0.4,
 
-  // Text 
+  // Text
   mainTextSize: 4,
-  linkTextSize: .8,
+  linkTextSize: 0.8,
   linkGap: 1,
   textYPosition: 4.5,
   textZPosition: 10,
   textBobAmplitude: 0.3,
   textBobSpeed: 1.5,
-  textRotationDamping: 0.03
+  textRotationDamping: 0.03,
 };
 
 const linkData = [
-  { label: 'about', action: 'showAbout' },
-  { label: 'github', url: 'https://github.com/kate-jiang' },
-  { label: 'insta', url: 'https://instagram.com/katejiang__' },
-  { label: 'twitter', url: 'https://twitter.com/chinesefoid' }
+  { label: "about", action: "showAbout" },
+  { label: "github", url: "https://github.com/kate-jiang" },
+  { label: "insta", url: "https://instagram.com/katejiang__" },
+  { label: "twitter", url: "https://twitter.com/chinesefoid" },
 ];
 
 // =============================================================================
@@ -109,7 +109,7 @@ let groundShader = null;
 // RENDERER SETUP
 // =============================================================================
 
-const canvas = document.getElementById('webgl');
+const canvas = document.getElementById("webgl");
 const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -127,10 +127,7 @@ renderer.toneMappingExposure = 1.3;
 const scene = new THREE.Scene();
 const backgroundScene = new THREE.Scene();
 
-const camera = new THREE.PerspectiveCamera(
-  config.fov,
-  window.innerWidth / window.innerHeight,
-);
+const camera = new THREE.PerspectiveCamera(config.fov, window.innerWidth / window.innerHeight);
 camera.position.set(config.cameraPosition.x, config.cameraPosition.y, config.cameraPosition.z);
 scene.add(camera);
 
@@ -195,10 +192,10 @@ function resetAllHoverStates() {
 }
 
 function updateCursor(intersects) {
-  const hasClickable = intersects.some(i =>
-    i.object.userData.url || i.object.userData.action || i.object.name === 'floatingText'
+  const hasClickable = intersects.some(
+    i => i.object.userData.url || i.object.userData.action || i.object.name === "floatingText"
   );
-  document.body.style.cursor = hasClickable ? 'pointer' : 'default';
+  document.body.style.cursor = hasClickable ? "pointer" : "default";
 }
 
 function triggerTextClickAnimation() {
@@ -213,10 +210,10 @@ function handleClick(intersects) {
     const clickedObject = intersects[0].object;
     const userData = clickedObject.userData;
     if (userData.url) {
-      window.open(userData.url, '_blank');
-    } else if (userData.action === 'showAbout') {
+      window.open(userData.url, "_blank");
+    } else if (userData.action === "showAbout") {
       showAboutPanel();
-    } else if (clickedObject.name === 'floatingText') {
+    } else if (clickedObject.name === "floatingText") {
       triggerTextClickAnimation();
     }
   }
@@ -226,32 +223,32 @@ function handleClick(intersects) {
 // ABOUT PANEL
 // =============================================================================
 
-const aboutOverlay = document.getElementById('about-overlay');
-const aboutClose = document.getElementById('about-close');
+const aboutOverlay = document.getElementById("about-overlay");
+const aboutClose = document.getElementById("about-close");
 
 function showAboutPanel() {
-  aboutOverlay.classList.remove('hidden');
+  aboutOverlay.classList.remove("hidden");
   // Trigger reflow before adding visible class for transition
   aboutOverlay.offsetHeight;
-  aboutOverlay.classList.add('visible');
+  aboutOverlay.classList.add("visible");
   controls.autoRotate = false;
   // Reset cursor since overlay is now on top
-  document.body.style.cursor = 'default';
+  document.body.style.cursor = "default";
 }
 
 function hideAboutPanel() {
-  aboutOverlay.classList.remove('visible');
-  aboutOverlay.addEventListener('transitionend', function handler() {
-    if (!aboutOverlay.classList.contains('visible')) {
-      aboutOverlay.classList.add('hidden');
+  aboutOverlay.classList.remove("visible");
+  aboutOverlay.addEventListener("transitionend", function handler() {
+    if (!aboutOverlay.classList.contains("visible")) {
+      aboutOverlay.classList.add("hidden");
     }
-    aboutOverlay.removeEventListener('transitionend', handler);
+    aboutOverlay.removeEventListener("transitionend", handler);
   });
   controls.autoRotate = true;
 }
 
-aboutClose.addEventListener('click', hideAboutPanel);
-aboutOverlay.addEventListener('click', (e) => {
+aboutClose.addEventListener("click", hideAboutPanel);
+aboutOverlay.addEventListener("click", e => {
   if (e.target === aboutOverlay) {
     hideAboutPanel();
   }
@@ -266,31 +263,35 @@ function registerClickableMesh(mesh) {
 // EVENT LISTENERS
 // =============================================================================
 
-canvas.addEventListener('mousemove', (event) => {
+canvas.addEventListener("mousemove", event => {
   updateMouseFromEvent(event);
   const intersects = getIntersectedMeshes();
   updateHoverStates(intersects);
   updateCursor(intersects);
 });
 
-canvas.addEventListener('mousedown', () => {
+canvas.addEventListener("mousedown", () => {
   clickStartCameraPos.copy(camera.position);
 });
 
-canvas.addEventListener('click', (event) => {
+canvas.addEventListener("click", event => {
   if (camera.position.distanceToSquared(clickStartCameraPos) > config.clickMoveThreshold) return;
   updateMouseFromEvent(event);
   handleClick(getIntersectedMeshes());
 });
 
-canvas.addEventListener('touchstart', (event) => {
-  event.preventDefault();
-  clickStartCameraPos.copy(camera.position);
-  updateMouseFromTouch(event.touches[0]);
-  updateHoverStates(getIntersectedMeshes());
-}, { passive: false });
+canvas.addEventListener(
+  "touchstart",
+  event => {
+    event.preventDefault();
+    clickStartCameraPos.copy(camera.position);
+    updateMouseFromTouch(event.touches[0]);
+    updateHoverStates(getIntersectedMeshes());
+  },
+  { passive: false }
+);
 
-canvas.addEventListener('touchend', (event) => {
+canvas.addEventListener("touchend", event => {
   if (camera.position.distanceToSquared(clickStartCameraPos) > config.touchMoveThreshold) {
     resetAllHoverStates();
     return;
@@ -305,34 +306,34 @@ canvas.addEventListener('touchend', (event) => {
 // AUDIO CONTROL
 // =============================================================================
 
-const audioToggle = document.getElementById('audio-toggle');
-const audioIconOn = document.getElementById('audio-icon-on');
-const audioIconOff = document.getElementById('audio-icon-off');
-const nowPlaying = document.getElementById('now-playing');
+const audioToggle = document.getElementById("audio-toggle");
+const audioIconOn = document.getElementById("audio-icon-on");
+const audioIconOff = document.getElementById("audio-icon-off");
+const nowPlaying = document.getElementById("now-playing");
 
 let backgroundMusic = null;
 let isAudioPlaying = false;
 
 function lazyLoadAudio() {
   if (backgroundMusic) return;
-  backgroundMusic = new Audio('/arabesque.mp3');
+  backgroundMusic = new Audio("/arabesque.mp3");
   backgroundMusic.loop = true;
-  backgroundMusic.preload = 'auto';
+  backgroundMusic.preload = "auto";
 }
 
-audioToggle.addEventListener('click', () => {
+audioToggle.addEventListener("click", () => {
   if (!backgroundMusic) lazyLoadAudio();
 
   if (isAudioPlaying) {
     backgroundMusic.pause();
-    audioIconOn.style.display = 'none';
-    audioIconOff.style.display = 'block';
-    nowPlaying.classList.remove('visible');
+    audioIconOn.style.display = "none";
+    audioIconOff.style.display = "block";
+    nowPlaying.classList.remove("visible");
   } else {
     backgroundMusic.play();
-    audioIconOn.style.display = 'block';
-    audioIconOff.style.display = 'none';
-    nowPlaying.classList.add('visible');
+    audioIconOn.style.display = "block";
+    audioIconOff.style.display = "none";
+    nowPlaying.classList.add("visible");
   }
   isAudioPlaying = !isAudioPlaying;
 });
@@ -382,13 +383,13 @@ scene.add(rimLight);
 // LOADING MANAGER
 // =============================================================================
 
-const loadingOverlay = document.getElementById('loading-overlay');
+const loadingOverlay = document.getElementById("loading-overlay");
 const loadingManager = new THREE.LoadingManager();
 
 loadingManager.onLoad = () => {
   // Small delay to ensure first frame renders completely
   requestAnimationFrame(() => {
-    loadingOverlay.classList.add('fade-out');
+    loadingOverlay.classList.add("fade-out");
     // Start loading audio in background after page is ready
     lazyLoadAudio();
   });
@@ -399,9 +400,9 @@ loadingManager.onLoad = () => {
 // =============================================================================
 
 const loader = new THREE.TextureLoader(loadingManager);
-const grassTexture = loader.load('/textures/blade_diffuse.jpg');
-const alphaMap = loader.load('/textures/blade_alpha.jpg');
-const noiseTexture = loader.load('/textures/perlinFbm.jpg');
+const grassTexture = loader.load("/textures/blade_diffuse.jpg");
+const alphaMap = loader.load("/textures/blade_alpha.jpg");
+const noiseTexture = loader.load("/textures/perlinFbm.jpg");
 noiseTexture.wrapS = THREE.RepeatWrapping;
 noiseTexture.wrapT = THREE.RepeatWrapping;
 
@@ -552,7 +553,7 @@ const backgroundMaterial = new THREE.ShaderMaterial({
     resolution: { value: new THREE.Vector2(canvas.width, canvas.height) },
     fogFade: { value: config.fogFade },
     fov: { value: config.fov },
-    time: { value: 0 }
+    time: { value: 0 },
   },
   vertexShader: `
   varying vec2 vUv;
@@ -561,7 +562,7 @@ const backgroundMaterial = new THREE.ShaderMaterial({
   gl_Position = vec4(position, 1.0);
   }
 `,
-  fragmentShader: skyFragmentShader
+  fragmentShader: skyFragmentShader,
 });
 backgroundMaterial.depthWrite = false;
 
@@ -573,7 +574,9 @@ backgroundScene.add(background);
 // GROUND
 // =============================================================================
 
-const groundVertexPrefix = sharedPrefix + `
+const groundVertexPrefix =
+  sharedPrefix +
+  `
 attribute vec3 basePosition;
 uniform float delta;
 uniform float posX;
@@ -611,16 +614,26 @@ return norm;
 }
 `;
 
-const groundBaseGeometry = new THREE.PlaneGeometry(config.width, config.width, config.resolution, config.resolution);
+const groundBaseGeometry = new THREE.PlaneGeometry(
+  config.width,
+  config.width,
+  config.resolution,
+  config.resolution
+);
 groundBaseGeometry.lookAt(new THREE.Vector3(0, 1, 0));
 
-const groundGeometry = new THREE.PlaneGeometry(config.width, config.width, config.resolution, config.resolution);
-groundGeometry.setAttribute('basePosition', groundBaseGeometry.getAttribute('position'));
+const groundGeometry = new THREE.PlaneGeometry(
+  config.width,
+  config.width,
+  config.resolution,
+  config.resolution
+);
+groundGeometry.setAttribute("basePosition", groundBaseGeometry.getAttribute("position"));
 groundGeometry.lookAt(new THREE.Vector3(0, 1, 0));
 
 const groundMaterial = new THREE.MeshPhongMaterial({
-  color: new THREE.Color('rgb(10%, 25%, 2%)'),
-  shininess: 10
+  color: new THREE.Color("rgb(10%, 25%, 2%)"),
+  shininess: 10,
 });
 
 groundMaterial.onBeforeCompile = function (shader) {
@@ -632,7 +645,7 @@ groundMaterial.onBeforeCompile = function (shader) {
   shader.uniforms.noiseTexture = { value: noiseTexture };
   shader.vertexShader = groundVertexPrefix + shader.vertexShader;
   shader.vertexShader = shader.vertexShader.replace(
-    '#include <beginnormal_vertex>',
+    "#include <beginnormal_vertex>",
     `vec3 pos = vec3(0);
   pos.x = basePosition.x - mod(mod((delta * posX), delta) + delta, delta);
   pos.z = basePosition.z - mod(mod((delta * posZ), delta) + delta, delta);
@@ -644,7 +657,7 @@ groundMaterial.onBeforeCompile = function (shader) {
   #endif`
   );
   shader.vertexShader = shader.vertexShader.replace(
-    '#include <begin_vertex>',
+    "#include <begin_vertex>",
     `vec3 transformed = vec3(pos);`
   );
   groundShader = shader;
@@ -659,7 +672,9 @@ scene.add(ground);
 // GRASS SHADERS
 // =============================================================================
 
-const grassVertexSource = sharedPrefix + `
+const grassVertexSource =
+  sharedPrefix +
+  `
 precision mediump float;
 attribute vec3 position;
 attribute vec3 normal;
@@ -829,7 +844,12 @@ gl_FragColor = vec4(col, 1.0);
 // GRASS GEOMETRY
 // =============================================================================
 
-const grassBaseGeometry = new THREE.PlaneGeometry(config.bladeWidth, config.bladeHeight, 1, config.joints);
+const grassBaseGeometry = new THREE.PlaneGeometry(
+  config.bladeWidth,
+  config.bladeHeight,
+  1,
+  config.joints
+);
 grassBaseGeometry.translate(0, config.bladeHeight / 2, 0);
 
 // Apply blade curvature
@@ -909,10 +929,22 @@ for (let i = 0; i < config.instances; i++) {
   scales.push(i % 3 !== 0 ? 2.0 + Math.random() * 1.25 : 2.0 + Math.random());
 }
 
-instancedGeometry.setAttribute('offset', new THREE.InstancedBufferAttribute(new Float32Array(offsets), 3));
-instancedGeometry.setAttribute('scale', new THREE.InstancedBufferAttribute(new Float32Array(scales), 1));
-instancedGeometry.setAttribute('halfRootAngle', new THREE.InstancedBufferAttribute(new Float32Array(halfRootAngles), 2));
-instancedGeometry.setAttribute('index', new THREE.InstancedBufferAttribute(new Float32Array(indices), 1));
+instancedGeometry.setAttribute(
+  "offset",
+  new THREE.InstancedBufferAttribute(new Float32Array(offsets), 3)
+);
+instancedGeometry.setAttribute(
+  "scale",
+  new THREE.InstancedBufferAttribute(new Float32Array(scales), 1)
+);
+instancedGeometry.setAttribute(
+  "halfRootAngle",
+  new THREE.InstancedBufferAttribute(new Float32Array(halfRootAngles), 2)
+);
+instancedGeometry.setAttribute(
+  "index",
+  new THREE.InstancedBufferAttribute(new Float32Array(indices), 1)
+);
 
 // =============================================================================
 // GRASS MATERIAL & MESH
@@ -937,11 +969,11 @@ const grassMaterial = new THREE.RawShaderMaterial({
     specularStrength: { value: config.specularStrength },
     shininess: { value: config.shininess },
     lightColour: { value: config.sunColour },
-    specularColour: { value: config.specularColour }
+    specularColour: { value: config.specularColour },
   },
   vertexShader: grassVertexSource,
   fragmentShader: grassFragmentSource,
-  side: THREE.DoubleSide
+  side: THREE.DoubleSide,
 });
 
 const grass = new THREE.Mesh(instancedGeometry, grassMaterial);
@@ -969,18 +1001,18 @@ for (let i = 0; i < config.particleCount; i++) {
   particleSizes[i] = Math.random() * 0.15 + 0.5;
 }
 
-particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-particleGeometry.setAttribute('size', new THREE.BufferAttribute(particleSizes, 1));
+particleGeometry.setAttribute("position", new THREE.BufferAttribute(particlePositions, 3));
+particleGeometry.setAttribute("size", new THREE.BufferAttribute(particleSizes, 1));
 
 // Create circular particle texture
-const particleCanvas = document.createElement('canvas');
+const particleCanvas = document.createElement("canvas");
 particleCanvas.width = 32;
 particleCanvas.height = 32;
-const ctx = particleCanvas.getContext('2d');
+const ctx = particleCanvas.getContext("2d");
 const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
-gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)');
-gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
+gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.5)");
+gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
 ctx.fillStyle = gradient;
 ctx.fillRect(0, 0, 32, 32);
 const particleTexture = new THREE.CanvasTexture(particleCanvas);
@@ -993,7 +1025,7 @@ const particleMaterial = new THREE.PointsMaterial({
   opacity: config.particleOpacity,
   blending: THREE.AdditiveBlending,
   sizeAttenuation: true,
-  depthWrite: false
+  depthWrite: false,
 });
 
 const particles = new THREE.Points(particleGeometry, particleMaterial);
@@ -1007,11 +1039,11 @@ const fontLoader = new FontLoader(loadingManager);
 
 function createTextMaterial() {
   return new THREE.MeshPhongMaterial({
-    color: 'rgb(221, 97, 192))',
+    color: "rgb(221, 97, 192))",
     specular: 0xffffff,
     shininess: 60,
-    emissive: 'rgb(160, 172, 96)',
-    emissiveIntensity: 0.25
+    emissive: "rgb(160, 172, 96)",
+    emissiveIntensity: 0.25,
   });
 }
 
@@ -1019,7 +1051,7 @@ function createLinkMeshes(font, textMesh, textMaterial) {
   let maxDescender = 0;
 
   // First pass: create geometries, compute widths, find max descender
-  linkData.forEach((item) => {
+  linkData.forEach(item => {
     const geometry = new TextGeometry(item.label, {
       font: font,
       size: config.linkTextSize,
@@ -1029,7 +1061,7 @@ function createLinkMeshes(font, textMesh, textMaterial) {
       bevelThickness: 0.14,
       bevelSize: 0.05,
       bevelOffset: 0,
-      bevelSegments: 6
+      bevelSegments: 6,
     });
 
     geometry.computeBoundingBox();
@@ -1042,14 +1074,14 @@ function createLinkMeshes(font, textMesh, textMaterial) {
   });
 
   // Compute total row width: sum of all link widths + gaps between them
-  const totalWidth = linkData.reduce((sum, item) => sum + item.width, 0) +
-    (linkData.length - 1) * config.linkGap;
+  const totalWidth =
+    linkData.reduce((sum, item) => sum + item.width, 0) + (linkData.length - 1) * config.linkGap;
 
   // Second pass: create meshes and hitboxes with accumulated positioning
   // currentX tracks the left edge of each link
   let currentX = -totalWidth / 2;
 
-  linkData.forEach((item) => {
+  linkData.forEach(item => {
     // Center geometry so it scales from center
     const centerX = -item.width / 2;
     item.geometry.translate(centerX - item.geometry.boundingBox.min.x, -maxDescender, 0);
@@ -1084,14 +1116,14 @@ function createLinkMeshes(font, textMesh, textMaterial) {
   });
 }
 
-fontLoader.load('/fonts/helvetiker_regular.typeface.json', function (font) {
+fontLoader.load("/fonts/helvetiker_regular.typeface.json", function (font) {
   // Create a group to hold everything - this handles position and camera-facing
   const textGroup = new THREE.Group();
   textGroup.position.set(0, config.textYPosition, config.textZPosition);
-  textGroup.name = 'textGroup';
+  textGroup.name = "textGroup";
   scene.add(textGroup);
 
-  const textGeometry = new TextGeometry('kate', {
+  const textGeometry = new TextGeometry("kate", {
     font: font,
     depth: 100,
     size: config.mainTextSize,
@@ -1101,7 +1133,7 @@ fontLoader.load('/fonts/helvetiker_regular.typeface.json', function (font) {
     bevelThickness: 0.08,
     bevelSize: 0.1,
     bevelOffset: 0,
-    bevelSegments: 8
+    bevelSegments: 8,
   });
 
   textGeometry.computeBoundingBox();
@@ -1112,7 +1144,7 @@ fontLoader.load('/fonts/helvetiker_regular.typeface.json', function (font) {
   const textMesh = new THREE.Mesh(textGeometry, textMaterial);
   textMesh.castShadow = true;
   textMesh.receiveShadow = true;
-  textMesh.name = 'floatingText';
+  textMesh.name = "floatingText";
   textMesh.userData.url = null;
   textGroup.add(textMesh);
   registerClickableMesh(textMesh);
@@ -1127,7 +1159,7 @@ fontLoader.load('/fonts/helvetiker_regular.typeface.json', function (font) {
   );
   // Position in local space: centered on text geometry
   textHitbox.position.set(0, textHeight / 2, 1.5);
-  textHitbox.name = 'floatingText';
+  textHitbox.name = "floatingText";
   textHitbox.userData.url = null;
   textMesh.add(textHitbox);
   registerClickableMesh(textHitbox);
@@ -1140,7 +1172,7 @@ fontLoader.load('/fonts/helvetiker_regular.typeface.json', function (font) {
 // WINDOW RESIZE HANDLER
 // =============================================================================
 
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -1190,8 +1222,8 @@ function updateHoverAnimations() {
 }
 
 function updateFloatingText(dt) {
-  const textGroup = scene.getObjectByName('textGroup');
-  const textMesh = scene.getObjectByName('floatingText');
+  const textGroup = scene.getObjectByName("textGroup");
+  const textMesh = scene.getObjectByName("floatingText");
   if (!textGroup || !textMesh) return;
 
   // Base bobbing animation for the whole group
