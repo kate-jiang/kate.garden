@@ -54,9 +54,9 @@ const config = {
     particleOpacity: 0.4,
 
     // Text settings
-    mainTextSize: 4,
-    linkTextSize: 1.1,
-    linkSpacing: 6,
+    mainTextSize: 5,
+    linkTextSize: 1,
+    linkGap: 1.5,
     textYPosition: 5,
     textZPosition: 10,
     textBobAmplitude: 0.3,
@@ -68,7 +68,7 @@ const config = {
 const linkData = [
     { label: 'about', action: 'showAbout' },
     { label: 'github', url: 'https://github.com/kate-jiang' },
-    { label: 'insta', url: 'https://instagram.com/katejiang__' },
+    { label: 'instagram', url: 'https://instagram.com/katejiang__' },
     { label: 'twitter', url: 'https://twitter.com/chinesefoid' }
 ];
 
@@ -945,10 +945,9 @@ function createTextMaterial() {
 }
 
 function createLinkMeshes(font, textMesh, textMaterial) {
-    const linkStartX = -((linkData.length - 1) * config.linkSpacing) / 2;
     let maxDescender = 0;
 
-    // First pass: create geometries and find max descender
+    // First pass: create geometries, compute widths, find max descender
     linkData.forEach((item) => {
         const geometry = new TextGeometry(item.label, {
             font: font,
@@ -963,17 +962,26 @@ function createLinkMeshes(font, textMesh, textMaterial) {
         });
 
         geometry.computeBoundingBox();
-        const xOffset = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+        const width = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
         if (geometry.boundingBox.min.y < maxDescender) {
             maxDescender = geometry.boundingBox.min.y;
         }
         item.geometry = geometry;
-        item.xOffset = xOffset;
+        item.width = width;
     });
 
-    // Second pass: create meshes and hitboxes
-    linkData.forEach((item, i) => {
-        item.geometry.translate(item.xOffset, -maxDescender, 0);
+    // Compute total row width: sum of all link widths + gaps between them
+    const totalWidth = linkData.reduce((sum, item) => sum + item.width, 0) +
+        (linkData.length - 1) * config.linkGap;
+
+    // Second pass: create meshes and hitboxes with accumulated positioning
+    // currentX tracks the left edge of each link
+    let currentX = -totalWidth / 2;
+
+    linkData.forEach((item) => {
+        // Center geometry so it scales from center
+        const centerX = -item.width / 2;
+        item.geometry.translate(centerX - item.geometry.boundingBox.min.x, -maxDescender, 0);
 
         const linkMesh = new THREE.Mesh(item.geometry, textMaterial);
         linkMesh.castShadow = true;
@@ -981,7 +989,7 @@ function createLinkMeshes(font, textMesh, textMaterial) {
         linkMesh.name = item.label;
         linkMesh.userData.url = item.url;
         linkMesh.userData.action = item.action;
-        linkMesh.position.set(linkStartX + i * config.linkSpacing, -2.5, 1);
+        linkMesh.position.set(currentX + item.width / 2, -2.5, 1);
         textMesh.add(linkMesh);
         registerClickableMesh(linkMesh);
 
@@ -992,12 +1000,16 @@ function createLinkMeshes(font, textMesh, textMaterial) {
             new THREE.PlaneGeometry(linkW + 1, linkH + 0.8),
             new THREE.MeshBasicMaterial({ visible: false })
         );
-        linkHitbox.position.set(linkStartX + i * config.linkSpacing, -2.5, 0.5);
+        // Center hitbox on the link
+        linkHitbox.position.set(currentX + item.width / 2, -2.5, 0.5);
         linkHitbox.name = item.label;
         linkHitbox.userData.url = item.url;
         linkHitbox.userData.action = item.action;
         textMesh.add(linkHitbox);
         registerClickableMesh(linkHitbox);
+
+        // Advance position for next link
+        currentX += item.width + config.linkGap;
     });
 }
 
