@@ -96,6 +96,13 @@ let clickStartCameraPos = new THREE.Vector3();
 const textTargetQuaternion = new THREE.Quaternion();
 const textCurrentQuaternion = new THREE.Quaternion();
 
+// Text click animation state
+let textClickAnimating = false;
+let textClickAnimationTime = 0;
+const textClickAnimationDuration = 0.8; // seconds
+const textJumpHeight = 1.5;
+const textTwirlRotations = 1; // full rotations
+
 // Shader reference
 let groundShader = null;
 
@@ -190,17 +197,29 @@ function resetAllHoverStates() {
 }
 
 function updateCursor(intersects) {
-    const hasClickable = intersects.some(i => i.object.userData.url || i.object.userData.action);
+    const hasClickable = intersects.some(i =>
+        i.object.userData.url || i.object.userData.action || i.object.name === 'floatingText'
+    );
     document.body.style.cursor = hasClickable ? 'pointer' : 'default';
+}
+
+function triggerTextClickAnimation() {
+    if (!textClickAnimating) {
+        textClickAnimating = true;
+        textClickAnimationTime = 0;
+    }
 }
 
 function handleClick(intersects) {
     if (intersects.length > 0) {
-        const userData = intersects[0].object.userData;
+        const clickedObject = intersects[0].object;
+        const userData = clickedObject.userData;
         if (userData.url) {
             window.open(userData.url, '_blank');
         } else if (userData.action === 'showAbout') {
             showAboutPanel();
+        } else if (clickedObject.name === 'floatingText') {
+            triggerTextClickAnimation();
         }
     }
 }
@@ -1014,6 +1033,12 @@ function createLinkMeshes(font, textMesh, textMaterial) {
 }
 
 fontLoader.load('/fonts/helvetiker_regular.typeface.json', function(font) {
+    // Create a group to hold everything - this handles position and camera-facing
+    const textGroup = new THREE.Group();
+    textGroup.position.set(0, config.textYPosition, config.textZPosition);
+    textGroup.name = 'textGroup';
+    scene.add(textGroup);
+
     const textGeometry = new TextGeometry('kate', {
         font: font,
         depth: 100,
@@ -1035,25 +1060,26 @@ fontLoader.load('/fonts/helvetiker_regular.typeface.json', function(font) {
     const textMesh = new THREE.Mesh(textGeometry, textMaterial);
     textMesh.castShadow = true;
     textMesh.receiveShadow = true;
-    textMesh.position.set(0, config.textYPosition, config.textZPosition);
     textMesh.name = 'floatingText';
-    scene.add(textMesh);
+    textGroup.add(textMesh);
 
     // Create hitbox for main text
     const textBox = textGeometry.boundingBox;
     const textWidth = textBox.max.x - textBox.min.x;
     const textHeight = textBox.max.y - textBox.min.y;
     const textHitbox = new THREE.Mesh(
-        new THREE.PlaneGeometry(textWidth, textHeight),
+        new THREE.PlaneGeometry(textWidth + 1, textHeight + 1),
         new THREE.MeshBasicMaterial({ visible: false })
     );
-    textHitbox.position.set(0, config.textYPosition, config.textZPosition);
+    // Position in local space: centered on text geometry
+    textHitbox.position.set(0, textHeight / 2, 1.5);
     textHitbox.name = 'floatingText';
     textHitbox.userData.url = null;
     textMesh.add(textHitbox);
     registerClickableMesh(textHitbox);
 
-    createLinkMeshes(font, textMesh, textMaterial);
+    // Links are added to the group, not textMesh, so they don't twirl
+    createLinkMeshes(font, textGroup, textMaterial);
 });
 
 // =============================================================================
@@ -1109,60 +1135,82 @@ function updateHoverAnimations() {
     });
 }
 
-function updateFloatingText() {
-    const text = scene.getObjectByName('floatingText');
-    if (text) {
-        // Bobbing animation
-        text.position.y = config.textYPosition + Math.sin(time * config.textBobSpeed) * config.textBobAmplitude;
+function updateFloatingText(dt) {
+    const textGroup = scene.getObjectByName('textGroup');
+    const textMesh = scene.getObjectByName('floatingText');
+    if (!textGroup || !textMesh) return;
 
-        // Calculate target rotation to face camera (Y-axis only)
-        const direction = new THREE.Vector3();
-        direction.subVectors(camera.position, text.position);
-        direction.y = 0; // Keep text upright
-        direction.normalize();
+    // Base bobbing animation for the whole group
+    const yOffset = Math.sin(time * config.textBobSpeed) * config.textBobAmplitude;
+    textGroup.position.y = config.textYPosition + yOffset;
 
-        // Create target quaternion from direction
-        const targetMatrix = new THREE.Matrix4();
-        targetMatrix.lookAt(direction, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 1, 0));
-        textTargetQuaternion.setFromRotationMatrix(targetMatrix);
+    // Calculate target rotation to face camera (Y-axis only) - applied to group
+    const direction = new THREE.Vector3();
+    direction.subVectors(camera.position, textGroup.position);
+    direction.y = 0;
+    direction.normalize();
 
-        // Smoothly interpolate current rotation toward target
-        textCurrentQuaternion.slerp(textTargetQuaternion, config.textRotationDamping);
-        text.quaternion.copy(textCurrentQuaternion);
+    const targetMatrix = new THREE.Matrix4();
+    targetMatrix.lookAt(direction, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 1, 0));
+    textTargetQuaternion.setFromRotationMatrix(targetMatrix);
 
-        // Position all text-affecting lights relative to camera for consistent illumination
-        const toCamera = direction.clone();
-        const perpendicular = new THREE.Vector3(-toCamera.z, 0, toCamera.x); // perpendicular on XZ plane
+    textCurrentQuaternion.slerp(textTargetQuaternion, config.textRotationDamping);
+    textGroup.quaternion.copy(textCurrentQuaternion);
 
-        // Main front light - between camera and text
-        textLight.position.set(
-            text.position.x + toCamera.x * 8,
-            text.position.y + 3,
-            text.position.z + toCamera.z * 8
-        );
+    // Click animation: twirl and jump - applied only to main text mesh
+    if (textClickAnimating) {
+        textClickAnimationTime += dt;
+        const progress = Math.min(textClickAnimationTime / textClickAnimationDuration, 1);
 
-        // Point light - slightly offset to the side for depth
-        pointLight.position.set(
-            text.position.x + toCamera.x * 6 + perpendicular.x * 3,
-            text.position.y + 3,
-            text.position.z + toCamera.z * 6 + perpendicular.z * 3
-        );
+        // Jump: parabolic arc (up and down)
+        const jumpProgress = Math.sin(progress * Math.PI);
+        textMesh.position.y = jumpProgress * textJumpHeight;
 
-        // Directional light - from above and front
-        dirLight.position.set(
-            text.position.x + toCamera.x * 5,
-            text.position.y + 8,
-            text.position.z + toCamera.z * 5
-        );
-        dirLight.target.position.copy(text.position);
+        // Twirl: full rotation with ease-out
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        textMesh.rotation.y = easeOut * Math.PI * 2 * textTwirlRotations;
 
-        // Rim light - behind text for edge highlights
-        rimLight.position.set(
-            text.position.x - toCamera.x * 5,
-            text.position.y + 2,
-            text.position.z - toCamera.z * 5
-        );
+        // End animation
+        if (progress >= 1) {
+            textClickAnimating = false;
+            textClickAnimationTime = 0;
+            textMesh.position.y = 0;
+            textMesh.rotation.y = 0;
+        }
     }
+
+    // Position all text-affecting lights relative to camera for consistent illumination
+    const toCamera = direction.clone();
+    const perpendicular = new THREE.Vector3(-toCamera.z, 0, toCamera.x); // perpendicular on XZ plane
+
+    // Main front light - between camera and text
+    textLight.position.set(
+        textGroup.position.x + toCamera.x * 8,
+        textGroup.position.y + 3,
+        textGroup.position.z + toCamera.z * 8
+    );
+
+    // Point light - slightly offset to the side for depth
+    pointLight.position.set(
+        textGroup.position.x + toCamera.x * 6 + perpendicular.x * 3,
+        textGroup.position.y + 3,
+        textGroup.position.z + toCamera.z * 6 + perpendicular.z * 3
+    );
+
+    // Directional light - from above and front
+    dirLight.position.set(
+        textGroup.position.x + toCamera.x * 5,
+        textGroup.position.y + 8,
+        textGroup.position.z + toCamera.z * 5
+    );
+    dirLight.target.position.copy(textGroup.position);
+
+    // Rim light - behind text for edge highlights
+    rimLight.position.set(
+        textGroup.position.x - toCamera.x * 5,
+        textGroup.position.y + 2,
+        textGroup.position.z - toCamera.z * 5
+    );
 }
 
 function animate() {
@@ -1178,7 +1226,7 @@ function animate() {
 
     // Update animations
     updateHoverAnimations();
-    updateFloatingText();
+    updateFloatingText(dt);
     updateParticles(dt);
 
     // Update controls
