@@ -52,14 +52,21 @@ const config = {
   particleOpacity: 0.4,
 
   // Text
-  mainTextSize: 4,
-  linkTextSize: 0.8,
+  mainTextSize: 5,
+  linkTextSize: 1.1,
   linkGap: 1,
-  textYPosition: 4.5,
+  textYPosition: 4.6,
   textZPosition: 10,
   textBobAmplitude: 0.3,
   textBobSpeed: 1.5,
   textRotationDamping: 0.03,
+
+  // Responsive
+  responsive: {
+    mobileBreakpoint: 480,
+    mobileTextScale: 0.75,
+    mobileMinDistance: 35,
+  },
 };
 
 const linkData = [
@@ -114,6 +121,27 @@ const textTwirlRotations = 1; // full rotations
 
 // Shader reference
 let groundShader = null;
+
+// Text group reference for responsive handling
+let textGroupRef = null;
+
+// =============================================================================
+// RESPONSIVE UTILITIES
+// =============================================================================
+
+/**
+ * Applies responsive settings to text group and camera controls
+ * based on current viewport width. Safe to call at any point during lifecycle.
+ */
+function applyResponsiveSettings() {
+  const isMobile = window.innerWidth <= config.responsive.mobileBreakpoint;
+
+  // Apply text scale if textGroup is loaded
+  if (textGroupRef) {
+    const scale = isMobile ? config.responsive.mobileTextScale : 1.0;
+    textGroupRef.scale.setScalar(scale);
+  }
+}
 
 // =============================================================================
 // RENDERER SETUP
@@ -1131,7 +1159,7 @@ function createLinkMeshes(font, textMesh, textMaterial) {
     linkMesh.name = item.label;
     linkMesh.userData.url = item.url;
     linkMesh.userData.action = item.action;
-    linkMesh.position.set(currentX + item.width / 2, -2.2, 1);
+    linkMesh.position.set(currentX + item.width / 2, -2.5, 1);
     textMesh.add(linkMesh);
     registerClickableMesh(linkMesh);
 
@@ -1143,7 +1171,7 @@ function createLinkMeshes(font, textMesh, textMaterial) {
       new THREE.MeshBasicMaterial({ visible: false })
     );
     // Center hitbox on the link
-    linkHitbox.position.set(currentX + item.width / 2, -2.2, 0.5);
+    linkHitbox.position.set(currentX + item.width / 2, -2.5, 0.5);
     linkHitbox.name = item.label;
     linkHitbox.userData.url = item.url;
     linkHitbox.userData.action = item.action;
@@ -1161,6 +1189,10 @@ fontLoader.load("/fonts/helvetiker_regular.typeface.json", function (font) {
   textGroup.position.set(0, config.textYPosition, config.textZPosition);
   textGroup.name = "textGroup";
   scene.add(textGroup);
+
+  // Store reference and apply responsive settings for initial load
+  textGroupRef = textGroup;
+  applyResponsiveSettings();
 
   const textGeometry = new TextGeometry("kate", {
     font: font,
@@ -1217,6 +1249,7 @@ window.addEventListener("resize", () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
   backgroundMaterial.uniforms.resolution.value.set(canvas.width, canvas.height);
   backgroundMaterial.uniforms.fov.value = config.fov;
+  applyResponsiveSettings();
   controls.update();
 });
 
