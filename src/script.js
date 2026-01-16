@@ -44,8 +44,6 @@ const config = {
   // Interaction
   hoverScale: 1.15,
   hoverEase: 0.15,
-  clickMoveThreshold: 1,
-  touchMoveThreshold: 0.2,
 
   // Particle
   particleCount: 1400,
@@ -89,11 +87,23 @@ const mouse = new THREE.Vector2();
 const clickableMeshes = [];
 const hoverState = new Map();
 const meshByUuid = new Map();
-let clickStartCameraPos = new THREE.Vector3();
+
+// Pointer tracking
+let isPointerDown = false;
+let pointerStartPos = { x: 0, y: 0 };
+let pointerMoved = false;
+let pendingHoverUpdate = false;
+const DRAG_THRESHOLD_PX = 5;
 
 // Text rotation state
 const textTargetQuaternion = new THREE.Quaternion();
 const textCurrentQuaternion = new THREE.Quaternion();
+const textDirection = new THREE.Vector3();
+const textTargetMatrix = new THREE.Matrix4();
+const textToCamera = new THREE.Vector3();
+const textPerpendicular = new THREE.Vector3();
+const ORIGIN = new THREE.Vector3(0, 0, 0);
+const UP = new THREE.Vector3(0, 1, 0);
 
 // Text click animation state
 let textClickAnimating = false;
@@ -151,11 +161,6 @@ controls.update();
 function updateMouseFromEvent(event) {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-}
-
-function updateMouseFromTouch(touch) {
-  mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
 }
 
 function getIntersectedMeshes() {
@@ -263,43 +268,77 @@ function registerClickableMesh(mesh) {
 // EVENT LISTENERS
 // =============================================================================
 
-canvas.addEventListener("mousemove", event => {
-  updateMouseFromEvent(event);
-  const intersects = getIntersectedMeshes();
-  updateHoverStates(intersects);
-  updateCursor(intersects);
-});
+canvas.addEventListener("pointerdown", e => {
+  isPointerDown = true;
+  pointerStartPos = { x: e.clientX, y: e.clientY };
+  pointerMoved = false;
 
-canvas.addEventListener("mousedown", () => {
-  clickStartCameraPos.copy(camera.position);
-});
-
-canvas.addEventListener("click", event => {
-  if (camera.position.distanceToSquared(clickStartCameraPos) > config.clickMoveThreshold) return;
-  updateMouseFromEvent(event);
-  handleClick(getIntersectedMeshes());
-});
-
-canvas.addEventListener(
-  "touchstart",
-  event => {
-    event.preventDefault();
-    clickStartCameraPos.copy(camera.position);
-    updateMouseFromTouch(event.touches[0]);
+  // Show hover state on touch tap
+  if (e.pointerType === "touch") {
+    updateMouseFromEvent(e);
     updateHoverStates(getIntersectedMeshes());
-  },
-  { passive: false }
-);
-
-canvas.addEventListener("touchend", event => {
-  if (camera.position.distanceToSquared(clickStartCameraPos) > config.touchMoveThreshold) {
-    resetAllHoverStates();
-    return;
   }
+});
 
-  updateMouseFromTouch(event.changedTouches[0]);
-  handleClick(getIntersectedMeshes());
+canvas.addEventListener("pointermove", e => {
+  if (isPointerDown) {
+    // Check drag threshold using screen pixels
+    const dx = e.clientX - pointerStartPos.x;
+    const dy = e.clientY - pointerStartPos.y;
+    if (dx * dx + dy * dy > DRAG_THRESHOLD_PX * DRAG_THRESHOLD_PX) {
+      pointerMoved = true;
+      resetAllHoverStates();
+    }
+  } else if (e.pointerType !== "touch") {
+    // Hover updates for mouse/pen only (not touch)
+    // Throttle to animation frame to avoid excessive raycasting
+    if (!pendingHoverUpdate) {
+      pendingHoverUpdate = true;
+      requestAnimationFrame(() => {
+        pendingHoverUpdate = false;
+        if (!isPointerDown) {
+          updateMouseFromEvent(e);
+          const intersects = getIntersectedMeshes();
+          updateHoverStates(intersects);
+          updateCursor(intersects);
+        }
+      });
+    }
+  }
+});
+
+canvas.addEventListener("pointerup", e => {
+  if (!pointerMoved && isPointerDown) {
+    updateMouseFromEvent(e);
+    handleClick(getIntersectedMeshes());
+  }
+  isPointerDown = false;
+  pointerMoved = false;
+
+  // Clear hover on touch release
+  if (e.pointerType === "touch") {
+    resetAllHoverStates();
+  }
+});
+
+// Handle pointer release outside canvas
+window.addEventListener("pointerup", () => {
+  isPointerDown = false;
+  pointerMoved = false;
+});
+
+canvas.addEventListener("pointercancel", () => {
+  isPointerDown = false;
+  pointerMoved = false;
   resetAllHoverStates();
+});
+
+canvas.addEventListener("pointerleave", e => {
+  // Only reset if not actively dragging
+  if (!isPointerDown) {
+    resetAllHoverStates();
+    updateCursor([]);
+  }
 });
 
 // =============================================================================
@@ -1231,14 +1270,12 @@ function updateFloatingText(dt) {
   textGroup.position.y = config.textYPosition + yOffset;
 
   // Calculate target rotation to face camera (Y-axis only) - applied to group
-  const direction = new THREE.Vector3();
-  direction.subVectors(camera.position, textGroup.position);
-  direction.y = 0;
-  direction.normalize();
+  textDirection.subVectors(camera.position, textGroup.position);
+  textDirection.y = 0;
+  textDirection.normalize();
 
-  const targetMatrix = new THREE.Matrix4();
-  targetMatrix.lookAt(direction, new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 1, 0));
-  textTargetQuaternion.setFromRotationMatrix(targetMatrix);
+  textTargetMatrix.lookAt(textDirection, ORIGIN, UP);
+  textTargetQuaternion.setFromRotationMatrix(textTargetMatrix);
 
   textCurrentQuaternion.slerp(textTargetQuaternion, config.textRotationDamping);
   textGroup.quaternion.copy(textCurrentQuaternion);
@@ -1267,36 +1304,36 @@ function updateFloatingText(dt) {
   }
 
   // Position all text-affecting lights relative to camera for consistent illumination
-  const toCamera = direction.clone();
-  const perpendicular = new THREE.Vector3(-toCamera.z, 0, toCamera.x); // perpendicular on XZ plane
+  textToCamera.copy(textDirection);
+  textPerpendicular.set(-textToCamera.z, 0, textToCamera.x); // perpendicular on XZ plane
 
   // Main front light - between camera and text
   textLight.position.set(
-    textGroup.position.x + toCamera.x * 8,
+    textGroup.position.x + textToCamera.x * 8,
     textGroup.position.y + 3,
-    textGroup.position.z + toCamera.z * 8
+    textGroup.position.z + textToCamera.z * 8
   );
 
   // Point light - slightly offset to the side for depth
   pointLight.position.set(
-    textGroup.position.x + toCamera.x * 6 + perpendicular.x * 3,
+    textGroup.position.x + textToCamera.x * 6 + textPerpendicular.x * 3,
     textGroup.position.y + 3,
-    textGroup.position.z + toCamera.z * 6 + perpendicular.z * 3
+    textGroup.position.z + textToCamera.z * 6 + textPerpendicular.z * 3
   );
 
   // Directional light - from above and front
   dirLight.position.set(
-    textGroup.position.x + toCamera.x * 5,
+    textGroup.position.x + textToCamera.x * 5,
     textGroup.position.y + 8,
-    textGroup.position.z + toCamera.z * 5
+    textGroup.position.z + textToCamera.z * 5
   );
   dirLight.target.position.copy(textGroup.position);
 
   // Rim light - behind text for edge highlights
   rimLight.position.set(
-    textGroup.position.x - toCamera.x * 5,
+    textGroup.position.x - textToCamera.x * 5,
     textGroup.position.y + 2,
-    textGroup.position.z - toCamera.z * 5
+    textGroup.position.z - textToCamera.z * 5
   );
 }
 
