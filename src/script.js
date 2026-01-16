@@ -66,8 +66,9 @@ const config = {
 
 // Link data configuration
 const linkData = [
+    { label: 'about', action: 'showAbout' },
     { label: 'github', url: 'https://github.com/kate-jiang' },
-    { label: 'resume', url: '/Kate_Resume.pdf' },
+    { label: 'insta', url: 'https://instagram.com/katejiang__' },
     { label: 'twitter', url: 'https://twitter.com/chinesefoid' }
 ];
 
@@ -189,18 +190,53 @@ function resetAllHoverStates() {
 }
 
 function updateCursor(intersects) {
-    const hasUrlIntersect = intersects.some(i => i.object.userData.url);
-    document.body.style.cursor = hasUrlIntersect ? 'pointer' : 'default';
+    const hasClickable = intersects.some(i => i.object.userData.url || i.object.userData.action);
+    document.body.style.cursor = hasClickable ? 'pointer' : 'default';
 }
 
 function handleClick(intersects) {
     if (intersects.length > 0) {
-        const url = intersects[0].object.userData.url;
-        if (url) {
-            window.open(url, '_blank');
+        const userData = intersects[0].object.userData;
+        if (userData.url) {
+            window.open(userData.url, '_blank');
+        } else if (userData.action === 'showAbout') {
+            showAboutPanel();
         }
     }
 }
+
+// =============================================================================
+// ABOUT PANEL
+// =============================================================================
+
+const aboutOverlay = document.getElementById('about-overlay');
+const aboutClose = document.getElementById('about-close');
+
+function showAboutPanel() {
+    aboutOverlay.classList.remove('hidden');
+    // Trigger reflow before adding visible class for transition
+    aboutOverlay.offsetHeight;
+    aboutOverlay.classList.add('visible');
+    controls.autoRotate = false;
+}
+
+function hideAboutPanel() {
+    aboutOverlay.classList.remove('visible');
+    aboutOverlay.addEventListener('transitionend', function handler() {
+        if (!aboutOverlay.classList.contains('visible')) {
+            aboutOverlay.classList.add('hidden');
+        }
+        aboutOverlay.removeEventListener('transitionend', handler);
+    });
+    controls.autoRotate = true;
+}
+
+aboutClose.addEventListener('click', hideAboutPanel);
+aboutOverlay.addEventListener('click', (e) => {
+    if (e.target === aboutOverlay) {
+        hideAboutPanel();
+    }
+});
 
 function registerClickableMesh(mesh) {
     clickableMeshes.push(mesh);
@@ -944,6 +980,7 @@ function createLinkMeshes(font, textMesh, textMaterial) {
         linkMesh.receiveShadow = true;
         linkMesh.name = item.label;
         linkMesh.userData.url = item.url;
+        linkMesh.userData.action = item.action;
         linkMesh.position.set(linkStartX + i * config.linkSpacing, -2.5, 1);
         textMesh.add(linkMesh);
         registerClickableMesh(linkMesh);
@@ -958,6 +995,7 @@ function createLinkMeshes(font, textMesh, textMaterial) {
         linkHitbox.position.set(linkStartX + i * config.linkSpacing, -2.5, 0.5);
         linkHitbox.name = item.label;
         linkHitbox.userData.url = item.url;
+        linkHitbox.userData.action = item.action;
         textMesh.add(linkHitbox);
         registerClickableMesh(linkHitbox);
     });
@@ -1133,7 +1171,6 @@ function animate() {
 
     // Update controls
     controls.update();
-    console.log(camera.position)
 
     // Render
     renderer.clear();
