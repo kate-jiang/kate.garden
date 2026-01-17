@@ -1292,7 +1292,7 @@ function createLinkMeshes(font, textMesh, textMaterial) {
     const geometry = new TextGeometry(item.label, {
       font: font,
       size: config.linkTextSize,
-      height: 0.5,
+      height: 0.67,
       curveSegments: 12,
       bevelEnabled: true,
       bevelThickness: 0.14,
@@ -1331,8 +1331,8 @@ function createLinkMeshes(font, textMesh, textMaterial) {
     linkMesh.userData.action = item.action;
     linkMesh.position.set(currentX + item.width / 2, -2.5, 1);
 
-    const linkLight = new THREE.PointLight(0xffddaa, 0.8, 8);
-    linkLight.position.set(0, 0.5, 5.5);
+    const linkLight = new THREE.PointLight(0xffddaa, 3, 8);
+    linkLight.position.set(0.3, 0.5, 7);
     linkMesh.add(linkLight);
     item.light = linkLight;
 
