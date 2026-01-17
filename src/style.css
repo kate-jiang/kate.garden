@@ -177,12 +177,13 @@ canvas {
 
 #about-close {
   position: absolute;
-  top: 16px;
-  right: 20px;
+  top: 12px;
+  right: 14px;
   width: 32px;
   height: 32px;
   background: transparent;
   border: none;
+  border-radius: 50%;
   font-size: 24px;
   color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
@@ -266,13 +267,8 @@ canvas {
 /* Mobile */
 @media (max-width: 480px) {
   #about-paper {
-    width: 94vw;
+    width: 92vw;
     padding: 28px 24px;
-  }
-
-  #about-close {
-    top: 12px;
-    right: 16px;
   }
 
   #about-content h1 {
@@ -280,7 +276,7 @@ canvas {
   }
 
   #about-content p {
-    font-size: 18px;
+    font-size: 19px;
   }
 
   #about-content strong {
