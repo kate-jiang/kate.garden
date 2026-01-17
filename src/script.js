@@ -89,7 +89,6 @@ const dayConfig = {
   grassBrightness: 1.0,
   textLightIntensity: 2.0,
   rimLightIntensity: 1.5,
-  textFillLightIntensity: 0.0,
 };
 
 const nightConfig = {
@@ -114,7 +113,6 @@ const nightConfig = {
   grassBrightness: 0.53,
   textLightIntensity: 3.0,
   rimLightIntensity: 2.0,
-  textFillLightIntensity: 3,
 };
 
 const linkData = [
@@ -1317,6 +1315,12 @@ function createLinkMeshes(font, textMesh, textMaterial) {
     linkMesh.userData.url = item.url;
     linkMesh.userData.action = item.action;
     linkMesh.position.set(currentX + item.width / 2, -2.5, 1);
+
+    const linkLight = new THREE.PointLight(0xffddaa, 1, 10);
+    linkLight.position.set(0, 1, 5.5);
+    linkMesh.add(linkLight);
+    item.light = linkLight;
+
     textMesh.add(linkMesh);
     registerClickableMesh(linkMesh);
 
@@ -1536,13 +1540,6 @@ function updateFloatingText(dt) {
     textGroup.position.y + 2,
     textGroup.position.z - textToCamera.z * 5
   );
-
-  // Fill light - in front of text for even illumination (night mode boost)
-  textFillLight.position.set(
-    textGroup.position.x + textToCamera.x * 8,
-    textGroup.position.y - 2,
-    textGroup.position.z + textToCamera.z * 8
-  );
 }
 
 // =============================================================================
@@ -1692,11 +1689,6 @@ function updateNightMode(dt) {
     nightConfig.rimLightIntensity,
     easedT
   );
-  textFillLight.intensity = lerpValue(
-    dayConfig.textFillLightIntensity,
-    nightConfig.textFillLightIntensity,
-    easedT
-  );
 }
 
 // Apply initial night mode state if loaded from localStorage
@@ -1736,7 +1728,6 @@ function applyInitialNightMode() {
     // Set text-specific lighting for night readability
     textLight.intensity = nightConfig.textLightIntensity;
     rimLight.intensity = nightConfig.rimLightIntensity;
-    textFillLight.intensity = nightConfig.textFillLightIntensity;
   }
 }
 
