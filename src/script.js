@@ -1316,8 +1316,8 @@ function createLinkMeshes(font, textMesh, textMaterial) {
     linkMesh.userData.action = item.action;
     linkMesh.position.set(currentX + item.width / 2, -2.5, 1);
 
-    const linkLight = new THREE.PointLight(0xffddaa, 1, 10);
-    linkLight.position.set(0, 1, 5.5);
+    const linkLight = new THREE.PointLight(0xffddaa, 0.8, 8);
+    linkLight.position.set(0, 0.5, 5.5);
     linkMesh.add(linkLight);
     item.light = linkLight;
 
@@ -1404,6 +1404,16 @@ fontLoader.load("/fonts/helvetiker_regular.typeface.json", function (font) {
   textHitbox.userData.url = null;
   textMesh.add(textHitbox);
   registerClickableMesh(textHitbox);
+
+  // Underglow
+  const underglowSpacing = textWidth / 2.5;
+
+  for (let i = 0; i < 3; i++) {
+    const underglowLight = new THREE.PointLight(0xff66cc, 2.5, 8);
+    const xPos = -underglowSpacing + i * underglowSpacing;
+    underglowLight.position.set(xPos, -1.7, 0.7);
+    textMesh.add(underglowLight);
+  }
 
   // Links are added to the group, not textMesh, so they don't twirl
   createLinkMeshes(font, textGroup, textMaterial);
