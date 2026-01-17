@@ -2,7 +2,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'SF Pro', 'Helvetica Neue', sans-serif;
+  font-family: "SF Pro", "Helvetica Neue", sans-serif;
   outline: none;
 }
 
@@ -48,12 +48,42 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 1s ease-in-out,
+    transform 1s ease-in-out;
   flex-shrink: 0;
   position: relative;
   z-index: 2;
   opacity: 0;
   animation: fadeInAudio 0.5s ease 0.6s forwards;
+}
+
+body.night-mode #audio-toggle {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+#audio-toggle:hover {
+  background: rgba(40, 40, 40, 0.5);
+  transform: scale(1.07);
+}
+
+body.night-mode #audio-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+#audio-toggle svg {
+  width: 24px;
+  height: 24px;
+  color: rgba(255, 255, 255, 0.85);
+  transition: color 1s ease-in-out;
+}
+
+#audio-toggle:hover svg {
+  color: white;
+}
+
+body.night-mode #audio-toggle:hover svg {
+  color: white;
 }
 
 @keyframes fadeInAudio {
@@ -63,21 +93,6 @@ canvas {
   to {
     opacity: 1;
   }
-}
-
-#audio-toggle:hover {
-  background: rgba(40, 40, 40, 0.5);
-  transform: scale(1.07);
-}
-
-#audio-toggle svg {
-  width: 24px;
-  height: 24px;
-  color: rgba(255, 255, 255, .85);
-}
-
-#audio-toggle:hover svg {
-  color: white;
 }
 
 #now-playing {
@@ -97,8 +112,15 @@ canvas {
   opacity: 0;
   transform: scaleX(0);
   transform-origin: left center;
-  transition: transform 0.4s ease, opacity 0.4s ease;
+  transition:
+    transform 0.4s ease,
+    opacity 0.4s ease,
+    background 1s ease-in-out;
   will-change: transform, opacity;
+}
+
+body.night-mode #now-playing {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 #now-playing.visible {
@@ -112,13 +134,14 @@ canvas {
   font-weight: 400;
   color: rgba(255, 255, 255, 0.85);
   white-space: nowrap;
+  transition: color 1s ease-in-out;
 }
 
 /* Night Mode Toggle */
 #night-mode-container {
   position: fixed;
-  top: 74px;
-  left: 20px;
+  top: 20px;
+  right: 20px;
   z-index: 50;
 }
 
@@ -134,9 +157,15 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s ease, transform 0.2s ease;
+  transition:
+    background 1s ease-in-out,
+    transform 1s ease-in-out;
   opacity: 0;
   animation: fadeInAudio 0.5s ease 0.6s forwards;
+}
+
+body.night-mode #night-mode-toggle {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 #night-mode-toggle:hover {
@@ -144,13 +173,22 @@ canvas {
   transform: scale(1.07);
 }
 
+body.night-mode #night-mode-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
 #night-mode-toggle svg {
   width: 24px;
   height: 24px;
-  color: rgba(255, 255, 255, .85);
+  color: rgba(255, 255, 255, 0.85);
+  transition: color 1s ease-in-out;
 }
 
 #night-mode-toggle:hover svg {
+  color: white;
+}
+
+body.night-mode #night-mode-toggle:hover svg {
   color: white;
 }
 
@@ -172,7 +210,6 @@ canvas {
   opacity: 0;
   pointer-events: none;
 }
-
 
 /* About Panel Overlay */
 #about-overlay {
@@ -212,7 +249,9 @@ canvas {
   border: 1.5px solid rgba(255, 255, 255, 0.4);
   transform: scale(0.9);
   opacity: 0;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
 }
 
 #about-close {

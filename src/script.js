@@ -503,11 +503,13 @@ const moonIcon = document.getElementById("moon-icon");
 if (isNightMode) {
   sunIcon.style.display = "none";
   moonIcon.style.display = "block";
+  document.body.classList.add("night-mode");
 }
 
 nightModeToggle.addEventListener("click", () => {
   isNightMode = !isNightMode;
   nightTransitionTarget = isNightMode ? 1 : 0;
+  document.body.classList.toggle("night-mode", isNightMode);
 
   // Auto-play audio on first interaction (only if user hasn't disabled it)
   if (!hasAutoPlayed && userAudioPreference === "true") {
