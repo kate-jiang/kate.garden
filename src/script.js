@@ -301,8 +301,8 @@ canvas.addEventListener("pointerdown", e => {
   pointerStartPos = { x: e.clientX, y: e.clientY };
   pointerMoved = false;
 
-  // Auto-play audio on first interaction
-  if (!hasAutoPlayed) {
+  // Auto-play audio on first interaction (only if user hasn't disabled it)
+  if (!hasAutoPlayed && userAudioPreference === "true") {
     hasAutoPlayed = true;
     startAudioPlayback();
   }
@@ -388,6 +388,13 @@ let backgroundMusic = null;
 let isAudioPlaying = false;
 let hasAutoPlayed = false;
 
+// Autoplay preference
+const AUDIO_PREFERENCE_KEY = "audioEnabled";
+let userAudioPreference = localStorage.getItem(AUDIO_PREFERENCE_KEY);
+if (userAudioPreference === null) {
+  userAudioPreference = "true";
+}
+
 async function lazyLoadAudio() {
   if (backgroundMusic) return;
   backgroundMusic = new Audio("/arabesque.mp3");
@@ -417,11 +424,17 @@ audioToggle.addEventListener("click", () => {
     audioIconOn.style.display = "none";
     audioIconOff.style.display = "block";
     nowPlaying.classList.remove("visible");
+
+    localStorage.setItem(AUDIO_PREFERENCE_KEY, "false");
+    userAudioPreference = "false";
   } else {
     backgroundMusic.play();
     audioIconOn.style.display = "block";
     audioIconOff.style.display = "none";
     nowPlaying.classList.add("visible");
+
+    localStorage.setItem(AUDIO_PREFERENCE_KEY, "true");
+    userAudioPreference = "true";
   }
   isAudioPlaying = !isAudioPlaying;
 });
