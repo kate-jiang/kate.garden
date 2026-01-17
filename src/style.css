@@ -114,6 +114,46 @@ canvas {
   white-space: nowrap;
 }
 
+/* Night Mode Toggle */
+#night-mode-container {
+  position: fixed;
+  top: 74px;
+  left: 20px;
+  z-index: 50;
+}
+
+#night-mode-toggle {
+  width: 44px;
+  height: 44px;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 50%;
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+  opacity: 0;
+  animation: fadeInAudio 0.5s ease 0.6s forwards;
+}
+
+#night-mode-toggle:hover {
+  background: rgba(40, 40, 40, 0.5);
+  transform: scale(1.07);
+}
+
+#night-mode-toggle svg {
+  width: 24px;
+  height: 24px;
+  color: rgba(255, 255, 255, .85);
+}
+
+#night-mode-toggle:hover svg {
+  color: white;
+}
+
 #loading-overlay {
   position: fixed;
   top: 0;

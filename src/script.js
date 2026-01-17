@@ -39,7 +39,7 @@ const config = {
   maxDistance: 50,
   minPolarAngle: 1.61,
   maxPolarAngle: 1.7,
-  autoRotateSpeed: -0.07,
+  autoRotateSpeed: -0.06,
 
   // Interaction
   hoverScale: 1.15,
@@ -49,7 +49,6 @@ const config = {
   particleCount: 1400,
   particleColor: 0xd4c5a0,
   particleSize: 0.14,
-  particleOpacity: 0.4,
 
   // Text
   mainTextSize: 5,
@@ -69,6 +68,47 @@ const config = {
   },
 };
 
+const dayConfig = {
+  skyColour: new THREE.Vector3(0.012, 0.12, 0.54),
+  fogColorA: new THREE.Vector3(0.35, 0.5, 0.9),
+  fogColorB: new THREE.Vector3(1.0, 1.0, 0.75),
+  cloudBase: new THREE.Vector3(1.0, 0.98, 0.95),
+  cloudShadow: new THREE.Vector3(0.65, 0.7, 0.8),
+  sunGlow: new THREE.Vector3(1.0, 1.0, 0.8),
+  elevation: 0.2,
+  azimuth: 0.4,
+  ambientIntensity: 0.9,
+  dirLightIntensity: 0.8,
+  pointLightIntensity: 1.5,
+  particleOpacity: 0.6,
+  particleSpeedMultiplier: 1.3,
+  toneMappingExposure: 1.3,
+  textColor: 0xdd61c0,
+  textEmissive: 0xa0ac60,
+  textEmissiveIntensity: 0.25,
+};
+
+const nightConfig = {
+  skyColour: new THREE.Vector3(0.01, 0.02, 0.1),
+  fogColorA: new THREE.Vector3(0.05, 0.08, 0.18),
+  fogColorB: new THREE.Vector3(0.15, 0.12, 0.25),
+  cloudBase: new THREE.Vector3(0.15, 0.13, 0.22),
+  cloudShadow: new THREE.Vector3(0.08, 0.07, 0.12),
+  sunGlow: new THREE.Vector3(0.95, 0.9, 0.7),
+  elevation: -0.3,
+  azimuth: 0.6,
+  ambientIntensity: 0.4,
+  dirLightIntensity: 0.2,
+  pointLightIntensity: 0.5,
+  particleColor: 0xff6d1c,
+  particleOpacity: 1,
+  particleSpeedMultiplier: 0.85,
+  toneMappingExposure: 0.7,
+  textColor: 0xffccaa,
+  textEmissive: 0x6933e8,
+  textEmissiveIntensity: 0.4,
+};
+
 const linkData = [
   { label: "about", action: "showAbout" },
   { label: "github", url: "https://github.com/kate-jiang" },
@@ -80,6 +120,10 @@ const linkData = [
 // DERIVED VALUES & STATE
 // =============================================================================
 
+let groundShader = null;
+let textGroupRef = null;
+let textMaterialRef = null;
+
 const delta = config.width / config.resolution;
 const pos = new THREE.Vector2(0, 0);
 const sunDirection = new THREE.Vector3(
@@ -87,6 +131,12 @@ const sunDirection = new THREE.Vector3(
   Math.sin(config.elevation),
   -Math.cos(config.azimuth)
 );
+
+const NIGHT_MODE_KEY = "nightMode";
+let isNightMode = localStorage.getItem(NIGHT_MODE_KEY) === "true";
+let nightTransition = isNightMode ? 1 : 0;
+let nightTransitionTarget = isNightMode ? 1 : 0;
+let particleSpeedMultiplier = dayConfig.particleSpeedMultiplier;
 
 // Interaction state
 const raycaster = new THREE.Raycaster();
@@ -118,12 +168,6 @@ let textClickAnimationTime = 0;
 const textClickAnimationDuration = 0.8; // seconds
 const textJumpHeight = 1.5;
 const textTwirlRotations = 1; // full rotations
-
-// Shader reference
-let groundShader = null;
-
-// Text group reference for responsive handling
-let textGroupRef = null;
 
 // =============================================================================
 // RESPONSIVE UTILITIES
@@ -367,7 +411,7 @@ canvas.addEventListener("pointercancel", () => {
   resetAllHoverStates();
 });
 
-canvas.addEventListener("pointerleave", e => {
+canvas.addEventListener("pointerleave", () => {
   // Only reset if not actively dragging
   if (!isPointerDown) {
     resetAllHoverStates();
@@ -437,6 +481,37 @@ audioToggle.addEventListener("click", () => {
     userAudioPreference = "true";
   }
   isAudioPlaying = !isAudioPlaying;
+});
+
+// =============================================================================
+// NIGHT MODE CONTROL
+// =============================================================================
+
+const nightModeToggle = document.getElementById("night-mode-toggle");
+const sunIcon = document.getElementById("sun-icon");
+const moonIcon = document.getElementById("moon-icon");
+
+// Initialize UI from saved preference
+if (isNightMode) {
+  sunIcon.style.display = "none";
+  moonIcon.style.display = "block";
+}
+
+nightModeToggle.addEventListener("click", () => {
+  isNightMode = !isNightMode;
+  nightTransitionTarget = isNightMode ? 1 : 0;
+
+  // Update icons
+  if (isNightMode) {
+    sunIcon.style.display = "none";
+    moonIcon.style.display = "block";
+  } else {
+    sunIcon.style.display = "block";
+    moonIcon.style.display = "none";
+  }
+
+  // Persist preference
+  localStorage.setItem(NIGHT_MODE_KEY, isNightMode.toString());
 });
 
 // =============================================================================
@@ -528,10 +603,37 @@ uniform float fogFade;
 uniform float fov;
 uniform float time;
 
-const vec3 skyColour = 0.6 * vec3(0.02, 0.2, 0.9);
+// Night mode uniforms
+uniform vec3 skyColour;
+uniform vec3 fogColorA;
+uniform vec3 fogColorB;
+uniform vec3 cloudBaseColor;
+uniform vec3 cloudShadowColor;
+uniform vec3 sunGlowColor;
+uniform float starIntensity;
 
 vec3 getSkyColour(vec3 rayDir) {
 return mix(0.35 * skyColour, skyColour, pow(1.0 - rayDir.y, 4.0));
+}
+
+// Star field function for night sky
+float stars(vec3 rayDir, float time) {
+if (starIntensity < 0.01) return 0.0;
+if (rayDir.y < 0.1) return 0.0; // No stars near horizon
+
+vec3 p = rayDir * 300.0;
+vec3 id = floor(p);
+vec3 fp = fract(p) - 0.5;
+
+float h = fract(sin(dot(id, vec3(127.1, 311.7, 74.7))) * 43758.5453);
+float size = h * 0.5 + 0.5;
+float brightness = step(0.965, h); // Only ~3% of cells have stars
+float star = brightness * smoothstep(0.2 * size, 0.0, length(fp));
+
+// Fade stars near horizon
+float horizonFade = smoothstep(0.1, 0.3, rayDir.y);
+
+return star * starIntensity * horizonFade;
 }
 
 vec3 applyFog(vec3 rgb, vec3 rayOri, vec3 rayDir, vec3 sunDir) {
@@ -539,7 +641,7 @@ float dist = 4000.0;
 if (abs(rayDir.y) < 0.0001) rayDir.y = 0.0001;
 float fogAmount = 1.0 * exp(-rayOri.y * fogFade) * (1.0 - exp(-dist * rayDir.y * fogFade)) / (rayDir.y * fogFade);
 float sunAmount = max(dot(rayDir, sunDir), 0.0);
-vec3 fogColor = mix(vec3(0.35, 0.5, 0.9), vec3(1.0, 1.0, 0.75), pow(sunAmount, 16.0));
+vec3 fogColor = mix(fogColorA, fogColorB, pow(sunAmount, 16.0));
 return mix(rgb, fogColor, clamp(fogAmount, 0.0, 1.0));
 }
 
@@ -626,19 +728,20 @@ vec3 rayDir = rayDirection(fov, gl_FragCoord.xy);
 mat3 viewMatrix_ = lookAt(cameraPosition, target, up);
 rayDir = viewMatrix_ * rayDir;
 vec3 col = getSkyColour(rayDir);
+
+col += vec3(stars(rayDir, time));
+
 vec3 sunDir = normalize(sunDirection);
 float mu = dot(sunDir, rayDir);
 
 float cloudDensity = getCloudDensity(rayDir, time);
 float sunAmount = max(mu, 0.0);
-vec3 cloudBase = vec3(1.0, 0.98, 0.95);
-vec3 cloudShadow = vec3(0.65, 0.7, 0.8);
-vec3 cloudColor = mix(cloudShadow, cloudBase, 0.4 + sunAmount * 0.6);
+vec3 cloudColor = mix(cloudShadowColor, cloudBaseColor, 0.4 + sunAmount * 0.6);
 
 float edgeFade = smoothstep(0.0, 0.3, rayDir.y);
 col = mix(col, cloudColor, cloudDensity * 0.6 * edgeFade);
 
-col += vec3(1.0, 1.0, 0.8) * getGlow(1.0 - mu, 0.00005, 0.9);
+col += sunGlowColor * getGlow(1.0 - mu, 0.00005, 0.9);
 col += applyFog(col, vec3(0, 1000, 0), rayDir, sunDir);
 col = ACESFilm(col);
 col = pow(col, vec3(0.4545));
@@ -653,6 +756,13 @@ const backgroundMaterial = new THREE.ShaderMaterial({
     fogFade: { value: config.fogFade },
     fov: { value: config.fov },
     time: { value: 0 },
+    skyColour: { value: dayConfig.skyColour.clone() },
+    fogColorA: { value: dayConfig.fogColorA.clone() },
+    fogColorB: { value: dayConfig.fogColorB.clone() },
+    cloudBaseColor: { value: dayConfig.cloudBase.clone() },
+    cloudShadowColor: { value: dayConfig.cloudShadow.clone() },
+    sunGlowColor: { value: dayConfig.sunGlow.clone() },
+    starIntensity: { value: 0 },
   },
   vertexShader: `
   varying vec2 vUv;
@@ -1121,7 +1231,7 @@ const particleMaterial = new THREE.PointsMaterial({
   size: config.particleSize,
   map: particleTexture,
   transparent: true,
-  opacity: config.particleOpacity,
+  opacity: dayConfig.particleOpacity,
   blending: THREE.AdditiveBlending,
   sizeAttenuation: true,
   depthWrite: false,
@@ -1183,7 +1293,7 @@ function createLinkMeshes(font, textMesh, textMaterial) {
   linkData.forEach(item => {
     // Center geometry so it scales from center
     const centerX = -item.width / 2;
-    item.geometry.translate(centerX - item.geometry.boundingBox.min.x, -maxDescender, 0);
+    item.geometry.translate(centerX - item.geometry.boundingBox.min.x, -maxDescender, 1);
 
     const linkMesh = new THREE.Mesh(item.geometry, textMaterial);
     linkMesh.castShadow = true;
@@ -1244,6 +1354,15 @@ fontLoader.load("/fonts/helvetiker_regular.typeface.json", function (font) {
   textGeometry.translate(xOffset, 0, 0);
 
   const textMaterial = createTextMaterial();
+  textMaterialRef = textMaterial;
+
+  // Apply night mode if already active (since font loads async)
+  if (isNightMode) {
+    textMaterial.color.set(nightConfig.textColor);
+    textMaterial.emissive.set(nightConfig.textEmissive);
+    textMaterial.emissiveIntensity = nightConfig.textEmissiveIntensity;
+  }
+
   const textMesh = new THREE.Mesh(textGeometry, textMaterial);
   textMesh.castShadow = true;
   textMesh.receiveShadow = true;
@@ -1298,18 +1417,20 @@ function updateParticles(dt) {
   for (let i = 0; i < config.particleCount; i++) {
     const i3 = i * 3;
 
-    const windStrength = 1.67 + 0.3 * Math.sin(time * 0.5 + i * 0.1);
+    const windStrength = (1.67 + 0.3 * Math.sin(time * 0.5 + i * 0.1)) * particleSpeedMultiplier;
     positions[i3] += particleVelocities[i3] * dt * windStrength;
-    positions[i3 + 1] += particleVelocities[i3 + 1] * dt + Math.sin(time * 2 + i * 0.5) * dt * 0.2;
-    positions[i3 + 2] += particleVelocities[i3 + 2] * dt;
+    positions[i3 + 1] +=
+      particleVelocities[i3 + 1] * dt * particleSpeedMultiplier +
+      Math.sin(time * 2 + i * 0.5) * dt * 0.2;
+    positions[i3 + 2] += particleVelocities[i3 + 2] * dt * particleSpeedMultiplier;
 
     // Wrap particles around boundaries
     if (positions[i3] > 30) positions[i3] = -30;
     if (positions[i3] < -30) positions[i3] = 30;
-    if (positions[i3 + 1] > 22) positions[i3 + 1] = 2;
-    if (positions[i3 + 1] < 2) positions[i3 + 1] = 22;
-    if (positions[i3 + 2] > 50) positions[i3 + 2] = -10;
-    if (positions[i3 + 2] < -10) positions[i3 + 2] = 50;
+    if (positions[i3 + 1] > 22) positions[i3 + 1] = 0;
+    if (positions[i3 + 1] < 0) positions[i3 + 1] = 22;
+    if (positions[i3 + 2] > 70) positions[i3 + 2] = -70;
+    if (positions[i3 + 2] < -70) positions[i3 + 2] = 70;
   }
 
   particleGeometry.attributes.position.needsUpdate = true;
@@ -1402,6 +1523,171 @@ function updateFloatingText(dt) {
   );
 }
 
+// =============================================================================
+// NIGHT MODE TRANSITION
+// =============================================================================
+
+function lerpValue(a, b, t) {
+  return a + (b - a) * t;
+}
+
+function lerpVector3(target, a, b, t) {
+  target.x = lerpValue(a.x, b.x, t);
+  target.y = lerpValue(a.y, b.y, t);
+  target.z = lerpValue(a.z, b.z, t);
+}
+
+function updateNightMode(dt) {
+  // Check if transition is needed
+  if (Math.abs(nightTransition - nightTransitionTarget) < 0.001) {
+    nightTransition = nightTransitionTarget;
+    return;
+  }
+
+  // Animate transition
+  const direction = nightTransitionTarget > nightTransition ? 1 : -1;
+  nightTransition = Math.max(0, Math.min(1, nightTransition + direction * 0.8 * dt));
+
+  // Ease in-out cubic for smooth feel
+  const t = nightTransition;
+  const easedT = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+  // Interpolate sun
+  const elevation = lerpValue(dayConfig.elevation, nightConfig.elevation, easedT);
+  const azimuth = lerpValue(dayConfig.azimuth, nightConfig.azimuth, easedT);
+  sunDirection.set(Math.sin(azimuth), Math.sin(elevation), -Math.cos(azimuth));
+
+  // Interpolate sky shader uniforms
+  lerpVector3(
+    backgroundMaterial.uniforms.skyColour.value,
+    dayConfig.skyColour,
+    nightConfig.skyColour,
+    easedT
+  );
+  lerpVector3(
+    backgroundMaterial.uniforms.fogColorA.value,
+    dayConfig.fogColorA,
+    nightConfig.fogColorA,
+    easedT
+  );
+  lerpVector3(
+    backgroundMaterial.uniforms.fogColorB.value,
+    dayConfig.fogColorB,
+    nightConfig.fogColorB,
+    easedT
+  );
+  lerpVector3(
+    backgroundMaterial.uniforms.cloudBaseColor.value,
+    dayConfig.cloudBase,
+    nightConfig.cloudBase,
+    easedT
+  );
+  lerpVector3(
+    backgroundMaterial.uniforms.cloudShadowColor.value,
+    dayConfig.cloudShadow,
+    nightConfig.cloudShadow,
+    easedT
+  );
+  lerpVector3(
+    backgroundMaterial.uniforms.sunGlowColor.value,
+    dayConfig.sunGlow,
+    nightConfig.sunGlow,
+    easedT
+  );
+  backgroundMaterial.uniforms.starIntensity.value = easedT;
+
+  // Interpolate lighting
+  ambientLight.intensity = lerpValue(
+    dayConfig.ambientIntensity,
+    nightConfig.ambientIntensity,
+    easedT
+  );
+  dirLight.intensity = lerpValue(
+    dayConfig.dirLightIntensity,
+    nightConfig.dirLightIntensity,
+    easedT
+  );
+  pointLight.intensity = lerpValue(
+    dayConfig.pointLightIntensity,
+    nightConfig.pointLightIntensity,
+    easedT
+  );
+
+  // Interpolate particle opacity, color, and speed (sweep away at night)
+  particleMaterial.opacity = lerpValue(
+    dayConfig.particleOpacity,
+    nightConfig.particleOpacity,
+    easedT
+  );
+  const dayParticleColor = new THREE.Color(dayConfig.particleColor);
+  const nightParticleColor = new THREE.Color(nightConfig.particleColor);
+  particleMaterial.color.lerpColors(dayParticleColor, nightParticleColor, easedT);
+  particleSpeedMultiplier = lerpValue(
+    dayConfig.particleSpeedMultiplier,
+    nightConfig.particleSpeedMultiplier,
+    easedT
+  );
+
+  // Interpolate tone mapping exposure
+  renderer.toneMappingExposure = lerpValue(
+    dayConfig.toneMappingExposure,
+    nightConfig.toneMappingExposure,
+    easedT
+  );
+
+  // Interpolate text material (warm glow at night)
+  if (textMaterialRef) {
+    const dayTextColor = new THREE.Color(dayConfig.textColor);
+    const nightTextColor = new THREE.Color(nightConfig.textColor);
+    textMaterialRef.color.lerpColors(dayTextColor, nightTextColor, easedT);
+
+    const dayEmissive = new THREE.Color(dayConfig.textEmissive);
+    const nightEmissive = new THREE.Color(nightConfig.textEmissive);
+    textMaterialRef.emissive.lerpColors(dayEmissive, nightEmissive, easedT);
+
+    textMaterialRef.emissiveIntensity = lerpValue(
+      dayConfig.textEmissiveIntensity,
+      nightConfig.textEmissiveIntensity,
+      easedT
+    );
+  }
+}
+
+// Apply initial night mode state if loaded from localStorage
+function applyInitialNightMode() {
+  if (isNightMode) {
+    sunDirection.set(
+      Math.sin(nightConfig.azimuth),
+      Math.sin(nightConfig.elevation),
+      -Math.cos(nightConfig.azimuth)
+    );
+
+    backgroundMaterial.uniforms.skyColour.value.copy(nightConfig.skyColour);
+    backgroundMaterial.uniforms.fogColorA.value.copy(nightConfig.fogColorA);
+    backgroundMaterial.uniforms.fogColorB.value.copy(nightConfig.fogColorB);
+    backgroundMaterial.uniforms.cloudBaseColor.value.copy(nightConfig.cloudBase);
+    backgroundMaterial.uniforms.cloudShadowColor.value.copy(nightConfig.cloudShadow);
+    backgroundMaterial.uniforms.sunGlowColor.value.copy(nightConfig.sunGlow);
+    backgroundMaterial.uniforms.starIntensity.value = 1;
+
+    ambientLight.intensity = nightConfig.ambientIntensity;
+    dirLight.intensity = nightConfig.dirLightIntensity;
+    pointLight.intensity = nightConfig.pointLightIntensity;
+
+    particleMaterial.opacity = nightConfig.particleOpacity;
+    particleMaterial.color.set(nightConfig.particleColor);
+    particleSpeedMultiplier = nightConfig.particleSpeedMultiplier;
+    renderer.toneMappingExposure = nightConfig.toneMappingExposure;
+
+    // Set text material (if already loaded)
+    if (textMaterialRef) {
+      textMaterialRef.color.set(nightConfig.textColor);
+      textMaterialRef.emissive.set(nightConfig.textEmissive);
+      textMaterialRef.emissiveIntensity = nightConfig.textEmissiveIntensity;
+    }
+  }
+}
+
 function animate() {
   const now = performance.now();
   let dt = (now - lastFrame) / 1000;
@@ -1412,6 +1698,9 @@ function animate() {
   // Update uniforms
   grassMaterial.uniforms.time.value = time;
   backgroundMaterial.uniforms.time.value = time;
+
+  // Update night mode transition
+  updateNightMode(dt);
 
   // Update animations
   updateHoverAnimations();
@@ -1428,5 +1717,7 @@ function animate() {
 
   requestAnimationFrame(animate);
 }
+
+applyInitialNightMode();
 
 animate();
