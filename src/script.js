@@ -143,6 +143,8 @@ let isNightMode = localStorage.getItem(NIGHT_MODE_KEY) === "true";
 let nightTransition = isNightMode ? 1 : 0;
 let nightTransitionTarget = isNightMode ? 1 : 0;
 let particleSpeedMultiplier = dayConfig.particleSpeedMultiplier;
+let cloudTimeOffset = 0; // Accumulates extra time for cloud acceleration during transitions
+let particleSpeedBoost = 0; // Additional speed multiplier during transitions
 
 // Interaction state
 const raycaster = new THREE.Raycaster();
@@ -506,6 +508,12 @@ if (isNightMode) {
 nightModeToggle.addEventListener("click", () => {
   isNightMode = !isNightMode;
   nightTransitionTarget = isNightMode ? 1 : 0;
+
+  // Auto-play audio on first interaction (only if user hasn't disabled it)
+  if (!hasAutoPlayed && userAudioPreference === "true") {
+    hasAutoPlayed = true;
+    startAudioPlayback();
+  }
 
   // Update icons
   if (isNightMode) {
@@ -1442,16 +1450,17 @@ let lastFrame = performance.now();
 
 function updateParticles(dt) {
   const positions = particleGeometry.attributes.position.array;
+  const totalSpeedMultiplier = particleSpeedMultiplier + particleSpeedBoost;
 
   for (let i = 0; i < config.particleCount; i++) {
     const i3 = i * 3;
 
-    const windStrength = (1.67 + 0.3 * Math.sin(time * 0.5 + i * 0.1)) * particleSpeedMultiplier;
+    const windStrength = (1.67 + 0.3 * Math.sin(time * 0.5 + i * 0.1)) * totalSpeedMultiplier;
     positions[i3] += particleVelocities[i3] * dt * windStrength;
     positions[i3 + 1] +=
-      particleVelocities[i3 + 1] * dt * particleSpeedMultiplier +
+      particleVelocities[i3 + 1] * dt * totalSpeedMultiplier +
       Math.sin(time * 2 + i * 0.5) * dt * 0.2;
-    positions[i3 + 2] += particleVelocities[i3 + 2] * dt * particleSpeedMultiplier;
+    positions[i3 + 2] += particleVelocities[i3 + 2] * dt * totalSpeedMultiplier;
 
     // Wrap particles around boundaries
     if (positions[i3] > 30) positions[i3] = -30;
@@ -1570,16 +1579,22 @@ function updateNightMode(dt) {
   // Check if transition is needed
   if (Math.abs(nightTransition - nightTransitionTarget) < 0.001) {
     nightTransition = nightTransitionTarget;
+    particleSpeedBoost = 0;
     return;
   }
 
   // Animate transition
   const direction = nightTransitionTarget > nightTransition ? 1 : -1;
-  nightTransition = Math.max(0, Math.min(1, nightTransition + direction * 0.8 * dt));
+  nightTransition = Math.max(0, Math.min(1, nightTransition + direction * 0.6 * dt));
 
   // Ease in-out cubic for smooth feel
   const t = nightTransition;
   const easedT = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+  // Dramatically accelerate clouds and particles during transition - peaks in the middle, eases at edges
+  const speedCurve = Math.pow(Math.sin(t * Math.PI), 2); // gentler bell curve
+  cloudTimeOffset += dt * 100 * speedCurve;
+  particleSpeedBoost = 8 * speedCurve; // 8x speed boost at peak
 
   // Interpolate sun
   const elevation = lerpValue(dayConfig.elevation, nightConfig.elevation, easedT);
@@ -1750,7 +1765,7 @@ function animate() {
 
   // Update uniforms
   grassMaterial.uniforms.time.value = time;
-  backgroundMaterial.uniforms.time.value = time;
+  backgroundMaterial.uniforms.time.value = time + cloudTimeOffset;
 
   // Update night mode transition
   updateNightMode(dt);
