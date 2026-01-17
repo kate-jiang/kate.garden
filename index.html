@@ -1,80 +1,94 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kate</title>
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>kate</title>
-  <link rel="stylesheet" href="./src/style.css">
-</head>
+  <body>
+    <canvas id="webgl"></canvas>
 
-<body>
-  <canvas id="webgl"></canvas>
+    <div id="loading-overlay"></div>
 
-  <div id="loading-overlay"></div>
-
-  <div id="audio-container">
-    <button id="audio-toggle" aria-label="Toggle music">
-      <svg id="audio-icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M11 5L6 9H2v6h4l5 4V5z" />
-        <line x1="23" y1="9" x2="17" y2="15" />
-        <line x1="17" y1="9" x2="23" y2="15" />
-      </svg>
-      <svg id="audio-icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        style="display:none;">
-        <path d="M11 5L6 9H2v6h4l5 4V5z" />
-        <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
-        <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
-      </svg>
-    </button>
-    <div id="now-playing">
-      <span>me playing piano</span>
-    </div>
-  </div>
-
-  <div id="night-mode-container">
-    <button id="night-mode-toggle" aria-label="Toggle night mode">
-      <svg id="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="5"/>
-        <line x1="12" y1="1" x2="12" y2="3"/>
-        <line x1="12" y1="21" x2="12" y2="23"/>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-        <line x1="1" y1="12" x2="3" y2="12"/>
-        <line x1="21" y1="12" x2="23" y2="12"/>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-      </svg>
-      <svg id="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-      </svg>
-    </button>
-  </div>
-
-  <div id="about-overlay" class="hidden">
-    <div id="about-paper">
-      <button id="about-close">&times;</button>
-      <div id="about-content">
-        <h1>hello cruel world</h1>
-        <p>
-          i'm an engineer & musician based in nyc.
-          i am currently working on
-          <a href="https://harmonycloudmusic.com" target="_blank">harmony cloud</a>,
-          an ear training tool for jazz musicians.
-        </p>
-        <p>
-          feel free to reach out!
-          <br />
-          <strong>email: kate at kate.garden</strong>
-        </p>
-        <a href="/Kate_Resume.pdf" target="_blank" id="resume-link">
-          view my resume →
-        </a>
+    <div id="audio-container">
+      <button id="audio-toggle" class="ui-button" aria-label="Toggle music">
+        <svg
+          id="audio-icon-off"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M11 5L6 9H2v6h4l5 4V5z" />
+          <line x1="23" y1="9" x2="17" y2="15" />
+          <line x1="17" y1="9" x2="23" y2="15" />
+        </svg>
+        <svg
+          id="audio-icon-on"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          style="display: none"
+        >
+          <path d="M11 5L6 9H2v6h4l5 4V5z" />
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+        </svg>
+      </button>
+      <div id="now-playing">
+        <span>me playing piano</span>
       </div>
     </div>
-  </div>
 
-  <script type="module" src="./src/script.js"></script>
-</body>
+    <div id="night-mode-container">
+      <button id="night-mode-toggle" class="ui-button" aria-label="Toggle night mode">
+        <svg id="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>
+        <svg
+          id="moon-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          style="display: none"
+        >
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      </button>
+    </div>
 
+    <div id="about-overlay" class="hidden">
+      <div id="about-paper">
+        <button id="about-close">&times;</button>
+        <div id="about-content">
+          <h1>hello cruel world</h1>
+          <p>
+            i'm an engineer & musician based in nyc. i am currently working on
+            <a href="https://harmonycloudmusic.com" target="_blank">harmony cloud</a>, an ear
+            training tool for jazz musicians.
+          </p>
+          <p>
+            feel free to reach out!
+            <br />
+            <strong>email: kate at kate.garden</strong>
+          </p>
+          <a href="/Kate_Resume.pdf" target="_blank" id="resume-link"> view my resume → </a>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./src/script.js"></script>
+  </body>
 </html>

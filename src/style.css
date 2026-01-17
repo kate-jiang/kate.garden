@@ -25,6 +25,61 @@ canvas {
   -webkit-tap-highlight-color: transparent;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.ui-button {
+  width: 44px;
+  height: 44px;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 50%;
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 1.5s ease-in-out,
+    transform 0.2s ease;
+  opacity: 0;
+  animation: fadeIn 0.5s ease 0.6s forwards;
+}
+
+.ui-button svg {
+  width: 24px;
+  height: 24px;
+  color: rgba(255, 255, 255, 0.8);
+  transition: color 1s ease-in-out;
+}
+
+.ui-button:hover {
+  transform: scale(1.07);
+}
+
+.ui-button:hover svg {
+  color: white;
+}
+
+body.night-mode .ui-button {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+body.night-mode .ui-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+body.night-mode .ui-button:hover svg {
+  color: white;
+}
+
 /* Audio Container */
 #audio-container {
   position: fixed;
@@ -37,69 +92,16 @@ canvas {
 }
 
 #audio-toggle {
-  width: 44px;
-  height: 44px;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 50%;
-  border: 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    background 1s ease-in-out,
-    transform 1s ease-in-out;
   flex-shrink: 0;
   position: relative;
   z-index: 2;
-  opacity: 0;
-  animation: fadeInAudio 0.5s ease 0.6s forwards;
-}
-
-body.night-mode #audio-toggle {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-#audio-toggle:hover {
-  background: rgba(40, 40, 40, 0.5);
-  transform: scale(1.07);
-}
-
-body.night-mode #audio-toggle:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-#audio-toggle svg {
-  width: 24px;
-  height: 24px;
-  color: rgba(255, 255, 255, 0.85);
-  transition: color 1s ease-in-out;
-}
-
-#audio-toggle:hover svg {
-  color: white;
-}
-
-body.night-mode #audio-toggle:hover svg {
-  color: white;
-}
-
-@keyframes fadeInAudio {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
 
 #now-playing {
   height: 36px;
   background: rgba(20, 20, 20, 0.3);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
   border: 0;
   border-radius: 0 18px 18px 0;
   display: flex;
@@ -134,7 +136,6 @@ body.night-mode #now-playing {
   font-weight: 400;
   color: rgba(255, 255, 255, 0.85);
   white-space: nowrap;
-  transition: color 1s ease-in-out;
 }
 
 /* Night Mode Toggle */
@@ -142,54 +143,7 @@ body.night-mode #now-playing {
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 50;
-}
-
-#night-mode-toggle {
-  width: 44px;
-  height: 44px;
-  background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 50%;
-  border: 0;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    background 1s ease-in-out,
-    transform 1s ease-in-out;
-  opacity: 0;
-  animation: fadeInAudio 0.5s ease 0.6s forwards;
-}
-
-body.night-mode #night-mode-toggle {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-#night-mode-toggle:hover {
-  background: rgba(40, 40, 40, 0.5);
-  transform: scale(1.07);
-}
-
-body.night-mode #night-mode-toggle:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-#night-mode-toggle svg {
-  width: 24px;
-  height: 24px;
-  color: rgba(255, 255, 255, 0.85);
-  transition: color 1s ease-in-out;
-}
-
-#night-mode-toggle:hover svg {
-  color: white;
-}
-
-body.night-mode #night-mode-toggle:hover svg {
-  color: white;
+  z-index: 2;
 }
 
 #loading-overlay {
