@@ -200,7 +200,7 @@ body.night-mode #now-playing {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 32px;
-  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   transform: scale(0.9);
   opacity: 0;
   transition:
@@ -273,7 +273,7 @@ body.night-mode #now-playing {
   font-size: 16px;
   font-weight: 400;
   border-radius: 32px;
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   transition: background 0.2s ease;
 }
 
