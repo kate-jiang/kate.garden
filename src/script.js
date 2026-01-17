@@ -91,10 +91,10 @@ const dayConfig = {
 };
 
 const nightConfig = {
-  skyColour: new THREE.Vector3(0.005, 0.01, 0.06),
-  fogColorA: new THREE.Vector3(0.03, 0.04, 0.1),
-  fogColorB: new THREE.Vector3(0.08, 0.06, 0.14),
-  cloudBase: new THREE.Vector3(0.1, 0.08, 0.15),
+  skyColour: new THREE.Vector3(0.005, 0.012, 0.07),
+  fogColorA: new THREE.Vector3(0.04, 0.04, 0.1),
+  fogColorB: new THREE.Vector3(0.09, 0.06, 0.14),
+  cloudBase: new THREE.Vector3(0.11, 0.09, 0.15),
   cloudShadow: new THREE.Vector3(0.04, 0.035, 0.07),
   sunGlow: new THREE.Vector3(0.95, 0.9, 0.7),
   elevation: -0.3,
@@ -109,7 +109,7 @@ const nightConfig = {
   textColor: 0xffccaa,
   textEmissive: 0x4715bd,
   textEmissiveIntensity: 0.4,
-  grassBrightness: 0.5,
+  grassBrightness: 0.45,
   textLightIntensity: 3.0,
   rimLightIntensity: 2.0,
 };
