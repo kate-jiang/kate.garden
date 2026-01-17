@@ -138,7 +138,10 @@ const sunDirection = new THREE.Vector3(
 );
 
 const NIGHT_MODE_KEY = "nightMode";
-let isNightMode = localStorage.getItem(NIGHT_MODE_KEY) === "true";
+let isNightMode =
+  localStorage.getItem(NIGHT_MODE_KEY) === "true" ||
+  (localStorage.getItem(NIGHT_MODE_KEY) === null &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches);
 let nightTransition = isNightMode ? 1 : 0;
 let nightTransitionTarget = isNightMode ? 1 : 0;
 let particleSpeedMultiplier = dayConfig.particleSpeedMultiplier;
@@ -622,6 +625,7 @@ uniform vec3 sunDirection;
 uniform float fogFade;
 uniform float fov;
 uniform float time;
+uniform float cloudSpeed;
 
 // Night mode uniforms
 uniform vec3 skyColour;
@@ -720,10 +724,10 @@ return sum;
 }
 
 float cloudNoise(vec2 p, float time, float seed) {
-vec2 offset = vec2(time * 0.07 + seed, seed * 23.7);
-float n = fbm(p * 1.2 + offset, seed);
-n += fbm(p * 2.5 + offset * 1.2, seed + 100.0) * 0.35;
-return n;
+  vec2 offset = vec2(time * cloudSpeed + seed, seed * 23.7);
+  float n = fbm(p * 1.2 + offset, seed);
+  n += fbm(p * 2.5 + offset * 1.2, seed + 100.0) * 0.35;
+  return n;
 }
 
 float getCloudLayer(vec3 rayDir, float time, float seed, float height) {
@@ -776,6 +780,7 @@ const backgroundMaterial = new THREE.ShaderMaterial({
     fogFade: { value: config.fogFade },
     fov: { value: config.fov },
     time: { value: 0 },
+    cloudSpeed: { value: 0.12 },
     skyColour: { value: dayConfig.skyColour.clone() },
     fogColorA: { value: dayConfig.fogColorA.clone() },
     fogColorB: { value: dayConfig.fogColorB.clone() },
