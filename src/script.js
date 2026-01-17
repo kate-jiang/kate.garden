@@ -35,9 +35,9 @@ const config = {
   fov: 45,
   cameraPosition: { x: -18, y: -1, z: 55 },
   cameraTarget: { x: 0, y: 5, z: 10 },
-  minDistance: 40,
+  minDistance: 50,
   maxDistance: 50,
-  minPolarAngle: 1.61,
+  minPolarAngle: 1.66,
   maxPolarAngle: 1.7,
   autoRotateSpeed: -0.06,
 
@@ -64,7 +64,6 @@ const config = {
   responsive: {
     mobileBreakpoint: 480,
     mobileTextScale: 0.75,
-    mobileMinDistance: 35,
   },
 };
 
@@ -225,6 +224,7 @@ const controls = new OrbitControls(camera, canvas);
 controls.target.set(config.cameraTarget.x, config.cameraTarget.y, config.cameraTarget.z);
 controls.enableDamping = true;
 controls.enablePan = false;
+controls.enableZoom = false;
 controls.enableRotate = true;
 controls.autoRotate = true;
 controls.minDistance = config.minDistance;
@@ -1287,12 +1287,12 @@ function createLinkMeshes(font, textMesh, textMaterial) {
     const geometry = new TextGeometry(item.label, {
       font: font,
       size: config.linkTextSize,
-      height: 0.25,
+      height: 0.5,
       curveSegments: 12,
       bevelEnabled: true,
       bevelThickness: 0.14,
       bevelSize: 0.05,
-      bevelOffset: 0,
+      bevelOffset: -0.015,
       bevelSegments: 6,
     });
 
@@ -1369,12 +1369,10 @@ fontLoader.load("/fonts/helvetiker_regular.typeface.json", function (font) {
     font: font,
     depth: 100,
     size: config.mainTextSize,
-    height: 2,
-    curveSegments: 32,
+    height: 1.2,
     bevelEnabled: true,
-    bevelThickness: 0.08,
-    bevelSize: 0.1,
-    bevelOffset: 0,
+    bevelThickness: 0.2,
+    bevelSize: 0.15,
     bevelSegments: 8,
   });
 
