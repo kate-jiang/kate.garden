@@ -86,6 +86,7 @@ const dayConfig = {
   textColor: 0xdd61c0,
   textEmissive: 0xa0ac60,
   textEmissiveIntensity: 0.25,
+  grassBrightness: 1.0,
 };
 
 const nightConfig = {
@@ -107,6 +108,7 @@ const nightConfig = {
   textColor: 0xffccaa,
   textEmissive: 0x6933e8,
   textEmissiveIntensity: 0.4,
+  grassBrightness: 0.53,
 };
 
 const linkData = [
@@ -989,6 +991,7 @@ uniform vec3 sunDirection;
 uniform sampler2D map;
 uniform sampler2D alphaMap;
 uniform vec3 specularColour;
+uniform float grassBrightness;
 
 varying float frc;
 varying float idx;
@@ -1044,6 +1047,7 @@ if (dotNormalLight <= 0.0) {
 
 vec3 col = 0.3 * skyLight * textureColour + ambientStrength * ambient + diffuseStrength * diffuse + specularStrength * specular + diffuseTranslucency + forwardTranslucency;
 col = mix(0.35 * vec3(0.1, 0.25, 0.02), col, frc);
+col *= grassBrightness;
 col = ACESFilm(col);
 col = pow(col, vec3(0.4545));
 gl_FragColor = vec4(col, 1.0);
@@ -1179,6 +1183,7 @@ const grassMaterial = new THREE.RawShaderMaterial({
     shininess: { value: config.shininess },
     lightColour: { value: config.sunColour },
     specularColour: { value: config.specularColour },
+    grassBrightness: { value: dayConfig.grassBrightness },
   },
   vertexShader: grassVertexSource,
   fragmentShader: grassFragmentSource,
@@ -1651,6 +1656,13 @@ function updateNightMode(dt) {
       easedT
     );
   }
+
+  // Interpolate grass brightness
+  grassMaterial.uniforms.grassBrightness.value = lerpValue(
+    dayConfig.grassBrightness,
+    nightConfig.grassBrightness,
+    easedT
+  );
 }
 
 // Apply initial night mode state if loaded from localStorage
@@ -1678,6 +1690,7 @@ function applyInitialNightMode() {
     particleMaterial.color.set(nightConfig.particleColor);
     particleSpeedMultiplier = nightConfig.particleSpeedMultiplier;
     renderer.toneMappingExposure = nightConfig.toneMappingExposure;
+    grassMaterial.uniforms.grassBrightness.value = nightConfig.grassBrightness;
 
     // Set text material (if already loaded)
     if (textMaterialRef) {
