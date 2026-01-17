@@ -56,7 +56,7 @@ const config = {
   linkGap: 1,
   textYPosition: 4.6,
   textZPosition: 10,
-  textBobAmplitude: 0.3,
+  textBobAmplitude: 0.25,
   textBobSpeed: 1.5,
   textRotationDamping: 0.03,
 
@@ -87,6 +87,9 @@ const dayConfig = {
   textEmissive: 0xa0ac60,
   textEmissiveIntensity: 0.25,
   grassBrightness: 1.0,
+  textLightIntensity: 2.0,
+  rimLightIntensity: 1.5,
+  textFillLightIntensity: 0.0,
 };
 
 const nightConfig = {
@@ -109,6 +112,9 @@ const nightConfig = {
   textEmissive: 0x6933e8,
   textEmissiveIntensity: 0.4,
   grassBrightness: 0.53,
+  textLightIntensity: 3.0,
+  rimLightIntensity: 2.0,
+  textFillLightIntensity: 3,
 };
 
 const linkData = [
@@ -556,6 +562,10 @@ scene.add(textLight);
 const rimLight = new THREE.PointLight(0xffffff, 1.5, 30);
 rimLight.position.set(0, 5, 5);
 scene.add(rimLight);
+
+const textFillLight = new THREE.PointLight(0xaabbff, 0, 25);
+textFillLight.position.set(0, 6, 30);
+scene.add(textFillLight);
 
 // =============================================================================
 // LOADING MANAGER
@@ -1526,6 +1536,13 @@ function updateFloatingText(dt) {
     textGroup.position.y + 2,
     textGroup.position.z - textToCamera.z * 5
   );
+
+  // Fill light - in front of text for even illumination (night mode boost)
+  textFillLight.position.set(
+    textGroup.position.x + textToCamera.x * 8,
+    textGroup.position.y - 2,
+    textGroup.position.z + textToCamera.z * 8
+  );
 }
 
 // =============================================================================
@@ -1663,6 +1680,23 @@ function updateNightMode(dt) {
     nightConfig.grassBrightness,
     easedT
   );
+
+  // Interpolate text-specific lighting for night readability
+  textLight.intensity = lerpValue(
+    dayConfig.textLightIntensity,
+    nightConfig.textLightIntensity,
+    easedT
+  );
+  rimLight.intensity = lerpValue(
+    dayConfig.rimLightIntensity,
+    nightConfig.rimLightIntensity,
+    easedT
+  );
+  textFillLight.intensity = lerpValue(
+    dayConfig.textFillLightIntensity,
+    nightConfig.textFillLightIntensity,
+    easedT
+  );
 }
 
 // Apply initial night mode state if loaded from localStorage
@@ -1698,6 +1732,11 @@ function applyInitialNightMode() {
       textMaterialRef.emissive.set(nightConfig.textEmissive);
       textMaterialRef.emissiveIntensity = nightConfig.textEmissiveIntensity;
     }
+
+    // Set text-specific lighting for night readability
+    textLight.intensity = nightConfig.textLightIntensity;
+    rimLight.intensity = nightConfig.rimLightIntensity;
+    textFillLight.intensity = nightConfig.textFillLightIntensity;
   }
 }
 
