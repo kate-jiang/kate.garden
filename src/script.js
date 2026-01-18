@@ -510,6 +510,7 @@ if (isNightMode) {
 }
 
 nightModeToggle.addEventListener("click", () => {
+  if (nightTransition !== nightTransitionTarget) return;
   isNightMode = !isNightMode;
   nightTransitionTarget = isNightMode ? 1 : 0;
   document.body.classList.toggle("night-mode", isNightMode);
