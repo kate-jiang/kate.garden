@@ -65,33 +65,25 @@ canvas {
     transform 0.2s ease;
   opacity: 0;
   animation: fadeIn 0.5s ease 0.6s forwards;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 .ui-button svg {
   width: 24px;
   height: 24px;
-  color: rgba(255, 255, 255, 0.8);
+  color: white;
   transition: color 1s ease-in-out;
 }
 
 .ui-button:hover {
-  transform: scale(1.07);
-}
-
-.ui-button:hover svg {
-  color: white;
+  transform: scale(1.1) translateZ(0);
 }
 
 body.night-mode .ui-button {
   background: rgba(255, 255, 255, 0.12);
-}
-
-body.night-mode .ui-button:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-body.night-mode .ui-button:hover svg {
-  color: white;
 }
 
 /* Audio Container */
