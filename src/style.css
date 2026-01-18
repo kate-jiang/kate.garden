@@ -262,6 +262,10 @@ body.night-mode #now-playing {
   text-decoration: none;
 }
 
+body.night-mode #about-content a:hover {
+  color: #a8d5ff;
+}
+
 #about-content h1 {
   font-size: 28px;
   font-weight: 500;
