@@ -98,7 +98,7 @@ const nightConfig = {
   cloudShadow: new THREE.Vector3(0.04, 0.035, 0.07),
   sunGlow: new THREE.Vector3(0.95, 0.9, 0.7),
   elevation: -0.3,
-  azimuth: 0.6,
+  azimuth: 0.7,
   ambientIntensity: 0.3,
   dirLightIntensity: 0.2,
   pointLightIntensity: 0.5,
