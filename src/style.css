@@ -65,10 +65,6 @@ canvas {
     transform 0.2s ease;
   opacity: 0;
   animation: fadeIn 0.5s ease 0.6s forwards;
-  will-change: transform;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translateZ(0);
 }
 
 .ui-button svg {
@@ -76,10 +72,6 @@ canvas {
   height: 24px;
   color: white;
   transition: color 1s ease-in-out;
-}
-
-.ui-button:hover {
-  transform: scale(1.1) translateZ(0);
 }
 
 body.night-mode .ui-button {
@@ -332,3 +324,17 @@ body.night-mode #about-content a:hover {
     padding: 14px 20px;
   }
 }
+
+@media (hover: hover) {
+  .ui-button {
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+
+  .ui-button:hover {
+    transform: scale(1.1) translateZ(0);
+  }
+}
+
