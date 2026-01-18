@@ -86,7 +86,7 @@ body.night-mode .ui-button {
   display: flex;
   align-items: center;
   gap: 0;
-  z-index: 50;
+  z-index: 1001;
 }
 
 #audio-toggle {
@@ -141,7 +141,7 @@ body.night-mode #now-playing {
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 2;
+  z-index: 1001;
 }
 
 #loading-overlay {
