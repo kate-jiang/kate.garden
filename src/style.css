@@ -202,8 +202,8 @@ body.night-mode #now-playing {
   transform: scale(0.9);
   opacity: 0;
   transition:
-    transform 0.3s ease,
-    opacity 0.3s ease;
+    transform 0.4s ease,
+    opacity 0.4s ease;
 }
 
 #about-close {
