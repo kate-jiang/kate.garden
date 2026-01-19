@@ -117,7 +117,7 @@ const nightConfig = {
 const linkData = [
   { label: "about", action: "showAbout" },
   { label: "music", action: "showMusic" },
-  { label: "photos", url: "https://instagram.com/katejiang__" },
+  { label: "photo", url: "https://instagram.com/katejiang__" },
   { label: "code", url: "https://github.com/kate-jiang" },
 ];
 
