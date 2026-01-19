@@ -320,10 +320,15 @@ function showOverlay(contentType) {
   // Show the requested content and set data attribute
   if (contentType === "about") {
     aboutContent.style.display = "block";
-    contentOverlay.setAttribute("data-content", "about");
   } else if (contentType === "music") {
     musicContent.style.display = "block";
-    contentOverlay.setAttribute("data-content", "music");
+    // Scroll to currently playing item when opening
+    setTimeout(() => {
+      const activeItem = playlistItems.querySelector(".playlist-item.active");
+      if (activeItem) {
+        activeItem.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 100);
   }
 
   // Show overlay
@@ -459,9 +464,24 @@ const audioIconOn = document.getElementById("audio-icon-on");
 const audioIconOff = document.getElementById("audio-icon-off");
 const nowPlaying = document.getElementById("now-playing");
 
-let backgroundMusic = null;
+const audioPlayer = document.getElementById("audio-player");
+const playPauseBtn = document.querySelector(".play-pause-btn");
+const playIcon = document.querySelector(".play-icon");
+const pauseIcon = document.querySelector(".pause-icon");
+const prevBtn = document.querySelector(".prev-btn");
+const nextBtn = document.querySelector(".next-btn");
+const progressBar = document.querySelector(".progress-bar");
+const timeCurrent = document.querySelector(".time-current");
+const timeDuration = document.querySelector(".time-duration");
+const trackTitle = document.querySelector(".track-title");
+const trackArtist = document.querySelector(".track-artist");
+const playlistItems = document.querySelector(".playlist-items");
+
 let isAudioPlaying = false;
 let hasAutoPlayed = false;
+let currentTrackIndex = 0;
+let isUpdatingProgress = false;
+let isPlayerLoaded = false;
 
 // Autoplay preference
 const AUDIO_PREFERENCE_KEY = "audioEnabled";
@@ -470,49 +490,251 @@ if (userAudioPreference === null) {
   userAudioPreference = "true";
 }
 
-async function lazyLoadAudio() {
-  if (backgroundMusic) return;
-  backgroundMusic = new Audio("/arabesque.mp3");
-  backgroundMusic.loop = true;
-  backgroundMusic.preload = "auto";
+const playlist = [
+  {
+    title: "promises",
+    artist: "kate",
+    src: "/music/false.mp3",
+    duration: "4:05",
+  },
+  {
+    title: "Arabesque No. 1",
+    artist: "Claude Debussy, kate",
+    src: "/music/arabesque.mp3",
+    duration: "5:02",
+  },
+  {
+    title: "daydreaming",
+    artist: "Radiohead, kate",
+    src: "/music/daydreaming.mp3",
+    duration: "2:54",
+  },
+  {
+    title: "delays",
+    artist: "kate",
+    src: "/music/delay.mp3",
+    duration: "3:53",
+  },
+  {
+    title: "august",
+    artist: "kate",
+    src: "/music/august.mp3",
+    duration: "5:58",
+  },
+  {
+    title: "a lot can change in a year",
+    artist: "Johannes Brahms, kate",
+    src: "/music/alot.mp3",
+    duration: "3:44",
+  },
+  {
+    title: "Intermezzo, Op. 118 No. 2",
+    artist: "Johannes Brahms, kate",
+    src: "/music/brahms.mp3",
+    duration: "5:39",
+  },
+  {
+    title: "Children's Corner, L. 113: I",
+    artist: "Claude Debussy, kate",
+    src: "/music/childrens.mp3",
+    duration: "2:36",
+  },
+];
+
+// Initialize player (lazy - doesn't load audio yet)
+function initPlayer() {
+  updateTrackInfo(currentTrackIndex);
+  updatePlaylistUI();
 }
 
-async function startAudioPlayback() {
-  if (!backgroundMusic) await lazyLoadAudio();
+function lazyLoadPlayer() {
+  if (isPlayerLoaded) return;
+  isPlayerLoaded = true;
+  loadTrack(currentTrackIndex);
+}
 
-  try {
-    await backgroundMusic.play();
-    isAudioPlaying = true;
-    audioIconOn.style.display = "block";
-    audioIconOff.style.display = "none";
-    nowPlaying.classList.add("visible");
-  } catch (error) {
+function updateNowPlayingText(track) {
+  const nowPlayingSpan = nowPlaying.querySelector("span");
+  if (nowPlayingSpan) {
+    nowPlayingSpan.textContent = `${track.title}`;
+    if (track.title.length < 11) {
+      nowPlayingSpan.textContent += ` - ${track.artist}`;
+    }
+  }
+}
+
+function updateTrackInfo(index) {
+  const track = playlist[index];
+  trackTitle.textContent = track.title;
+  trackArtist.textContent = track.artist;
+  updateNowPlayingText(track);
+}
+
+function loadTrack(index) {
+  const track = playlist[index];
+  audioPlayer.src = track.src;
+  trackTitle.textContent = track.title;
+  trackArtist.textContent = track.artist;
+  updateNowPlayingText(track);
+  updatePlaylistUI();
+}
+
+function updatePlaylistUI() {
+  playlistItems.innerHTML = "";
+  playlist.forEach((track, index) => {
+    const item = document.createElement("div");
+    item.className = "playlist-item" + (index === currentTrackIndex ? " active" : "");
+    item.innerHTML = `
+      <div class="playlist-item-info">
+        <div class="playlist-item-title">${track.title}</div>
+        <div class="playlist-item-artist">${track.artist}</div>
+      </div>
+      <div class="playlist-item-duration">${track.duration}</div>
+    `;
+    item.addEventListener("click", () => {
+      currentTrackIndex = index;
+      loadTrack(index);
+      playAudio();
+    });
+    playlistItems.appendChild(item);
+
+    // Auto-scroll to active item
+    if (index === currentTrackIndex) {
+      setTimeout(() => {
+        item.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 0);
+    }
+  });
+}
+
+function playAudio() {
+  lazyLoadPlayer();
+  audioPlayer.play().catch(error => {
     console.log("Audio playback failed:", error);
+  });
+  localStorage.setItem(AUDIO_PREFERENCE_KEY, "true");
+  userAudioPreference = "true";
+}
+
+function startAudioPlayback() {
+  playAudio();
+}
+
+function pauseAudio() {
+  audioPlayer.pause();
+  localStorage.setItem(AUDIO_PREFERENCE_KEY, "false");
+  userAudioPreference = "false";
+}
+
+function togglePlayPause() {
+  if (isAudioPlaying) {
+    pauseAudio();
+  } else {
+    playAudio();
   }
 }
 
-audioToggle.addEventListener("click", () => {
-  if (!backgroundMusic) lazyLoadAudio();
+function nextTrack() {
+  lazyLoadPlayer();
+  currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+  loadTrack(currentTrackIndex);
+  playAudio();
+}
 
-  if (isAudioPlaying) {
-    backgroundMusic.pause();
-    audioIconOn.style.display = "none";
-    audioIconOff.style.display = "block";
-    nowPlaying.classList.remove("visible");
+function prevTrack() {
+  lazyLoadPlayer();
+  currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+  loadTrack(currentTrackIndex);
+  playAudio();
+}
 
-    localStorage.setItem(AUDIO_PREFERENCE_KEY, "false");
-    userAudioPreference = "false";
-  } else {
-    backgroundMusic.play();
-    audioIconOn.style.display = "block";
-    audioIconOff.style.display = "none";
-    nowPlaying.classList.add("visible");
+function formatTime(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
+}
 
-    localStorage.setItem(AUDIO_PREFERENCE_KEY, "true");
-    userAudioPreference = "true";
-  }
-  isAudioPlaying = !isAudioPlaying;
+// Audio player event listeners
+audioPlayer.addEventListener("play", () => {
+  isAudioPlaying = true;
+  playIcon.style.display = "none";
+  pauseIcon.style.display = "block";
+  audioIconOn.style.display = "block";
+  audioIconOff.style.display = "none";
+  nowPlaying.classList.add("visible");
 });
+
+audioPlayer.addEventListener("pause", () => {
+  isAudioPlaying = false;
+  playIcon.style.display = "block";
+  pauseIcon.style.display = "none";
+  audioIconOn.style.display = "none";
+  audioIconOff.style.display = "block";
+  nowPlaying.classList.remove("visible");
+});
+
+audioPlayer.addEventListener("timeupdate", () => {
+  if (!isUpdatingProgress) {
+    const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+    progressBar.value = progress || 0;
+    timeCurrent.textContent = formatTime(audioPlayer.currentTime);
+  }
+});
+
+audioPlayer.addEventListener("loadedmetadata", () => {
+  timeDuration.textContent = formatTime(audioPlayer.duration);
+  progressBar.value = 0;
+});
+
+audioPlayer.addEventListener("ended", () => {
+  nextTrack();
+});
+
+audioPlayer.addEventListener("error", () => {
+  console.log("Audio loading failed:", audioPlayer.error);
+});
+
+// Control button listeners
+playPauseBtn.addEventListener("click", togglePlayPause);
+nextBtn.addEventListener("click", nextTrack);
+prevBtn.addEventListener("click", prevTrack);
+
+// Progress bar
+progressBar.addEventListener("mousedown", () => {
+  isUpdatingProgress = true;
+});
+
+progressBar.addEventListener("input", () => {
+  const seekTime = (progressBar.value / 100) * audioPlayer.duration;
+  audioPlayer.currentTime = seekTime;
+  timeCurrent.textContent = formatTime(seekTime);
+});
+
+progressBar.addEventListener("mouseup", () => {
+  isUpdatingProgress = false;
+});
+
+progressBar.addEventListener("touchstart", () => {
+  isUpdatingProgress = true;
+});
+
+progressBar.addEventListener("touchend", () => {
+  isUpdatingProgress = false;
+});
+
+progressBar.addEventListener("touchcancel", () => {
+  isUpdatingProgress = false;
+});
+
+// Top-left toggle button
+audioToggle.addEventListener("click", togglePlayPause);
+
+// Now playing click
+nowPlaying.addEventListener("click", showMusicPanel);
+nowPlaying.style.cursor = "pointer";
+
+// Initialize
+initPlayer();
 
 // =============================================================================
 // NIGHT MODE CONTROL

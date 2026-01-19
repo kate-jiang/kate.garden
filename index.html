@@ -1,10 +1,13 @@
 <!doctype html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="description" content="kate is an engineer & musician based in nyc." />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>😍</text></svg>">
+    <link rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>😍</text></svg>">
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
@@ -26,37 +29,24 @@
 
   <body>
     <canvas id="webgl"></canvas>
-
     <div id="loading-overlay"></div>
 
     <div id="audio-container">
       <button id="audio-toggle" class="ui-button" aria-label="Toggle music">
-        <svg
-          id="audio-icon-off"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
+        <svg id="audio-icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M11 5L6 9H2v6h4l5 4V5z" />
           <line x1="23" y1="9" x2="17" y2="15" />
           <line x1="17" y1="9" x2="23" y2="15" />
         </svg>
-        <svg
-          id="audio-icon-on"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          style="display: none"
-        >
+        <svg id="audio-icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          style="display: none">
           <path d="M11 5L6 9H2v6h4l5 4V5z" />
           <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
           <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
         </svg>
       </button>
       <div id="now-playing">
-        <span>me playing piano</span>
+        <span>now playing: kate</span>
       </div>
     </div>
 
@@ -73,14 +63,7 @@
           <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
           <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
         </svg>
-        <svg
-          id="moon-icon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          style="display: none"
-        >
+        <svg id="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
         </svg>
       </button>
@@ -103,15 +86,52 @@
           </p>
           <a href="/Kate_Resume.pdf" target="_blank" id="resume-link"> view my resume → </a>
         </div>
-        <div id="music-content" class="overlay-content" style="display: none;">
-          <iframe width="100%" height="450" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/soundcloud%253Aplaylists%253A2176990025&color=%23ff5500&auto_play=false&hide_related=true&show_comments=true&show_user=true&show_reposts=false&show_teaser=false&sharing=false"></iframe>
-          <div style="font-size: 10px; color: #cccccc;line-break: anywhere;word-break: normal;overflow: hidden;white-space: nowrap;text-overflow: ellipsis; font-family: Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif;font-weight: 100;">
-            <a href="https://soundcloud.com/katejiang" title="katejiang" target="_blank" style="color: #cccccc; text-decoration: none;">katejiang</a> · <a href="https://soundcloud.com/katejiang/sets/my-music" title="my music" target="_blank" style="color: #cccccc; text-decoration: none;">my music</a>
+        <div id="music-content" class="overlay-content">
+          <audio id="audio-player" preload="none"></audio>
+
+          <div class="player-track-info">
+            <div class="track-title">Track Title</div>
+            <div class="track-artist">Artist</div>
+          </div>
+
+          <div class="player-progress">
+            <span class="time-current">0:00</span>
+            <input type="range" class="progress-bar" min="0" max="100" value="0" step="0.1">
+            <span class="time-duration">0:00</span>
+          </div>
+
+          <div class="player-controls">
+            <button class="control-btn prev-btn">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
+              </svg>
+            </button>
+            <button class="control-btn play-pause-btn">
+              <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+              </svg>
+            </button>
+            <button class="control-btn next-btn">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M7 6v12l8.5-6z" />
+                <path d="M17 6h2v12h-2z" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="playlist">
+            <div class="playlist-header">Up Next</div>
+            <div class="playlist-items"></div>
           </div>
         </div>
       </div>
     </div>
+    </div>
 
     <script type="module" src="./src/script.js"></script>
   </body>
+
 </html>
