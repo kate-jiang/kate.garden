@@ -520,5 +520,9 @@ body.night-mode #about-content a:hover {
   .ui-button:hover {
     transform: scale(1.1) translateZ(0);
   }
+
+  .playlist-item:hover {
+    background: transparent;
+  }
 }
 
