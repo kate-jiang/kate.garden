@@ -107,7 +107,7 @@ body.night-mode .ui-button {
   margin-left: -18px;
   padding-left: 24px;
   padding-right: 16px;
-  max-width: 300px;
+  max-width: 50vw;
   overflow: hidden;
   opacity: 0;
   transform: scaleX(0);
@@ -518,7 +518,7 @@ body.night-mode #about-content a:hover {
   }
 
   #now-playing {
-    max-width: 200px;
+    max-width: 60vw;
   }
 
   #about-content {
