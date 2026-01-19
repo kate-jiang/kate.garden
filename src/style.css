@@ -401,12 +401,12 @@ body.night-mode #about-content a:hover {
 .playlist-header {
   font-size: 14px;
   font-weight: 500;
-  margin-bottom: 12px;
   opacity: 0.7;
 }
 
 .playlist-items {
-  max-height: 20vh;
+  max-height: 190px;
+  paddingTop: 12px;
   padding-bottom: 24px;
   overflow-y: auto;
   scrollbar-width: none; /* Firefox */
@@ -493,6 +493,10 @@ body.night-mode #about-content a:hover {
   .playlist-header {
     font-size: 13px;
     margin-bottom: 8px;
+  }
+
+  .playlist-items {
+    max-height: 125px;
   }
 
   .playlist-item-title {
