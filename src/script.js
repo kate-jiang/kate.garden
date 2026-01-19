@@ -46,9 +46,9 @@ const config = {
   hoverEase: 0.15,
 
   // Particle
-  particleCount: 1400,
+  particleCount: 4500,
   particleColor: 0xd4c5a0,
-  particleSize: 0.14,
+  particleSize: 0.1,
 
   // Text
   mainTextSize: 5,
@@ -1492,9 +1492,9 @@ const particleSizes = new Float32Array(config.particleCount);
 
 for (let i = 0; i < config.particleCount; i++) {
   const i3 = i * 3;
-  particlePositions[i3] = Math.random() * 60 - 30;
-  particlePositions[i3 + 1] = Math.random() * 20 - 5;
-  particlePositions[i3 + 2] = Math.random() * 60 - 10;
+  particlePositions[i3] = Math.random() * 120 - 60;
+  particlePositions[i3 + 1] = Math.random() * 10 - 5;
+  particlePositions[i3 + 2] = Math.random() * 140 - 70;
 
   particleVelocities[i3] = Math.random() * 0.5 + 0.3;
   particleVelocities[i3 + 1] = Math.random() * 0.2 - 0.1;
@@ -1733,12 +1733,12 @@ function updateParticles(dt) {
     positions[i3 + 2] += particleVelocities[i3 + 2] * dt * totalSpeedMultiplier;
 
     // Wrap particles around boundaries
-    if (positions[i3] > 30) positions[i3] = -30;
-    if (positions[i3] < -30) positions[i3] = 30;
-    if (positions[i3 + 1] > 22) positions[i3 + 1] = 0;
-    if (positions[i3 + 1] < 0) positions[i3 + 1] = 22;
-    if (positions[i3 + 2] > 70) positions[i3 + 2] = -70;
-    if (positions[i3 + 2] < -70) positions[i3 + 2] = 70;
+    if (positions[i3] > 60) positions[i3] = -60;
+    if (positions[i3] < -60) positions[i3] = 60;
+    if (positions[i3 + 1] > 25) positions[i3 + 1] = -3;
+    if (positions[i3 + 1] < -3) positions[i3 + 1] = 14;
+    if (positions[i3 + 2] > 80) positions[i3 + 2] = -80;
+    if (positions[i3 + 2] < -80) positions[i3 + 2] = 80;
   }
 
   particleGeometry.attributes.position.needsUpdate = true;
