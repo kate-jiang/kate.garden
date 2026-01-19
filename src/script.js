@@ -546,6 +546,7 @@ const playlist = [
 
 // Initialize player (lazy - doesn't load audio yet)
 function initPlayer() {
+  loadTrack(currentTrackIndex);
   updateTrackInfo(currentTrackIndex);
   updatePlaylistUI();
 }
@@ -576,6 +577,10 @@ function updateTrackInfo(index) {
 function loadTrack(index) {
   const track = playlist[index];
   audioPlayer.src = track.src;
+  audioPlayer.currentTime = 0;
+  timeCurrent.textContent = "0:00";
+  timeDuration.textContent = track.duration;
+  progressBar.value = 0;
   trackTitle.textContent = track.title;
   trackArtist.textContent = track.artist;
   updateNowPlayingText(track);
@@ -652,6 +657,7 @@ function prevTrack() {
 }
 
 function formatTime(seconds) {
+  if (!isFinite(seconds) || seconds < 0) return "0:00";
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${mins}:${secs.toString().padStart(2, "0")}`;
