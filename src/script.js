@@ -1065,10 +1065,13 @@ uniform float radius;
 uniform float width;
 
 float placeOnSphere(vec3 v) {
-float theta = acos(v.z / radius);
-float phi = acos(v.x / (radius * sin(theta)));
-float sV = radius * sin(theta) * sin(phi);
-if (sV != sV) sV = v.y;
+float theta = acos(clamp(v.z / radius, -1.0, 1.0));
+float sinTheta = sin(theta);
+if (abs(sinTheta) < 0.0001) {
+  return v.y;
+}
+float phi = acos(clamp(v.x / (radius * sinTheta), -1.0, 1.0));
+float sV = radius * sinTheta * sin(phi);
 return sV;
 }
 
@@ -1188,21 +1191,24 @@ return 2.0 * cross(q.xyz, v * q.w + cross(q.xyz, v)) + v;
 }
 
 float placeOnSphere(vec3 v) {
-float theta = acos(v.z / radius);
-float phi = acos(v.x / (radius * sin(theta)));
-float sV = radius * sin(theta) * sin(phi);
-if (sV != sV) sV = v.y;
+float theta = acos(clamp(v.z / radius, -1.0, 1.0));
+float sinTheta = sin(theta);
+if (abs(sinTheta) < 0.0001) {
+  return v.y;
+}
+float phi = acos(clamp(v.x / (radius * sinTheta), -1.0, 1.0));
+float sV = radius * sinTheta * sin(phi);
 return sV;
 }
 
 void main() {
 frc = position.y / float(${config.bladeHeight});
-vec3 vPosition = position;
-vPosition.y *= scale;
+vec3 localPosition = position;
+localPosition.y *= scale;
 vNormal = normal;
 vNormal.y /= scale;
 vec4 direction = vec4(0.0, halfRootAngle.x, 0.0, halfRootAngle.y);
-vPosition = rotateVectorByQuaternion(vPosition, direction);
+localPosition = rotateVectorByQuaternion(localPosition, direction);
 vNormal = rotateVectorByQuaternion(vNormal, direction);
 vUv = uv;
 
@@ -1239,12 +1245,13 @@ halfAngle -= noise * 0.05;
 
 direction = normalize(vec4(sin(halfAngle), 0.0, -sin(halfAngle), cos(halfAngle)));
 
-vPosition = rotateVectorByQuaternion(vPosition, direction);
+localPosition = rotateVectorByQuaternion(localPosition, direction);
 vNormal = rotateVectorByQuaternion(vNormal, direction);
-vPosition += pos;
+localPosition += pos;
 
 idx = index;
-gl_Position = projectionMatrix * modelViewMatrix * vec4(vPosition, 1.0);
+vPosition = localPosition;
+gl_Position = projectionMatrix * modelViewMatrix * vec4(localPosition, 1.0);
 }`;
 
 const grassFragmentSource = `
