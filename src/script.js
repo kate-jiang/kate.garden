@@ -1678,7 +1678,7 @@ fontLoader.load("/fonts/helvetiker_regular.typeface.json", function (font) {
     const underglowLight = new THREE.PointLight(0xff66cc, 2.5, 8);
     const xPos = -underglowSpacing + i * underglowSpacing;
     underglowLight.position.set(xPos, -1.7, 0.7);
-    textMesh.add(underglowLight);
+    textGroup.add(underglowLight);
   }
 
   // Links are added to the group, not textMesh, so they don't twirl
