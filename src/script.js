@@ -387,7 +387,7 @@ canvas.addEventListener("pointerdown", e => {
   // Auto-play audio on first interaction (only if user hasn't disabled it)
   if (!hasAutoPlayed && userAudioPreference === "true") {
     hasAutoPlayed = true;
-    startAudioPlayback();
+    playAudio();
   }
 
   // Show hover state on touch tap
@@ -602,7 +602,7 @@ function updatePlaylistUI() {
     item.addEventListener("click", () => {
       currentTrackIndex = index;
       loadTrack(index);
-      playAudio();
+      setTimeout(playAudio, 300);
     });
     playlistItems.appendChild(item);
 
@@ -619,13 +619,10 @@ function playAudio() {
   lazyLoadPlayer();
   audioPlayer.play().catch(error => {
     console.log("Audio playback failed:", error);
+    setTimeout(() => audioPlayer.play(), 300);
   });
   localStorage.setItem(AUDIO_PREFERENCE_KEY, "true");
   userAudioPreference = "true";
-}
-
-function startAudioPlayback() {
-  playAudio();
 }
 
 function pauseAudio() {
@@ -646,14 +643,16 @@ function nextTrack() {
   lazyLoadPlayer();
   currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
   loadTrack(currentTrackIndex);
-  playAudio();
+  setTimeout(playAudio, 300);
+  // playAudio();
 }
 
 function prevTrack() {
   lazyLoadPlayer();
   currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
   loadTrack(currentTrackIndex);
-  playAudio();
+  setTimeout(playAudio, 300);
+  // playAudio();
 }
 
 function formatTime(seconds) {
@@ -769,7 +768,7 @@ nightModeToggle.addEventListener("click", () => {
   // Auto-play audio on first interaction (only if user hasn't disabled it)
   if (!hasAutoPlayed && userAudioPreference === "true") {
     hasAutoPlayed = true;
-    startAudioPlayback();
+    playAudio();
   }
 
   // Update icons
