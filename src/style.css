@@ -478,6 +478,10 @@ body.night-mode #about-content a:hover {
     width: 92vw;
   }
 
+  #music-content {
+    padding: 30px 20px 0 20px;
+  }
+
   #now-playing {
     max-width: 200px;
   }
