@@ -300,9 +300,9 @@ body.night-mode #about-content a:hover {
 }
 
 .track-title {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .track-artist {
@@ -406,7 +406,7 @@ body.night-mode #about-content a:hover {
 }
 
 .playlist-items {
-  max-height: 200px;
+  max-height: 20vh;
   padding-bottom: 24px;
   overflow-y: auto;
   scrollbar-width: none; /* Firefox */
@@ -470,7 +470,38 @@ body.night-mode #about-content a:hover {
   }
 
   #music-content {
-    padding: 30px 20px 0 20px;
+    padding: 24px 20px 0 20px;
+  }
+
+  .player-track-info {
+    margin-bottom: 16px;
+  }
+
+  .track-title {
+    font-size: 20px;
+    margin-bottom: 0px;
+  }
+
+  .player-progress {
+    padding: 0 6px;
+  }
+
+  .playlist {
+    padding-top: 12px;
+  }
+
+  .playlist-header {
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .playlist-item-title {
+    font-size: 15px;
+    margin-bottom: 0;
+  }
+
+  .playlist-item-duration {
+    font-size: 13px;
   }
 
   #now-playing {
@@ -520,4 +551,3 @@ body.night-mode #about-content a:hover {
     background: rgba(255, 255, 255, 0.3);
   }
 }
-

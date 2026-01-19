@@ -326,7 +326,7 @@ function showOverlay(contentType) {
     setTimeout(() => {
       const activeItem = playlistItems.querySelector(".playlist-item.active");
       if (activeItem) {
-        activeItem.scrollIntoView({ behavior: "smooth", block: "center" });
+        activeItem.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     }, 100);
   }
@@ -604,7 +604,7 @@ function updatePlaylistUI() {
     // Auto-scroll to active item
     if (index === currentTrackIndex) {
       setTimeout(() => {
-        item.scrollIntoView({ behavior: "smooth", block: "center" });
+        item.scrollIntoView({ behavior: "smooth", block: "start" });
       }, 0);
     }
   });
