@@ -163,8 +163,7 @@ body.night-mode #now-playing {
   pointer-events: none;
 }
 
-/* About Panel Overlay */
-#about-overlay {
+#content-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -177,20 +176,20 @@ body.night-mode #now-playing {
   pointer-events: none;
 }
 
-#about-overlay.visible {
+#content-overlay.visible {
   pointer-events: auto;
 }
 
-#about-overlay.hidden {
+#content-overlay.hidden {
   visibility: hidden;
 }
 
-#about-overlay.visible #about-paper {
+#content-overlay.visible #content-paper {
   transform: scale(1);
   opacity: 1;
 }
 
-#about-paper {
+#content-paper {
   position: relative;
   width: min(90vw, 480px);
   padding: 40px;
@@ -206,10 +205,15 @@ body.night-mode #now-playing {
     opacity 0.4s ease;
 }
 
-#about-close {
+/* Different widths for different content types */
+#content-overlay[data-content="music"] #content-paper {
+  width: min(90vw, 600px);
+}
+
+#content-close {
   position: absolute;
-  top: 12px;
-  right: 14px;
+  top: 10px;
+  right: 12px;
   width: 32px;
   height: 32px;
   background: transparent;
@@ -222,12 +226,15 @@ body.night-mode #now-playing {
   line-height: 1;
 }
 
-#about-close:hover {
+#content-close:hover {
+  color: white;
+}
+
+.overlay-content {
   color: white;
 }
 
 #about-content {
-  color: white;
   user-select: text;
   -webkit-user-select: text;
   -moz-user-select: text;
@@ -283,11 +290,19 @@ body.night-mode #about-content a:hover {
   background: rgba(255, 255, 255, 0.3);
 }
 
+#music-content iframe {
+  border-radius: 12px;
+}
+
 /* Tablet */
 @media (max-width: 768px) {
-  #about-paper {
+  #content-paper {
     width: min(92vw, 420px);
-    padding: 40px 32px;
+    padding: 32px 24px;
+  }
+
+  #content-overlay[data-content="music"] #content-paper {
+    width: min(92vw, 520px);
   }
 
   #about-content h1 {
@@ -301,9 +316,17 @@ body.night-mode #about-content a:hover {
 
 /* Mobile */
 @media (max-width: 480px) {
-  #about-paper {
+  #content-paper {
     width: 92vw;
-    padding: 28px 24px;
+    padding: 24px 20px;
+  }
+
+  #content-overlay[data-content="music"] #content-paper {
+    padding: 20px 16px;
+  }
+
+  #content-overlay[data-content="music"] #content-close {
+    display: none;
   }
 
   #about-content h1 {

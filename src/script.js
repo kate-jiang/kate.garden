@@ -116,9 +116,9 @@ const nightConfig = {
 
 const linkData = [
   { label: "about", action: "showAbout" },
-  { label: "github", url: "https://github.com/kate-jiang" },
-  { label: "insta", url: "https://instagram.com/katejiang__" },
-  { label: "twitter", url: "https://twitter.com/chinesefoid" },
+  { label: "music", action: "showMusic" },
+  { label: "photos", url: "https://instagram.com/katejiang__" },
+  { label: "code", url: "https://github.com/kate-jiang" },
 ];
 
 // =============================================================================
@@ -175,22 +175,16 @@ const UP = new THREE.Vector3(0, 1, 0);
 // Text click animation state
 let textClickAnimating = false;
 let textClickAnimationTime = 0;
-const textClickAnimationDuration = 0.8; // seconds
+const textClickAnimationDuration = 0.8;
 const textJumpHeight = 1.5;
-const textTwirlRotations = 1; // full rotations
+const textTwirlRotations = 1;
 
 // =============================================================================
 // RESPONSIVE UTILITIES
 // =============================================================================
 
-/**
- * Applies responsive settings to text group and camera controls
- * based on current viewport width. Safe to call at any point during lifecycle.
- */
 function applyResponsiveSettings() {
   const isMobile = window.innerWidth <= config.responsive.mobileBreakpoint;
-
-  // Apply text scale if textGroup is loaded
   if (textGroupRef) {
     const scale = isMobile ? config.responsive.mobileTextScale : 1.0;
     textGroupRef.scale.setScalar(scale);
@@ -301,6 +295,8 @@ function handleClick(intersects) {
       window.open(userData.url, "_blank");
     } else if (userData.action === "showAbout") {
       showAboutPanel();
+    } else if (userData.action === "showMusic") {
+      showMusicPanel();
     } else if (clickedObject.name === "floatingText") {
       triggerTextClickAnimation();
     }
@@ -308,37 +304,61 @@ function handleClick(intersects) {
 }
 
 // =============================================================================
-// ABOUT PANEL
+// CONTENT OVERLAY (ABOUT & MUSIC)
 // =============================================================================
 
-const aboutOverlay = document.getElementById("about-overlay");
-const aboutClose = document.getElementById("about-close");
+const contentOverlay = document.getElementById("content-overlay");
+const contentClose = document.getElementById("content-close");
+const aboutContent = document.getElementById("about-content");
+const musicContent = document.getElementById("music-content");
 
-function showAboutPanel() {
-  aboutOverlay.classList.remove("hidden");
+function showOverlay(contentType) {
+  // Hide all content sections
+  aboutContent.style.display = "none";
+  musicContent.style.display = "none";
+
+  // Show the requested content and set data attribute
+  if (contentType === "about") {
+    aboutContent.style.display = "block";
+    contentOverlay.setAttribute("data-content", "about");
+  } else if (contentType === "music") {
+    musicContent.style.display = "block";
+    contentOverlay.setAttribute("data-content", "music");
+  }
+
+  // Show overlay
+  contentOverlay.classList.remove("hidden");
   // Trigger reflow before adding visible class for transition
-  aboutOverlay.offsetHeight;
-  aboutOverlay.classList.add("visible");
+  contentOverlay.offsetHeight;
+  contentOverlay.classList.add("visible");
   controls.autoRotate = false;
   // Reset cursor since overlay is now on top
   document.body.style.cursor = "default";
 }
 
-function hideAboutPanel() {
-  aboutOverlay.classList.remove("visible");
-  aboutOverlay.addEventListener("transitionend", function handler() {
-    if (!aboutOverlay.classList.contains("visible")) {
-      aboutOverlay.classList.add("hidden");
+function hideOverlay() {
+  contentOverlay.classList.remove("visible");
+  contentOverlay.addEventListener("transitionend", function handler() {
+    if (!contentOverlay.classList.contains("visible")) {
+      contentOverlay.classList.add("hidden");
     }
-    aboutOverlay.removeEventListener("transitionend", handler);
+    contentOverlay.removeEventListener("transitionend", handler);
   });
   controls.autoRotate = true;
 }
 
-aboutClose.addEventListener("click", hideAboutPanel);
-aboutOverlay.addEventListener("click", e => {
-  if (e.target === aboutOverlay) {
-    hideAboutPanel();
+function showAboutPanel() {
+  showOverlay("about");
+}
+
+function showMusicPanel() {
+  showOverlay("music");
+}
+
+contentClose.addEventListener("click", hideOverlay);
+contentOverlay.addEventListener("click", e => {
+  if (e.target === contentOverlay) {
+    hideOverlay();
   }
 });
 
