@@ -513,6 +513,12 @@ const playlist = [
     duration: "5:02",
   },
   {
+    title: "Intermezzo, Op. 118 No. 2",
+    artist: "Johannes Brahms, kate",
+    src: "/music/intermezzo.mp3",
+    duration: "5:39",
+  },
+  {
     title: "Daydreaming",
     artist: "Radiohead, kate",
     src: "/music/daydreaming.mp3",
@@ -535,12 +541,6 @@ const playlist = [
     artist: "Claude Debussy, kate",
     src: "/music/childrens.mp3",
     duration: "2:36",
-  },
-  {
-    title: "Intermezzo, Op. 118 No. 2",
-    artist: "Johannes Brahms, kate",
-    src: "/music/intermezzo.mp3",
-    duration: "5:39",
   },
 ];
 
