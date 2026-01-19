@@ -513,14 +513,14 @@ const playlist = [
     duration: "5:02",
   },
   {
-    title: "daydreaming",
+    title: "Daydreaming",
     artist: "Radiohead, kate",
     src: "/music/daydreaming.mp3",
     duration: "2:54",
   },
   {
     title: "august",
-    artist: "kate",
+    artist: "kate, with orchestra",
     src: "/music/august.mp3",
     duration: "5:58",
   },
@@ -562,7 +562,8 @@ function updateNowPlayingText(track) {
   if (nowPlayingSpan) {
     nowPlayingSpan.textContent = `${track.title}`;
     if (track.title.length < 11) {
-      nowPlayingSpan.textContent += ` - ${track.artist}`;
+      const displayArtist = track.artist.length > 10 ? track.artist.split(",")[0] : track.artist;
+      nowPlayingSpan.textContent += ` - ${displayArtist}`;
     }
   }
 }
