@@ -531,16 +531,16 @@ const playlist = [
     duration: "3:44",
   },
   {
-    title: "Intermezzo, Op. 118 No. 2",
-    artist: "Johannes Brahms, kate",
-    src: "/music/intermezzo.mp3",
-    duration: "5:39",
-  },
-  {
     title: "Children's Corner, L. 113: I",
     artist: "Claude Debussy, kate",
     src: "/music/childrens.mp3",
     duration: "2:36",
+  },
+  {
+    title: "Intermezzo, Op. 118 No. 2",
+    artist: "Johannes Brahms, kate",
+    src: "/music/intermezzo.mp3",
+    duration: "5:39",
   },
 ];
 
@@ -558,12 +558,18 @@ function lazyLoadPlayer() {
 }
 
 function updateNowPlayingText(track) {
-  const nowPlayingSpan = nowPlaying.querySelector("span");
-  if (nowPlayingSpan) {
-    nowPlayingSpan.textContent = `${track.title}`;
+  const titleSpan = nowPlaying.querySelector(".now-playing-title");
+  const artistSpan = nowPlaying.querySelector(".now-playing-artist");
+
+  if (titleSpan) {
+    titleSpan.textContent = track.title;
+  }
+  if (artistSpan) {
     if (track.title.length < 11) {
       const displayArtist = track.artist.length > 10 ? track.artist.split(",")[0] : track.artist;
-      nowPlayingSpan.textContent += ` - ${displayArtist}`;
+      artistSpan.textContent = "by " + displayArtist;
+    } else {
+      artistSpan.textContent = "";
     }
   }
 }

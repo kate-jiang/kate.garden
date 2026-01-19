@@ -120,6 +120,8 @@ body.night-mode .ui-button {
 }
 
 #now-playing span {
+  font-size: 14px;
+  line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -134,11 +136,16 @@ body.night-mode #now-playing {
   opacity: 1;
 }
 
-#now-playing span {
-  font-size: 14px;
-  line-height: 1;
+.now-playing-title {
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.now-playing-artist {
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.85);
+  margin-left: 5px;
+  color: rgba(255, 255, 255, 0.6);
   white-space: nowrap;
 }
 
