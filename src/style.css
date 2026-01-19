@@ -518,7 +518,6 @@ body.night-mode #about-content a:hover {
 
   .control-btn:hover {
     background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.05);
   }
 }
 
