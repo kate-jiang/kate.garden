@@ -381,6 +381,9 @@ canvas.addEventListener("pointerdown", e => {
   pointerStartPos = { x: e.clientX, y: e.clientY };
   pointerMoved = false;
 
+  // Capture pointer to prevent touch events leaking to overlay elements
+  canvas.setPointerCapture(e.pointerId);
+
   // Auto-play audio on first interaction (only if user hasn't disabled it)
   if (!hasAutoPlayed && userAudioPreference === "true") {
     hasAutoPlayed = true;

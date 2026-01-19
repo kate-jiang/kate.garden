@@ -375,12 +375,7 @@ body.night-mode #about-content a:hover {
   align-items: center;
   justify-content: center;
   color: #fff;
-  transition: all 0.2s;
-}
-
-.control-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.05);
+  transition: all 0.25s;
 }
 
 .control-btn svg {
@@ -433,10 +428,6 @@ body.night-mode #about-content a:hover {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-}
-
-.playlist-item:hover {
-  background: rgba(255, 255, 255, 0.1);
 }
 
 .playlist-item.active {
@@ -522,7 +513,12 @@ body.night-mode #about-content a:hover {
   }
 
   .playlist-item:hover {
-    background: transparent;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .control-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
   }
 }
 
