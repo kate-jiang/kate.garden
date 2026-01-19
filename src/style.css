@@ -506,6 +506,7 @@ body.night-mode #about-content a:hover {
 
   .playlist-items {
     max-height: 125px;
+    padding-bottom: 18px;
   }
 
   .playlist-item-title {
