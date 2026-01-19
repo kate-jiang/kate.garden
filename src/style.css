@@ -402,15 +402,17 @@ body.night-mode #about-content a:hover {
   font-size: 14px;
   font-weight: 500;
   opacity: 0.7;
+  margin-bottom: 12px;
 }
 
 .playlist-items {
   max-height: 190px;
-  paddingTop: 12px;
   padding-bottom: 24px;
   overflow-y: auto;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
+  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
 }
 
 .playlist-items::-webkit-scrollbar {
