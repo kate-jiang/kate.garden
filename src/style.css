@@ -198,12 +198,12 @@ body.night-mode #now-playing {
   visibility: hidden;
 }
 
-#content-overlay.visible #content-paper {
+#content-overlay.visible #content-surface {
   transform: scale(1);
   opacity: 1;
 }
 
-#content-paper {
+#content-surface {
   position: relative;
   width: min(90vw, 480px);
   padding: 0;
@@ -475,7 +475,7 @@ body.night-mode #about-content a:hover {
 
 /* Mobile */
 @media (max-width: 480px) {
-  #content-paper {
+  #content-surface {
     width: 92vw;
   }
 

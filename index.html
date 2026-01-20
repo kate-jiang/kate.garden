@@ -1,22 +1,14 @@
 <!doctype html>
 <html lang="en">
-
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="description" content="kate is an engineer & musician based in nyc." />
-    <link rel="icon"
-      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
-
-    <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://kate.garden" />
     <meta property="og:title" content="kate" />
     <meta property="og:description" content="kate is an engineer & musician based in nyc." />
     <meta property="og:image" content="https://kate.garden/preview.png" />
-
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://kate.garden" />
     <meta name="twitter:title" content="kate" />
@@ -25,11 +17,31 @@
 
     <title>kate</title>
     <link rel="stylesheet" href="./src/style.css" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
   </head>
 
   <body>
     <canvas id="webgl"></canvas>
     <div id="loading-overlay"></div>
+
+    <div id="night-mode-container">
+      <button id="night-mode-toggle" class="ui-button" aria-label="Toggle night mode">
+        <svg id="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>
+        <svg id="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      </button>
+    </div>
 
     <div id="audio-container">
       <button id="audio-toggle" class="ui-button" aria-label="Toggle music">
@@ -51,28 +63,10 @@
       </div>
     </div>
 
-    <div id="night-mode-container">
-      <button id="night-mode-toggle" class="ui-button" aria-label="Toggle night mode">
-        <svg id="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="5" />
-          <line x1="12" y1="1" x2="12" y2="3" />
-          <line x1="12" y1="21" x2="12" y2="23" />
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-          <line x1="1" y1="12" x2="3" y2="12" />
-          <line x1="21" y1="12" x2="23" y2="12" />
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-        </svg>
-        <svg id="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-        </svg>
-      </button>
-    </div>
-
     <div id="content-overlay" class="hidden">
-      <div id="content-paper">
+      <div id="content-surface">
         <button id="content-close">&times;</button>
+
         <div id="about-content" class="overlay-content">
           <h1>hello cruel world</h1>
           <p>
@@ -87,6 +81,7 @@
           </p>
           <a href="/Kate_Resume.pdf" target="_blank" id="resume-link"> view my resume → </a>
         </div>
+
         <div id="music-content" class="overlay-content">
           <audio id="audio-player" preload="none"></audio>
 
