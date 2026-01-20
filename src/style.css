@@ -525,7 +525,7 @@ body.night-mode #about-content a:hover {
   }
 
   #music-content {
-    padding: 24px 20px 0 20px;
+    padding: 24px 26px 0 26px;
   }
 
   .player-track-info {
@@ -538,7 +538,7 @@ body.night-mode #about-content a:hover {
   }
 
   .player-progress {
-    padding: 0 6px;
+    padding: 0 4px;
   }
 
   .playlist {
