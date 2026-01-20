@@ -498,13 +498,7 @@ const playlist = [
     title: "promises",
     artist: "kate",
     src: "/music/promises.mp3",
-    duration: "4:05",
-  },
-  {
-    title: "Intermezzo, Op. 118 No. 2",
-    artist: "Johannes Brahms, kate",
-    src: "/music/intermezzo.mp3",
-    duration: "5:39",
+    duration: "4:06",
   },
   {
     title: "Arabesque No. 1",
@@ -513,16 +507,22 @@ const playlist = [
     duration: "5:02",
   },
   {
-    title: "offset",
+    title: "offsets",
     artist: "kate",
     src: "/music/offset.mp3",
     duration: "3:53",
   },
   {
+    title: "Intermezzo, Op. 118 No. 2",
+    artist: "Johannes Brahms, kate",
+    src: "/music/intermezzo.mp3",
+    duration: "5:39",
+  },
+  {
     title: "Daydreaming",
     artist: "Radiohead, kate",
     src: "/music/daydreaming.mp3",
-    duration: "2:54",
+    duration: "2:19",
   },
   {
     title: "august",
