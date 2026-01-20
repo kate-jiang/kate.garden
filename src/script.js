@@ -518,7 +518,7 @@ const playlist = [
     title: "offsets",
     artist: "kate",
     src: "/music/offset.mp3",
-    duration: "3:53",
+    duration: "3:58",
   },
   {
     title: "Intermezzo, Op. 118 No. 2",
@@ -548,7 +548,7 @@ const playlist = [
     title: "Children's Corner, L. 113: I",
     artist: "Claude Debussy, kate",
     src: "/music/childrens.mp3",
-    duration: "2:36",
+    duration: "2:38",
   },
 ];
 
