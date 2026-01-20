@@ -869,11 +869,26 @@ const loadingOverlay = document.getElementById("loading-overlay");
 const loadingManager = new THREE.LoadingManager();
 
 loadingManager.onLoad = () => {
-  // Small delay to ensure first frame renders completely
   requestAnimationFrame(() => {
     loadingOverlay.classList.add("fade-out");
+    fetchViewCount();
   });
 };
+
+async function fetchViewCount() {
+  try {
+    const res = await fetch("/api/views");
+    if (res.ok) {
+      const data = await res.json();
+      const viewCountEl = document.getElementById("view-count");
+      if (viewCountEl && data.count) {
+        viewCountEl.textContent = data.count.toLocaleString();
+      }
+    }
+  } catch (e) {
+    console.log("View counter unavailable");
+  }
+}
 
 // =============================================================================
 // TEXTURES
