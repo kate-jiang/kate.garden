@@ -160,35 +160,28 @@ body.night-mode #now-playing {
 
 #view-counter {
   position: fixed;
-  bottom: 26px;
-  right: 28px;
+  bottom: 20px;
+  right: 20px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
   padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  z-index: 1001;
-  opacity: 0;
-  animation: fadeIn 0.5s ease 1s forwards;
 }
 
-.view-count {
+#view-count {
   font-size: 14px;
   font-weight: 500;
-  color: #fff;
-  font-variant-numeric: tabular-nums;
-  transition: color 1s ease-in-out;
+  color: rgba(255, 255, 255, 0.8);
 }
 
-.view-icon {
-  width: 16px;
-  height: 16px;
+#view-label {
+  font-size: 12px;
   color: rgba(255, 255, 255, 0.6);
-  transition: color 1s ease-in-out;
 }
 
 #loading-overlay {
@@ -513,19 +506,18 @@ body.night-mode #about-content a:hover {
     position: fixed;
     bottom: 12px;
     right: 12px;
-    gap: 6px;
-    padding: 6px 14px;
+    gap: 3px;
+    padding: 4px 10px;
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
   }
 
-  .view-count {
-    font-size: 12px;
+  #view-count {
+    font-size: 11px;
   }
 
-  .view-icon {
-    width: 13px;
-    height: 13px;
+  #view-label {
+    font-size: 11px;
   }
 
   #content-surface {
@@ -588,7 +580,8 @@ body.night-mode #about-content a:hover {
     font-size: 19px;
   }
 
-  #about-content strong, a {
+  #about-content strong,
+  a {
     font-weight: 500;
   }
 
