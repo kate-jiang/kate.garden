@@ -12,6 +12,7 @@ html {
   overflow: hidden;
   -webkit-text-size-adjust: none;
   text-size-adjust: none;
+  touch-action: none;
 }
 
 body {
