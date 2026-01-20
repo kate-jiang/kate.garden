@@ -360,9 +360,13 @@ function showMusicPanel() {
   showOverlay("music");
 }
 
-contentClose.addEventListener("click", hideOverlay);
+contentClose.addEventListener("click", e => {
+  e.preventDefault();
+  hideOverlay();
+});
 contentOverlay.addEventListener("click", e => {
   if (e.target === contentOverlay) {
+    e.preventDefault();
     hideOverlay();
   }
 });
@@ -377,6 +381,7 @@ function registerClickableMesh(mesh) {
 // =============================================================================
 
 canvas.addEventListener("pointerdown", e => {
+  e.preventDefault();
   isPointerDown = true;
   pointerStartPos = { x: e.clientX, y: e.clientY };
   pointerMoved = false;
@@ -398,6 +403,7 @@ canvas.addEventListener("pointerdown", e => {
 });
 
 canvas.addEventListener("pointermove", e => {
+  e.preventDefault();
   if (isPointerDown) {
     // Check drag threshold using screen pixels
     const dx = e.clientX - pointerStartPos.x;
@@ -425,6 +431,7 @@ canvas.addEventListener("pointermove", e => {
 });
 
 canvas.addEventListener("pointerup", e => {
+  e.preventDefault();
   if (!pointerMoved && isPointerDown) {
     updateMouseFromEvent(e);
     handleClick(getIntersectedMeshes());
@@ -439,7 +446,8 @@ canvas.addEventListener("pointerup", e => {
 });
 
 // Handle pointer release outside canvas
-window.addEventListener("pointerup", () => {
+window.addEventListener("pointerup", e => {
+  e.preventDefault();
   isPointerDown = false;
   pointerMoved = false;
 });
@@ -606,7 +614,8 @@ function updatePlaylistUI() {
       </div>
       <div class="playlist-item-duration">${track.duration}</div>
     `;
-    item.addEventListener("click", () => {
+    item.addEventListener("click", e => {
+      e.preventDefault();
       currentTrackIndex = index;
       loadTrack(index);
       setTimeout(playAudio, 300);
@@ -710,9 +719,18 @@ audioPlayer.addEventListener("error", () => {
 });
 
 // Control button listeners
-playPauseBtn.addEventListener("click", togglePlayPause);
-nextBtn.addEventListener("click", nextTrack);
-prevBtn.addEventListener("click", prevTrack);
+playPauseBtn.addEventListener("click", e => {
+  e.preventDefault();
+  togglePlayPause();
+});
+nextBtn.addEventListener("click", e => {
+  e.preventDefault();
+  nextTrack();
+});
+prevBtn.addEventListener("click", e => {
+  e.preventDefault();
+  prevTrack();
+});
 
 // Progress bar
 progressBar.addEventListener("mousedown", () => {
@@ -742,10 +760,16 @@ progressBar.addEventListener("touchcancel", () => {
 });
 
 // Top-left toggle button
-audioToggle.addEventListener("click", togglePlayPause);
+audioToggle.addEventListener("click", e => {
+  e.preventDefault();
+  togglePlayPause();
+});
 
 // Now playing click
-nowPlaying.addEventListener("click", showMusicPanel);
+nowPlaying.addEventListener("click", e => {
+  e.preventDefault();
+  showMusicPanel();
+});
 nowPlaying.style.cursor = "pointer";
 
 // Initialize
@@ -766,7 +790,8 @@ if (isNightMode) {
   document.body.classList.add("night-mode");
 }
 
-nightModeToggle.addEventListener("click", () => {
+nightModeToggle.addEventListener("click", e => {
+  e.preventDefault();
   if (nightTransition !== nightTransitionTarget) return;
   isNightMode = !isNightMode;
   nightTransitionTarget = isNightMode ? 1 : 0;
@@ -2055,6 +2080,19 @@ function animate() {
 
   requestAnimationFrame(animate);
 }
+
+let lastTouchEnd = 0;
+document.addEventListener(
+  "touchend",
+  e => {
+    var now = new Date().getTime();
+    if (now - lastTouchEnd <= 300) {
+      e.preventDefault();
+    }
+    lastTouchEnd = now;
+  },
+  false
+);
 
 applyInitialNightMode();
 
