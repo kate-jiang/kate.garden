@@ -594,7 +594,7 @@ body.night-mode #about-content p.secondary {
 
   #about-content {
     padding: 30px;
-    max-height: 480px;
+    max-height: 55vh;
   }
 
   #about-content h1 {
