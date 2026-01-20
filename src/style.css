@@ -171,12 +171,12 @@ body.night-mode #now-playing {
   -webkit-backdrop-filter: blur(8px);
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.15);
+  opacity: 0;
+  transition: opacity 0.8s ease-out;
 }
 
-#view-count {
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.8);
+#view-counter.loaded {
+  opacity: 1;
 }
 
 #view-label {

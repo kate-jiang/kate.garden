@@ -881,8 +881,10 @@ async function fetchViewCount() {
     if (res.ok) {
       const data = await res.json();
       const viewCountEl = document.getElementById("view-count");
-      if (viewCountEl && data.count) {
+      const viewCounterEl = document.getElementById("view-counter");
+      if (viewCountEl && viewCounterEl && data.count) {
         viewCountEl.textContent = data.count.toLocaleString();
+        viewCounterEl.classList.add("loaded");
       }
     }
   } catch (e) {
