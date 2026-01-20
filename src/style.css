@@ -414,7 +414,7 @@ body.night-mode #about-content a:hover {
 }
 
 .playlist-items {
-  max-height: 190px;
+  max-height: 192px;
   padding-bottom: 24px;
   overflow-y: auto;
   scrollbar-width: none; /* Firefox */
@@ -507,7 +507,7 @@ body.night-mode #about-content a:hover {
 
   .playlist-items {
     max-height: 22vh;
-    padding-bottom: 18px;
+    padding-bottom: 16px;
   }
 
   .playlist-item-title {
