@@ -246,6 +246,7 @@ body.night-mode #now-playing {
   border: 1px solid rgba(255, 255, 255, 0.4);
   transform: scale(0.9);
   opacity: 0;
+  overflow: hidden;
   transition:
     transform 0.4s ease,
     opacity 0.4s ease;
@@ -281,18 +282,25 @@ body.night-mode #now-playing {
   -webkit-user-select: text;
   -moz-user-select: text;
   -ms-user-select: text;
+  overflow-y: auto;
+  scrollbar-width: none;
+  max-height: 70vh;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10% 90%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 10% 90%, transparent 100%);
+}
+
+#about-content::-webkit-scrollbar {
+  display: none;
 }
 
 #about-content a {
-  font-weight: 400;
+  font-weight: 500;
   color: #fff;
-  text-decoration: none;
+  text-decoration: dotted underline;
 }
 
 #about-content a:hover {
-  font-weight: 400;
   color: #b8f839;
-  text-decoration: none;
 }
 
 body.night-mode #about-content a:hover {
@@ -301,16 +309,26 @@ body.night-mode #about-content a:hover {
 
 #about-content h1 {
   font-size: 28px;
-  font-weight: 500;
-  margin-bottom: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
 }
 
 #about-content p {
-  font-size: 18px;
-  font-weight: 300;
-  line-height: 1.4;
+  font-size: 19px;
+  font-weight: 400;
+  line-height: 1.6;
   margin-bottom: 18px;
   text-wrap: pretty;
+}
+
+#about-content p.secondary {
+  font-size: 14px;
+  opacity: 0.8;
+  transition: opacity 0.8s ease;
+}
+
+body.night-mode #about-content p.secondary {
+  opacity: 0.6;
 }
 
 #resume-link {
@@ -576,6 +594,7 @@ body.night-mode #about-content a:hover {
 
   #about-content {
     padding: 30px;
+    max-height: 50vh;
   }
 
   #about-content h1 {
@@ -584,6 +603,7 @@ body.night-mode #about-content a:hover {
 
   #about-content p {
     font-size: 19px;
+    line-height: 1.5;
   }
 
   #about-content strong,

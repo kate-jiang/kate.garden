@@ -48,7 +48,7 @@ const config = {
   // Particle
   particleCount: 5000,
   particleColor: 0xd4c5a0,
-  particleSize: 0.1,
+  particleSize: 0.12,
 
   // Text
   mainTextSize: 5,
