@@ -1,11 +1,7 @@
 name = "garden"
 compatibility_date = "2025-01-20"
-main = "workers/index.js"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "garden-views"
 database_id = "5940b434-65ae-4b2c-aed1-8d80c3d57c1a"
-
-[env.production]
-routes = ["https://kate.garden/*", "https://www.kate.garden/*"]
