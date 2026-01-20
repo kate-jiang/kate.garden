@@ -160,14 +160,13 @@ body.night-mode #now-playing {
 
 #view-counter {
   position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 26px;
+  right: 28px;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 20px;
-  background: rgba(0, 0, 0, 0.3);
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 24px;
@@ -179,29 +178,17 @@ body.night-mode #now-playing {
 
 .view-count {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   color: #fff;
   font-variant-numeric: tabular-nums;
   transition: color 1s ease-in-out;
 }
 
-.view-label {
-  font-size: 12px;
+.view-icon {
+  width: 16px;
+  height: 16px;
   color: rgba(255, 255, 255, 0.6);
   transition: color 1s ease-in-out;
-}
-
-body.night-mode #view-counter {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-body.night-mode .view-count {
-  color: #a8d5ff;
-}
-
-body.night-mode .view-label {
-  color: rgba(255, 255, 255, 0.6);
 }
 
 #loading-overlay {
@@ -522,6 +509,25 @@ body.night-mode #about-content a:hover {
 
 /* Mobile */
 @media (max-width: 480px) {
+  #view-counter {
+    position: fixed;
+    bottom: 12px;
+    right: 12px;
+    gap: 6px;
+    padding: 6px 14px;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  .view-count {
+    font-size: 12px;
+  }
+
+  .view-icon {
+    width: 13px;
+    height: 13px;
+  }
+
   #content-surface {
     width: 92vw;
   }
