@@ -419,8 +419,8 @@ body.night-mode #about-content a:hover {
   overflow-y: auto;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE/Edge */
-  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
 }
 
 .playlist-items::-webkit-scrollbar {
@@ -506,7 +506,7 @@ body.night-mode #about-content a:hover {
   }
 
   .playlist-items {
-    max-height: 125px;
+    max-height: 22vh;
     padding-bottom: 18px;
   }
 
