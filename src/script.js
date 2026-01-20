@@ -565,7 +565,7 @@ function updateNowPlayingText(track) {
     titleSpan.textContent = track.title;
   }
   if (artistSpan) {
-    if (track.title.length < 11) {
+    if (track.title.length < 12) {
       const displayArtist = track.artist.length > 10 ? track.artist.split(",")[0] : track.artist;
       artistSpan.textContent = "by " + displayArtist;
     } else {
