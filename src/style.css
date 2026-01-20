@@ -254,7 +254,7 @@ body.night-mode #now-playing {
 #about-content a {
   font-weight: 400;
   color: #fff;
-  text-decoration: dotted underline;
+  text-decoration: none;
 }
 
 #about-content a:hover {
@@ -274,10 +274,11 @@ body.night-mode #about-content a:hover {
 }
 
 #about-content p {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 300;
   line-height: 1.4;
   margin-bottom: 18px;
+  text-wrap: pretty;
 }
 
 #resume-link {
@@ -535,7 +536,7 @@ body.night-mode #about-content a:hover {
     font-size: 19px;
   }
 
-  #about-content strong {
+  #about-content strong, a {
     font-weight: 500;
   }
 
