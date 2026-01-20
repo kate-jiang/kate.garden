@@ -507,16 +507,16 @@ const playlist = [
     duration: "3:53",
   },
   {
-    title: "Arabesque No. 1",
-    artist: "Claude Debussy, kate",
-    src: "/music/arabesque.mp3",
-    duration: "5:02",
-  },
-  {
     title: "Intermezzo, Op. 118 No. 2",
     artist: "Johannes Brahms, kate",
     src: "/music/intermezzo.mp3",
     duration: "5:39",
+  },
+  {
+    title: "Arabesque No. 1",
+    artist: "Claude Debussy, kate",
+    src: "/music/arabesque.mp3",
+    duration: "5:02",
   },
   {
     title: "Daydreaming",
