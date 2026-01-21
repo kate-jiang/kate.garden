@@ -506,7 +506,7 @@ const playlist = [
     title: "promises",
     artist: "kate",
     src: "/music/promises.mp3",
-    duration: "4:06",
+    duration: "4:07",
   },
   {
     title: "Arabesque No. 1",
@@ -524,7 +524,7 @@ const playlist = [
     title: "Intermezzo, Op. 118 No. 2",
     artist: "Johannes Brahms, kate",
     src: "/music/intermezzo.mp3",
-    duration: "5:39",
+    duration: "5:38",
   },
   {
     title: "Daydreaming",
