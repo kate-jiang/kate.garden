@@ -1,6 +1,61 @@
 import * as THREE from "three";
 
 // =============================================================================
+// QUALITY PRESETS
+// =============================================================================
+
+export const qualityPresets = {
+  high: {
+    instances: 80000,
+    particleCount: 5000,
+    pixelRatioCap: Infinity,
+    shadowMapSize: 2048,
+    shadowsEnabled: true,
+    skyFbmIterations: 4,
+    cloudLayers: 2,
+    particleBounds: { x: [-60, 60], z: [-70, 70] },
+    grassCenter: { x: 0, z: 10 },
+  },
+  medium: {
+    instances: 40000,
+    particleCount: 2000,
+    pixelRatioCap: 2.0,
+    shadowMapSize: 1024,
+    shadowsEnabled: true,
+    skyFbmIterations: 4,
+    cloudLayers: 2,
+    particleBounds: { x: [-40, 40], z: [-10, 50] },
+    grassCenter: { x: -10, z: 10 },
+  },
+  low: {
+    instances: 15000,
+    particleCount: 500,
+    pixelRatioCap: 1.5,
+    shadowMapSize: 512,
+    shadowsEnabled: false,
+    skyFbmIterations: 3,
+    cloudLayers: 1,
+    particleBounds: { x: [-40, 40], z: [-10, 50] },
+    grassCenter: { x: -10, z: 10 },
+  },
+};
+
+export function getDeviceTier() {
+  const ua = navigator.userAgent;
+  const isIOS = /iPhone|iPad/i.test(ua);
+  const isAndroid = /Android/i.test(ua);
+
+  // Desktop → high
+  if (!isIOS && !isAndroid) return "high";
+
+  // iOS: Apple controls GPU quality → high
+  if (isIOS) return "high";
+
+  // Android: WebGL driver quality varies, be conservative → medium
+  return "medium";
+}
+
+// =============================================================================
 // CONFIG
 // =============================================================================
 
@@ -30,7 +85,7 @@ export const config = {
 
   // Camera
   fov: 45,
-  cameraPosition: { x: -18, y: -1, z: 55 },
+  cameraPosition: { x: -16, y: -1, z: 55 },
   cameraTarget: { x: 0, y: 5, z: 10 },
   minDistance: 50,
   maxDistance: 50,

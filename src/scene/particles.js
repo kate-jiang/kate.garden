@@ -4,17 +4,22 @@ import * as THREE from "three";
 // WIND PARTICLES
 // =============================================================================
 
-export function createParticles(config, dayConfig) {
+export function createParticles(config, dayConfig, qualityPreset) {
+  const particleCount = qualityPreset ? qualityPreset.particleCount : config.particleCount;
   const geometry = new THREE.BufferGeometry();
-  const positions = new Float32Array(config.particleCount * 3);
-  const velocities = new Float32Array(config.particleCount * 3);
-  const sizes = new Float32Array(config.particleCount);
+  const positions = new Float32Array(particleCount * 3);
+  const velocities = new Float32Array(particleCount * 3);
+  const sizes = new Float32Array(particleCount);
 
-  for (let i = 0; i < config.particleCount; i++) {
+  const bounds = qualityPreset?.particleBounds || { x: [-60, 60], z: [-70, 70] };
+  const xRange = bounds.x[1] - bounds.x[0];
+  const zRange = bounds.z[1] - bounds.z[0];
+
+  for (let i = 0; i < particleCount; i++) {
     const i3 = i * 3;
-    positions[i3] = Math.random() * 120 - 60;
+    positions[i3] = Math.random() * xRange + bounds.x[0];
     positions[i3 + 1] = Math.random() * 15 - 3;
-    positions[i3 + 2] = Math.random() * 140 - 70;
+    positions[i3 + 2] = Math.random() * zRange + bounds.z[0];
 
     velocities[i3] = Math.random() * 0.5 + 0.3;
     velocities[i3 + 1] = Math.random() * 0.2 - 0.1;
@@ -52,5 +57,5 @@ export function createParticles(config, dayConfig) {
 
   const mesh = new THREE.Points(geometry, material);
 
-  return { mesh, material, velocities, geometry };
+  return { mesh, material, velocities, geometry, particleCount };
 }

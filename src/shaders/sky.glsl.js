@@ -11,6 +11,8 @@ gl_Position = vec4(position, 1.0);
 `;
 
 export const skyFragmentShader = `
+precision highp float;
+
 varying vec2 vUv;
 uniform vec2 resolution;
 uniform vec3 sunDirection;
@@ -27,6 +29,10 @@ uniform vec3 cloudBaseColor;
 uniform vec3 cloudShadowColor;
 uniform vec3 sunGlowColor;
 uniform float starIntensity;
+
+// Quality uniforms
+uniform int fbmIterations;
+uniform int cloudLayerCount;
 
 vec3 getSkyColour(vec3 rayDir) {
 return mix(0.35 * skyColour, skyColour, pow(1.0 - rayDir.y, 4.0));
@@ -89,7 +95,10 @@ return pow(radius / dist, intensity);
 }
 
 float hash(vec2 p, float seed) {
-return fract(sin(dot(p + seed * 13.5, vec2(127.1, 311.7))) * 43758.5453123);
+// Mobile-friendly hash - avoids sin() with large multipliers which cause precision issues
+vec3 p3 = fract(vec3(p.xyx + seed) * 0.1031);
+p3 += dot(p3, p3.yzx + 33.33);
+return fract((p3.x + p3.y) * p3.z);
 }
 
 float noise(vec2 p, float seed) {
@@ -108,6 +117,7 @@ float sum = 0.0;
 float amp = 0.5;
 float freq = 1.0;
 for (int i = 0; i < 4; i++) {
+  if (i >= fbmIterations) break;
   sum += noise(p * freq, seed + float(i) * 7.3) * amp;
   amp *= 0.5;
   freq *= 2.0;
@@ -125,15 +135,21 @@ float cloudNoise(vec2 p, float time, float seed) {
 float getCloudLayer(vec3 rayDir, float time, float seed, float height) {
 if (rayDir.y < 0.15) return 0.0;
 float heightFactor = smoothstep(0.15, height, rayDir.y) * (1.0 - smoothstep(height, 0.6, rayDir.y));
-vec2 cloudPos = vec2(rayDir.x, rayDir.z) / rayDir.y * (height * 4.0);
+vec2 cloudPos = vec2(rayDir.x, rayDir.z) / max(rayDir.y, 0.15) * (height * 4.0);
 float density = cloudNoise(cloudPos, time, seed);
-density = smoothstep(0.6, 0.9, density);
+// Adjust threshold based on FBM iterations (fewer iterations = lower noise range)
+float lowThresh = 0.6 - 0.1 * (4.0 - float(fbmIterations));
+float highThresh = 0.9 - 0.05 * (4.0 - float(fbmIterations));
+density = smoothstep(lowThresh, highThresh, density);
 return density * heightFactor;
 }
 
 float getCloudDensity(vec3 rayDir, float time) {
 float layer1 = getCloudLayer(rayDir, time, 0.0, 0.25);
-float layer2 = getCloudLayer(rayDir, time, 42.0, 0.4) * 0.5;
+float layer2 = 0.0;
+if (cloudLayerCount >= 2) {
+  layer2 = getCloudLayer(rayDir, time, 42.0, 0.4) * 0.5;
+}
 return min(layer1 + layer2, 1.0);
 }
 

@@ -3,7 +3,14 @@ import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-import { config, dayConfig, nightConfig, linkData } from "./config/index.js";
+import {
+  config,
+  dayConfig,
+  nightConfig,
+  linkData,
+  qualityPresets,
+  getDeviceTier,
+} from "./config/index.js";
 import { createBackgroundScene } from "./scene/background.js";
 import { createGround } from "./scene/ground.js";
 import { createGrass } from "./scene/grass.js";
@@ -80,17 +87,25 @@ function applyResponsiveSettings() {
 }
 
 // =============================================================================
+// QUALITY PRESET
+// =============================================================================
+
+const qualityTier = getDeviceTier();
+const qualityPreset = qualityPresets[qualityTier];
+console.log(`Quality tier: ${qualityTier}`, qualityPreset);
+
+// =============================================================================
 // RENDERER SETUP
 // =============================================================================
 
 const canvas = document.getElementById("webgl");
 const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
 renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, qualityPreset.pixelRatioCap));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.autoClear = false;
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.enabled = qualityPreset.shadowsEnabled;
+renderer.shadowMap.type = qualityPreset.shadowsEnabled ? THREE.PCFSoftShadowMap : THREE.BasicShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.3;
 
@@ -722,9 +737,9 @@ scene.add(pointLight);
 
 const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
 dirLight.position.set(5, 10, 7);
-dirLight.castShadow = true;
-dirLight.shadow.mapSize.width = 2048;
-dirLight.shadow.mapSize.height = 2048;
+dirLight.castShadow = qualityPreset.shadowsEnabled;
+dirLight.shadow.mapSize.width = qualityPreset.shadowMapSize;
+dirLight.shadow.mapSize.height = qualityPreset.shadowMapSize;
 dirLight.shadow.camera.near = 0.5;
 dirLight.shadow.camera.far = 100;
 dirLight.shadow.camera.left = -30;
@@ -798,7 +813,8 @@ const { scene: backgroundScene, material: backgroundMaterial } = createBackgroun
   config,
   dayConfig,
   sunDirection,
-  canvas
+  canvas,
+  qualityPreset
 );
 
 // =============================================================================
@@ -821,7 +837,8 @@ const { mesh: grass, material: grassMaterial } = createGrass(
   camera,
   sunDirection,
   delta,
-  pos
+  pos,
+  qualityPreset
 );
 scene.add(grass);
 
@@ -834,7 +851,8 @@ const {
   material: particleMaterial,
   velocities: particleVelocities,
   geometry: particleGeometry,
-} = createParticles(config, dayConfig);
+  particleCount: actualParticleCount,
+} = createParticles(config, dayConfig, qualityPreset);
 scene.add(particles);
 
 // =============================================================================
@@ -1050,8 +1068,9 @@ function updateParticles(dt) {
   const positions = particleGeometry.attributes.position.array;
   const totalSpeedMultiplier =
     nightModeState.particleSpeedMultiplier + nightModeState.particleSpeedBoost;
+  const bounds = qualityPreset.particleBounds;
 
-  for (let i = 0; i < config.particleCount; i++) {
+  for (let i = 0; i < actualParticleCount; i++) {
     const i3 = i * 3;
 
     const windStrength = (1.67 + 0.3 * Math.sin(time * 0.5 + i * 0.1)) * totalSpeedMultiplier;
@@ -1062,12 +1081,12 @@ function updateParticles(dt) {
     positions[i3 + 2] += particleVelocities[i3 + 2] * dt * totalSpeedMultiplier;
 
     // Wrap particles around boundaries
-    if (positions[i3] > 60) positions[i3] = -60;
-    if (positions[i3] < -60) positions[i3] = 60;
+    if (positions[i3] > bounds.x[1]) positions[i3] = bounds.x[0];
+    if (positions[i3] < bounds.x[0]) positions[i3] = bounds.x[1];
     if (positions[i3 + 1] > 20) positions[i3 + 1] = -2;
     if (positions[i3 + 1] < -3) positions[i3 + 1] = 16;
-    if (positions[i3 + 2] > 80) positions[i3 + 2] = -80;
-    if (positions[i3 + 2] < -80) positions[i3 + 2] = 80;
+    if (positions[i3 + 2] > bounds.z[1]) positions[i3 + 2] = bounds.z[0];
+    if (positions[i3 + 2] < bounds.z[0]) positions[i3 + 2] = bounds.z[1];
   }
 
   particleGeometry.attributes.position.needsUpdate = true;

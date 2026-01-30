@@ -5,7 +5,7 @@ import { skyVertexShader, skyFragmentShader } from "../shaders/index.js";
 // BACKGROUND SCENE (SKY)
 // =============================================================================
 
-export function createBackgroundScene(config, dayConfig, sunDirection, canvas) {
+export function createBackgroundScene(config, dayConfig, sunDirection, canvas, qualityPreset) {
   const scene = new THREE.Scene();
 
   const material = new THREE.ShaderMaterial({
@@ -23,6 +23,8 @@ export function createBackgroundScene(config, dayConfig, sunDirection, canvas) {
       cloudShadowColor: { value: dayConfig.cloudShadow.clone() },
       sunGlowColor: { value: dayConfig.sunGlow.clone() },
       starIntensity: { value: 0 },
+      fbmIterations: { value: qualityPreset.skyFbmIterations },
+      cloudLayerCount: { value: qualityPreset.cloudLayers },
     },
     vertexShader: skyVertexShader,
     fragmentShader: skyFragmentShader,
