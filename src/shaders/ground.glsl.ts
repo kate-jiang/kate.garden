@@ -1,10 +1,10 @@
-import { sharedPrefix } from "./shared.js";
+import { sharedPrefix } from "./shared";
 
 // =============================================================================
 // GROUND SHADER
 // =============================================================================
 
-export const groundVertexPrefix =
+export const groundVertexPrefix: string =
   sharedPrefix +
   `
 attribute vec3 basePosition;

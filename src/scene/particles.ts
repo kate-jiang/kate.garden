@@ -1,10 +1,15 @@
 import * as THREE from "three";
+import type { Config, ModeConfig, QualityPreset, ParticlesResult } from "@/types";
 
 // =============================================================================
 // WIND PARTICLES
 // =============================================================================
 
-export function createParticles(config, dayConfig, qualityPreset) {
+export function createParticles(
+  config: Config,
+  dayConfig: ModeConfig,
+  qualityPreset?: QualityPreset
+): ParticlesResult {
   const particleCount = qualityPreset?.particleCount ?? config.particleCount;
   const geometry = new THREE.BufferGeometry();
   const positions = new Float32Array(particleCount * 3);
@@ -31,7 +36,7 @@ export function createParticles(config, dayConfig, qualityPreset) {
   const canvas = document.createElement("canvas");
   canvas.width = 32;
   canvas.height = 32;
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d")!;
   const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
   gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
   gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.5)");

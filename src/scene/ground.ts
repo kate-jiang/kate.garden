@@ -1,11 +1,17 @@
 import * as THREE from "three";
-import { groundVertexPrefix } from "../shaders/index.js";
+import { groundVertexPrefix } from "@/shaders";
+import type { Config, GroundResult } from "@/types";
 
 // =============================================================================
 // GROUND MESH
 // =============================================================================
 
-export function createGround(config, noiseTexture, delta, pos) {
+export function createGround(
+  config: Config,
+  noiseTexture: THREE.Texture,
+  delta: number,
+  pos: THREE.Vector2
+): GroundResult {
   const groundBaseGeometry = new THREE.PlaneGeometry(
     config.width,
     config.width,
@@ -29,7 +35,7 @@ export function createGround(config, noiseTexture, delta, pos) {
   });
 
   // Shader reference to be captured
-  let groundShader = null;
+  let groundShader: THREE.WebGLProgramParametersWithUniforms | null = null;
 
   groundMaterial.onBeforeCompile = function (shader) {
     shader.uniforms.delta = { value: delta };

@@ -1,11 +1,18 @@
 import * as THREE from "three";
-import { lerpValue, lerpVector3 } from "./utils.js";
+import { lerpValue, lerpVector3 } from "@/utils";
+import type { ModeConfig, NightModeState, NightModeRefs } from "@/types";
 
 // =============================================================================
 // NIGHT MODE TRANSITION
 // =============================================================================
 
-export function updateNightMode(dt, state, refs, dayConfig, nightConfig) {
+export function updateNightMode(
+  dt: number,
+  state: NightModeState,
+  refs: NightModeRefs,
+  dayConfig: ModeConfig,
+  nightConfig: ModeConfig
+): void {
   // Check if transition is needed
   if (Math.abs(state.nightTransition - state.nightTransitionTarget) < 0.001) {
     state.nightTransition = state.nightTransitionTarget;
@@ -147,7 +154,12 @@ export function updateNightMode(dt, state, refs, dayConfig, nightConfig) {
 }
 
 // Apply initial night mode state if loaded from localStorage
-export function applyInitialNightMode(state, refs, dayConfig, nightConfig) {
+export function applyInitialNightMode(
+  state: NightModeState,
+  refs: NightModeRefs,
+  dayConfig: ModeConfig,
+  nightConfig: ModeConfig
+): void {
   if (state.isNightMode) {
     state.sunDirection.set(
       Math.sin(nightConfig.azimuth),

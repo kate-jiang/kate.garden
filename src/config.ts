@@ -1,19 +1,22 @@
 import * as THREE from "three";
+import type {
+  Config,
+  ModeConfig,
+  LinkDataItem,
+  QualityPresets,
+  DeviceTier,
+} from "@/types";
 
-// =============================================================================
-// CONFIG
-// =============================================================================
-
-export const config = {
+export const config: Config = {
   // Grass
-  joints: 4,
+  joints: 2,
   bladeWidth: 0.067,
   bladeHeight: 0.5,
-  instances: 100000,
+  instances: 90000,
 
   // Terrain
   width: 100,
-  resolution: 64,
+  resolution: 8,
   radius: 240,
 
   // Lighting
@@ -63,7 +66,7 @@ export const config = {
   },
 };
 
-export const dayConfig = {
+export const dayConfig: ModeConfig = {
   skyColour: new THREE.Vector3(0.012, 0.12, 0.54),
   fogColorA: new THREE.Vector3(0.35, 0.5, 0.9),
   fogColorB: new THREE.Vector3(1.0, 1.0, 0.75),
@@ -87,7 +90,7 @@ export const dayConfig = {
   particleColor: 0xd4c5a0,
 };
 
-export const nightConfig = {
+export const nightConfig: ModeConfig = {
   skyColour: new THREE.Vector3(0.005, 0.012, 0.07),
   fogColorA: new THREE.Vector3(0.04, 0.04, 0.1),
   fogColorB: new THREE.Vector3(0.09, 0.06, 0.14),
@@ -111,7 +114,7 @@ export const nightConfig = {
   rimLightIntensity: 2.0,
 };
 
-export const linkData = [
+export const linkData: LinkDataItem[] = [
   { label: "about", action: "showAbout" },
   { label: "music", action: "showMusic" },
   { label: "photo", url: "https://instagram.com/katejiang__" },
@@ -122,9 +125,9 @@ export const linkData = [
 // QUALITY PRESETS & DEVICE DETECTION
 // =============================================================================
 
-export const qualityPresets = {
+export const qualityPresets: QualityPresets = {
   high: {
-    instances: 80000,
+    instances: 90000,
     particleCount: 5000,
     grassCenter: { x: 0, z: 10 },
   },
@@ -141,7 +144,7 @@ export const qualityPresets = {
 };
 
 // Devices verified to handle high quality well
-const HIGH_TIER_ANDROID = [
+const HIGH_TIER_ANDROID: RegExp[] = [
   // Samsung flagship (2022+)
   /SM-S9[0-4]/i, // Galaxy S22-S24 series
   /SM-F9[3-6]/i, // Galaxy Z Fold/Flip 4-6
@@ -180,7 +183,7 @@ const HIGH_TIER_ANDROID = [
 ];
 
 // Devices known to have WebGL issues (force medium)
-const MEDIUM_TIER_ANDROID = [
+const MEDIUM_TIER_ANDROID: RegExp[] = [
   // Older Google Pixels (5-7) - Tensor G1/G2 have WebGL quirks
   // Pixel 8/9 with Tensor G3/G4 handle high quality well
   /Pixel\s*[5-7]([^0-9]|$)/i,
@@ -194,28 +197,28 @@ const MEDIUM_TIER_ANDROID = [
   /Realme\s*[0-9][^0-9]/i, // Realme single-digit
 ];
 
-export function getGPURenderer() {
+export function getGPURenderer(): string | null {
   try {
     const canvas = document.createElement("canvas");
     const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
     if (!gl) return null;
 
-    const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+    const debugInfo = (gl as WebGLRenderingContext).getExtension("WEBGL_debug_renderer_info");
     if (!debugInfo) return null;
 
-    return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+    return (gl as WebGLRenderingContext).getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) as string;
   } catch {
     return null;
   }
 }
 
-export function getDeviceTier() {
+export function getDeviceTier(): DeviceTier {
   const ua = navigator.userAgent;
   const isIOS = /iPhone|iPad/i.test(ua);
   const isAndroid = /Android/i.test(ua);
   const gpu = getGPURenderer();
 
-  let tier = "high";
+  let tier: DeviceTier = "high";
 
   // Desktop → high
   if (!isIOS && !isAndroid) {
@@ -241,8 +244,7 @@ export function getDeviceTier() {
     // Check GPU for older iPhones (A9/A10 = iPhone 6s/7 era)
     else if (gpu && /Apple A(9|10)/i.test(gpu)) {
       tier = "medium";
-    }
-    else {
+    } else {
       tier = "high";
     }
   }
@@ -267,18 +269,16 @@ export function getDeviceTier() {
       // Latest flagship GPUs - Adreno 7xx/8xx, Mali-G7xx/8xx/9xx
       else if (/Adreno\s*\(TM\)\s*[789]\d\d|Mali-G[789]\d\d/i.test(gpu)) {
         tier = "high";
-      }
-      else {
+      } else {
         tier = "medium"; // Default Android: medium (conservative)
       }
-    }
-    else {
+    } else {
       tier = "medium"; // Default Android: medium (conservative)
     }
   }
 
   if (import.meta.env?.DEV) {
-    console.debug('[quality]', { tier, ua, gpu });
+    console.debug("[quality]", { tier, ua, gpu });
   }
 
   return tier;

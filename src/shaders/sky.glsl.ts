@@ -2,7 +2,7 @@
 // SKY SHADERS
 // =============================================================================
 
-export const skyVertexShader = `
+export const skyVertexShader: string = `
 varying vec2 vUv;
 void main() {
 vUv = uv;
@@ -10,7 +10,7 @@ gl_Position = vec4(position, 1.0);
 }
 `;
 
-export const skyFragmentShader = `
+export const skyFragmentShader: string = `
 precision highp float;
 
 varying vec2 vUv;

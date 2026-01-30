@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
+import { FontLoader, Font } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
@@ -10,19 +10,27 @@ import {
   linkData,
   qualityPresets,
   getDeviceTier,
-} from "./config.js";
-import { createBackgroundScene } from "./scene/background.js";
-import { createGround } from "./scene/ground.js";
-import { createGrass } from "./scene/grass.js";
-import { createParticles } from "./scene/particles.js";
-import { updateNightMode, applyInitialNightMode } from "./nightMode.js";
+} from "@/config";
+import { createBackgroundScene } from "@/scene/background";
+import { createGround } from "@/scene/ground";
+import { createGrass } from "@/scene/grass";
+import { createParticles } from "@/scene/particles";
+import { updateNightMode, applyInitialNightMode } from "@/nightMode";
+import type {
+  HoverState,
+  NightModeState,
+  NightModeRefs,
+  Track,
+  LinkDataItem,
+  GrassTextures,
+} from "@/types";
 
 // =============================================================================
 // DERIVED VALUES & STATE
 // =============================================================================
 
-let textGroupRef = null;
-let textMaterialRef = null;
+let textGroupRef: THREE.Group | null = null;
+let textMaterialRef: THREE.MeshPhongMaterial | null = null;
 
 const delta = config.width / config.resolution;
 const pos = new THREE.Vector2(0, 0);
@@ -46,9 +54,9 @@ let particleSpeedBoost = 0; // Additional speed multiplier during transitions
 // Interaction state
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
-const clickableMeshes = [];
-const hoverState = new Map();
-const meshByUuid = new Map();
+const clickableMeshes: THREE.Mesh[] = [];
+const hoverState = new Map<string, HoverState>();
+const meshByUuid = new Map<string, THREE.Mesh>();
 
 // Pointer tracking
 let isPointerDown = false;
@@ -78,7 +86,7 @@ const textTwirlRotations = 1;
 // RESPONSIVE UTILITIES
 // =============================================================================
 
-function applyResponsiveSettings() {
+function applyResponsiveSettings(): void {
   const isMobile = window.innerWidth <= config.responsive.mobileBreakpoint;
   if (textGroupRef) {
     const scale = isMobile ? config.responsive.mobileTextScale : 1.0;
@@ -90,7 +98,7 @@ function applyResponsiveSettings() {
 // RENDERER SETUP
 // =============================================================================
 
-const canvas = document.getElementById("webgl");
+const canvas = document.getElementById("webgl") as HTMLCanvasElement;
 const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -129,17 +137,17 @@ controls.update();
 // INTERACTION HELPERS
 // =============================================================================
 
-function updateMouseFromEvent(event) {
+function updateMouseFromEvent(event: PointerEvent | MouseEvent): void {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
 
-function getIntersectedMeshes() {
+function getIntersectedMeshes(): THREE.Intersection[] {
   raycaster.setFromCamera(mouse, camera);
   return raycaster.intersectObjects(clickableMeshes);
 }
 
-function updateHoverStates(intersects) {
+function updateHoverStates(intersects: THREE.Intersection[]): void {
   const intersectedNames = new Set(intersects.map(i => i.object.name));
 
   clickableMeshes.forEach(mesh => {
@@ -161,27 +169,27 @@ function updateHoverStates(intersects) {
   });
 }
 
-function resetAllHoverStates() {
+function resetAllHoverStates(): void {
   hoverState.forEach(state => {
     state.target = 1;
   });
 }
 
-function updateCursor(intersects) {
+function updateCursor(intersects: THREE.Intersection[]): void {
   const hasClickable = intersects.some(
     i => i.object.userData.url || i.object.userData.action || i.object.name === "floatingText"
   );
   document.body.style.cursor = hasClickable ? "pointer" : "default";
 }
 
-function triggerTextClickAnimation() {
+function triggerTextClickAnimation(): void {
   if (!textClickAnimating) {
     textClickAnimating = true;
     textClickAnimationTime = 0;
   }
 }
 
-function handleClick(intersects) {
+function handleClick(intersects: THREE.Intersection[]): void {
   if (intersects.length > 0) {
     const clickedObject = intersects[0].object;
     const userData = clickedObject.userData;
@@ -201,12 +209,12 @@ function handleClick(intersects) {
 // CONTENT OVERLAY (ABOUT & MUSIC)
 // =============================================================================
 
-const contentOverlay = document.getElementById("content-overlay");
-const contentClose = document.getElementById("content-close");
-const aboutContent = document.getElementById("about-content");
-const musicContent = document.getElementById("music-content");
+const contentOverlay = document.getElementById("content-overlay") as HTMLElement;
+const contentClose = document.getElementById("content-close") as HTMLElement;
+const aboutContent = document.getElementById("about-content") as HTMLElement;
+const musicContent = document.getElementById("music-content") as HTMLElement;
 
-function showOverlay(contentType) {
+function showOverlay(contentType: "about" | "music"): void {
   // Hide all content sections
   aboutContent.style.display = "none";
   musicContent.style.display = "none";
@@ -235,7 +243,7 @@ function showOverlay(contentType) {
   document.body.style.cursor = "default";
 }
 
-function hideOverlay() {
+function hideOverlay(): void {
   contentOverlay.classList.remove("visible");
   contentOverlay.addEventListener("transitionend", function handler() {
     if (!contentOverlay.classList.contains("visible")) {
@@ -246,11 +254,11 @@ function hideOverlay() {
   controls.autoRotate = true;
 }
 
-function showAboutPanel() {
+function showAboutPanel(): void {
   showOverlay("about");
 }
 
-function showMusicPanel() {
+function showMusicPanel(): void {
   showOverlay("music");
 }
 
@@ -265,7 +273,7 @@ contentOverlay.addEventListener("click", e => {
   }
 });
 
-function registerClickableMesh(mesh) {
+function registerClickableMesh(mesh: THREE.Mesh): void {
   clickableMeshes.push(mesh);
   meshByUuid.set(mesh.uuid, mesh);
 }
@@ -364,23 +372,23 @@ canvas.addEventListener("pointerleave", () => {
 // AUDIO CONTROL
 // =============================================================================
 
-const audioToggle = document.getElementById("audio-toggle");
-const audioIconOn = document.getElementById("audio-icon-on");
-const audioIconOff = document.getElementById("audio-icon-off");
-const nowPlaying = document.getElementById("now-playing");
+const audioToggle = document.getElementById("audio-toggle") as HTMLElement;
+const audioIconOn = document.getElementById("audio-icon-on") as HTMLElement;
+const audioIconOff = document.getElementById("audio-icon-off") as HTMLElement;
+const nowPlaying = document.getElementById("now-playing") as HTMLElement;
 
-const audioPlayer = document.getElementById("audio-player");
-const playPauseBtn = document.querySelector(".play-pause-btn");
-const playIcon = document.querySelector(".play-icon");
-const pauseIcon = document.querySelector(".pause-icon");
-const prevBtn = document.querySelector(".prev-btn");
-const nextBtn = document.querySelector(".next-btn");
-const progressBar = document.querySelector(".progress-bar");
-const timeCurrent = document.querySelector(".time-current");
-const timeDuration = document.querySelector(".time-duration");
-const trackTitle = document.querySelector(".track-title");
-const trackArtist = document.querySelector(".track-artist");
-const playlistItems = document.querySelector(".playlist-items");
+const audioPlayer = document.getElementById("audio-player") as HTMLAudioElement;
+const playPauseBtn = document.querySelector(".play-pause-btn") as HTMLElement;
+const playIcon = document.querySelector(".play-icon") as HTMLElement;
+const pauseIcon = document.querySelector(".pause-icon") as HTMLElement;
+const prevBtn = document.querySelector(".prev-btn") as HTMLElement;
+const nextBtn = document.querySelector(".next-btn") as HTMLElement;
+const progressBar = document.querySelector(".progress-bar") as HTMLInputElement;
+const timeCurrent = document.querySelector(".time-current") as HTMLElement;
+const timeDuration = document.querySelector(".time-duration") as HTMLElement;
+const trackTitle = document.querySelector(".track-title") as HTMLElement;
+const trackArtist = document.querySelector(".track-artist") as HTMLElement;
+const playlistItems = document.querySelector(".playlist-items") as HTMLElement;
 
 let isAudioPlaying = false;
 let hasAutoPlayed = false;
@@ -390,12 +398,12 @@ let isPlayerLoaded = false;
 
 // Autoplay preference
 const AUDIO_PREFERENCE_KEY = "audioEnabled";
-let userAudioPreference = localStorage.getItem(AUDIO_PREFERENCE_KEY);
+let userAudioPreference: string | null = localStorage.getItem(AUDIO_PREFERENCE_KEY);
 if (userAudioPreference === null) {
   userAudioPreference = "true";
 }
 
-const playlist = [
+const playlist: Track[] = [
   {
     title: "promises",
     artist: "kate",
@@ -447,19 +455,19 @@ const playlist = [
 ];
 
 // Initialize player (lazy - doesn't load audio yet)
-function initPlayer() {
+function initPlayer(): void {
   loadTrack(currentTrackIndex);
   updateTrackInfo(currentTrackIndex);
   updatePlaylistUI();
 }
 
-function lazyLoadPlayer() {
+function lazyLoadPlayer(): void {
   if (isPlayerLoaded) return;
   isPlayerLoaded = true;
   loadTrack(currentTrackIndex);
 }
 
-function updateNowPlayingText(track) {
+function updateNowPlayingText(track: Track): void {
   const titleSpan = nowPlaying.querySelector(".now-playing-title");
   const artistSpan = nowPlaying.querySelector(".now-playing-artist");
 
@@ -476,27 +484,27 @@ function updateNowPlayingText(track) {
   }
 }
 
-function updateTrackInfo(index) {
+function updateTrackInfo(index: number): void {
   const track = playlist[index];
   trackTitle.textContent = track.title;
   trackArtist.textContent = track.artist;
   updateNowPlayingText(track);
 }
 
-function loadTrack(index) {
+function loadTrack(index: number): void {
   const track = playlist[index];
   audioPlayer.src = track.src;
   audioPlayer.currentTime = 0;
   timeCurrent.textContent = "0:00";
   timeDuration.textContent = track.duration;
-  progressBar.value = 0;
+  progressBar.value = "0";
   trackTitle.textContent = track.title;
   trackArtist.textContent = track.artist;
   updateNowPlayingText(track);
   updatePlaylistUI();
 }
 
-function updatePlaylistUI() {
+function updatePlaylistUI(): void {
   playlistItems.innerHTML = "";
   playlist.forEach((track, index) => {
     const item = document.createElement("div");
@@ -525,7 +533,7 @@ function updatePlaylistUI() {
   });
 }
 
-function playAudio() {
+function playAudio(): void {
   lazyLoadPlayer();
   audioPlayer.play().catch(error => {
     console.log("Audio playback failed:", error);
@@ -535,13 +543,13 @@ function playAudio() {
   userAudioPreference = "true";
 }
 
-function pauseAudio() {
+function pauseAudio(): void {
   audioPlayer.pause();
   localStorage.setItem(AUDIO_PREFERENCE_KEY, "false");
   userAudioPreference = "false";
 }
 
-function togglePlayPause() {
+function togglePlayPause(): void {
   if (isAudioPlaying) {
     pauseAudio();
   } else {
@@ -549,23 +557,21 @@ function togglePlayPause() {
   }
 }
 
-function nextTrack() {
+function nextTrack(): void {
   lazyLoadPlayer();
   currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
   loadTrack(currentTrackIndex);
   setTimeout(playAudio, 300);
-  // playAudio();
 }
 
-function prevTrack() {
+function prevTrack(): void {
   lazyLoadPlayer();
   currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
   loadTrack(currentTrackIndex);
   setTimeout(playAudio, 300);
-  // playAudio();
 }
 
-function formatTime(seconds) {
+function formatTime(seconds: number): string {
   if (!isFinite(seconds) || seconds < 0) return "0:00";
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
@@ -594,14 +600,14 @@ audioPlayer.addEventListener("pause", () => {
 audioPlayer.addEventListener("timeupdate", () => {
   if (!isUpdatingProgress) {
     const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
-    progressBar.value = progress || 0;
+    progressBar.value = String(progress || 0);
     timeCurrent.textContent = formatTime(audioPlayer.currentTime);
   }
 });
 
 audioPlayer.addEventListener("loadedmetadata", () => {
   timeDuration.textContent = formatTime(audioPlayer.duration);
-  progressBar.value = 0;
+  progressBar.value = "0";
 });
 
 audioPlayer.addEventListener("ended", () => {
@@ -632,7 +638,7 @@ progressBar.addEventListener("mousedown", () => {
 });
 
 progressBar.addEventListener("input", () => {
-  const seekTime = (progressBar.value / 100) * audioPlayer.duration;
+  const seekTime = (parseFloat(progressBar.value) / 100) * audioPlayer.duration;
   audioPlayer.currentTime = seekTime;
   timeCurrent.textContent = formatTime(seekTime);
 });
@@ -673,9 +679,9 @@ initPlayer();
 // NIGHT MODE CONTROL
 // =============================================================================
 
-const nightModeToggle = document.getElementById("night-mode-toggle");
-const sunIcon = document.getElementById("sun-icon");
-const moonIcon = document.getElementById("moon-icon");
+const nightModeToggle = document.getElementById("night-mode-toggle") as HTMLElement;
+const sunIcon = document.getElementById("sun-icon") as HTMLElement;
+const moonIcon = document.getElementById("moon-icon") as HTMLElement;
 
 // Initialize UI from saved preference
 if (isNightMode) {
@@ -759,7 +765,7 @@ scene.add(textFillLight);
 // LOADING MANAGER
 // =============================================================================
 
-const loadingOverlay = document.getElementById("loading-overlay");
+const loadingOverlay = document.getElementById("loading-overlay") as HTMLElement;
 const loadingManager = new THREE.LoadingManager();
 
 loadingManager.onLoad = () => {
@@ -769,7 +775,7 @@ loadingManager.onLoad = () => {
   });
 };
 
-async function fetchViewCount() {
+async function fetchViewCount(): Promise<void> {
   try {
     const res = await fetch("/api/views");
     if (res.ok) {
@@ -823,7 +829,7 @@ scene.add(groundResult.mesh);
 const deviceTier = getDeviceTier();
 const qualityPreset = qualityPresets[deviceTier];
 
-const textures = { grassTexture, alphaMap, noiseTexture };
+const textures: GrassTextures = { grassTexture, alphaMap, noiseTexture };
 const { mesh: grass, material: grassMaterial } = createGrass(
   config,
   dayConfig,
@@ -854,7 +860,7 @@ scene.add(particles);
 
 const fontLoader = new FontLoader(loadingManager);
 
-function createTextMaterial() {
+function createTextMaterial(): THREE.MeshPhongMaterial {
   return new THREE.MeshPhongMaterial({
     color: "rgb(221, 97, 192))",
     specular: 0xffffff,
@@ -864,15 +870,19 @@ function createTextMaterial() {
   });
 }
 
-function createLinkMeshes(font, textMesh, textMaterial) {
+function createLinkMeshes(
+  font: Font,
+  textMesh: THREE.Group,
+  textMaterial: THREE.MeshPhongMaterial
+): void {
   let maxDescender = 0;
 
   // First pass: create geometries, compute widths, find max descender
-  linkData.forEach(item => {
+  linkData.forEach((item: LinkDataItem) => {
     const geometry = new TextGeometry(item.label, {
       font: font,
       size: config.linkTextSize,
-      height: 0.67,
+      depth: 0.67,
       curveSegments: 12,
       bevelEnabled: true,
       bevelThickness: 0.14,
@@ -882,9 +892,10 @@ function createLinkMeshes(font, textMesh, textMaterial) {
     });
 
     geometry.computeBoundingBox();
-    const width = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
-    if (geometry.boundingBox.min.y < maxDescender) {
-      maxDescender = geometry.boundingBox.min.y;
+    const bbox = geometry.boundingBox!;
+    const width = bbox.max.x - bbox.min.x;
+    if (bbox.min.y < maxDescender) {
+      maxDescender = bbox.min.y;
     }
     item.geometry = geometry;
     item.width = width;
@@ -892,24 +903,28 @@ function createLinkMeshes(font, textMesh, textMaterial) {
 
   // Compute total row width: sum of all link widths + gaps between them
   const totalWidth =
-    linkData.reduce((sum, item) => sum + item.width, 0) + (linkData.length - 1) * config.linkGap;
+    linkData.reduce((sum, item) => sum + (item.width ?? 0), 0) + (linkData.length - 1) * config.linkGap;
 
   // Second pass: create meshes and hitboxes with accumulated positioning
   // currentX tracks the left edge of each link
   let currentX = -totalWidth / 2;
 
-  linkData.forEach(item => {
-    // Center geometry so it scales from center
-    const centerX = -item.width / 2;
-    item.geometry.translate(centerX - item.geometry.boundingBox.min.x, -maxDescender, 1);
+  linkData.forEach((item: LinkDataItem) => {
+    const geometry = item.geometry!;
+    const width = item.width!;
+    const bbox = geometry.boundingBox!;
 
-    const linkMesh = new THREE.Mesh(item.geometry, textMaterial);
+    // Center geometry so it scales from center
+    const centerX = -width / 2;
+    geometry.translate(centerX - bbox.min.x, -maxDescender, 1);
+
+    const linkMesh = new THREE.Mesh(geometry, textMaterial);
     linkMesh.castShadow = true;
     linkMesh.receiveShadow = true;
     linkMesh.name = item.label;
     linkMesh.userData.url = item.url;
     linkMesh.userData.action = item.action;
-    linkMesh.position.set(currentX + item.width / 2, -2.5, 1);
+    linkMesh.position.set(currentX + width / 2, -2.5, 1);
 
     const linkLight = new THREE.PointLight(0xffddaa, 3, 8);
     linkLight.position.set(0.3, 0.5, 7);
@@ -919,7 +934,7 @@ function createLinkMeshes(font, textMesh, textMaterial) {
     textMesh.add(linkMesh);
     registerClickableMesh(linkMesh);
 
-    const linkBox = item.geometry.boundingBox;
+    const linkBox = geometry.boundingBox!;
     const linkW = linkBox.max.x - linkBox.min.x;
     const linkH = linkBox.max.y - linkBox.min.y;
     const linkHitbox = new THREE.Mesh(
@@ -927,7 +942,7 @@ function createLinkMeshes(font, textMesh, textMaterial) {
       new THREE.MeshBasicMaterial({ visible: false })
     );
     // Center hitbox on the link
-    linkHitbox.position.set(currentX + item.width / 2, -2.5, 0.5);
+    linkHitbox.position.set(currentX + width / 2, -2.5, 0.5);
     linkHitbox.name = item.label;
     linkHitbox.userData.url = item.url;
     linkHitbox.userData.action = item.action;
@@ -935,11 +950,11 @@ function createLinkMeshes(font, textMesh, textMaterial) {
     registerClickableMesh(linkHitbox);
 
     // Advance position for next link
-    currentX += item.width + config.linkGap;
+    currentX += width + config.linkGap;
   });
 }
 
-fontLoader.load("/fonts/helvetiker_regular.typeface.json", function (font) {
+fontLoader.load("/fonts/helvetiker_regular.typeface.json", function (font: Font) {
   // Create a group to hold everything - this handles position and camera-facing
   const textGroup = new THREE.Group();
   textGroup.position.set(0, config.textYPosition, config.textZPosition);
@@ -952,9 +967,9 @@ fontLoader.load("/fonts/helvetiker_regular.typeface.json", function (font) {
 
   const textGeometry = new TextGeometry("kate", {
     font: font,
-    depth: 100,
     size: config.mainTextSize,
-    height: 2,
+    depth: 2,
+    curveSegments: 12,
     bevelEnabled: true,
     bevelThickness: 0.2,
     bevelSize: 0.15,
@@ -962,7 +977,8 @@ fontLoader.load("/fonts/helvetiker_regular.typeface.json", function (font) {
   });
 
   textGeometry.computeBoundingBox();
-  const xOffset = -0.5 * (textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x);
+  const bbox = textGeometry.boundingBox!;
+  const xOffset = -0.5 * (bbox.max.x - bbox.min.x);
   textGeometry.translate(xOffset, 0, 0);
 
   const textMaterial = createTextMaterial();
@@ -984,7 +1000,7 @@ fontLoader.load("/fonts/helvetiker_regular.typeface.json", function (font) {
   registerClickableMesh(textMesh);
 
   // Create hitbox for main text
-  const textBox = textGeometry.boundingBox;
+  const textBox = textGeometry.boundingBox!;
   const textWidth = textBox.max.x - textBox.min.x;
   const textHeight = textBox.max.y - textBox.min.y;
   const textHitbox = new THREE.Mesh(
@@ -1034,7 +1050,7 @@ let time = 0;
 let lastFrame = performance.now();
 
 // Create state and refs objects for night mode system
-const nightModeState = {
+const nightModeState: NightModeState = {
   isNightMode,
   nightTransition,
   nightTransitionTarget,
@@ -1044,7 +1060,7 @@ const nightModeState = {
   sunDirection,
 };
 
-const nightModeRefs = {
+const nightModeRefs: NightModeRefs = {
   backgroundMaterial,
   grassMaterial,
   particleMaterial,
@@ -1057,8 +1073,8 @@ const nightModeRefs = {
   renderer,
 };
 
-function updateParticles(dt) {
-  const positions = particleGeometry.attributes.position.array;
+function updateParticles(dt: number): void {
+  const positions = particleGeometry.attributes.position.array as Float32Array;
   const totalSpeedMultiplier =
     nightModeState.particleSpeedMultiplier + nightModeState.particleSpeedBoost;
 
@@ -1084,7 +1100,7 @@ function updateParticles(dt) {
   particleGeometry.attributes.position.needsUpdate = true;
 }
 
-function updateHoverAnimations() {
+function updateHoverAnimations(): void {
   hoverState.forEach((state, uuid) => {
     const mesh = meshByUuid.get(uuid);
     if (mesh) {
@@ -1094,9 +1110,9 @@ function updateHoverAnimations() {
   });
 }
 
-function updateFloatingText(dt) {
-  const textGroup = scene.getObjectByName("textGroup");
-  const textMesh = scene.getObjectByName("floatingText");
+function updateFloatingText(dt: number): void {
+  const textGroup = scene.getObjectByName("textGroup") as THREE.Group | undefined;
+  const textMesh = scene.getObjectByName("floatingText") as THREE.Mesh | undefined;
   if (!textGroup || !textMesh) return;
 
   // Base bobbing animation for the whole group
@@ -1172,7 +1188,7 @@ function updateFloatingText(dt) {
 }
 
 // Sync local state with nightModeState for night mode toggle
-function syncNightModeState() {
+function syncNightModeState(): void {
   nightModeState.isNightMode = isNightMode;
   nightModeState.nightTransition = nightTransition;
   nightModeState.nightTransitionTarget = nightTransitionTarget;
@@ -1180,7 +1196,7 @@ function syncNightModeState() {
 }
 
 // Sync back from nightModeState to local variables
-function syncFromNightModeState() {
+function syncFromNightModeState(): void {
   nightTransition = nightModeState.nightTransition;
   nightTransitionTarget = nightModeState.nightTransitionTarget;
   particleSpeedMultiplier = nightModeState.particleSpeedMultiplier;
@@ -1188,7 +1204,7 @@ function syncFromNightModeState() {
   cloudTimeOffset = nightModeState.cloudTimeOffset;
 }
 
-function animate() {
+function animate(): void {
   const now = performance.now();
   let dt = (now - lastFrame) / 1000;
   dt = Math.min(dt, 0.1);
@@ -1228,7 +1244,7 @@ let lastTouchEnd = 0;
 document.addEventListener(
   "touchend",
   e => {
-    var now = new Date().getTime();
+    const now = new Date().getTime();
     if (now - lastTouchEnd <= 500) {
       e.preventDefault();
     }

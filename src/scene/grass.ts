@@ -1,11 +1,19 @@
 import * as THREE from "three";
-import { createGrassVertexShader, grassFragmentShader } from "../shaders/index.js";
+import { createGrassVertexShader, grassFragmentShader } from "@/shaders";
+import type {
+  Config,
+  ModeConfig,
+  QualityPreset,
+  GrassResult,
+  GrassTextures,
+  GrassUniforms,
+} from "@/types";
 
 // =============================================================================
 // GRASS GEOMETRY
 // =============================================================================
 
-export function createGrassBaseGeometry(config) {
+export function createGrassBaseGeometry(config: Config): THREE.PlaneGeometry {
   const grassBaseGeometry = new THREE.PlaneGeometry(
     config.bladeWidth,
     config.bladeHeight,
@@ -52,17 +60,18 @@ export function createGrassBaseGeometry(config) {
   );
   quaternion0.multiply(quaternion1);
 
-  for (let v = 0; v < grassBaseGeometry.attributes.position.array.length; v += 3) {
+  const positionArray = grassBaseGeometry.attributes.position.array as Float32Array;
+  for (let v = 0; v < positionArray.length; v += 3) {
     quaternion2.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2);
-    vertex.x = grassBaseGeometry.attributes.position.array[v];
-    vertex.y = grassBaseGeometry.attributes.position.array[v + 1];
-    vertex.z = grassBaseGeometry.attributes.position.array[v + 2];
+    vertex.x = positionArray[v];
+    vertex.y = positionArray[v + 1];
+    vertex.z = positionArray[v + 2];
     const frac = vertex.y / config.bladeHeight;
     quaternion2.slerp(quaternion0, frac);
     vertex.applyQuaternion(quaternion2);
-    grassBaseGeometry.attributes.position.array[v] = vertex.x;
-    grassBaseGeometry.attributes.position.array[v + 1] = vertex.y;
-    grassBaseGeometry.attributes.position.array[v + 2] = vertex.z;
+    positionArray[v] = vertex.x;
+    positionArray[v + 1] = vertex.y;
+    positionArray[v + 2] = vertex.z;
   }
   grassBaseGeometry.computeVertexNormals();
 
@@ -73,17 +82,21 @@ export function createGrassBaseGeometry(config) {
 // GRASS INSTANCING
 // =============================================================================
 
-export function createGrassInstances(config, grassBaseGeometry, qualityPreset) {
+export function createGrassInstances(
+  config: Config,
+  grassBaseGeometry: THREE.PlaneGeometry,
+  qualityPreset?: QualityPreset
+): THREE.InstancedBufferGeometry {
   const instancedGeometry = new THREE.InstancedBufferGeometry();
   instancedGeometry.index = grassBaseGeometry.index;
   instancedGeometry.attributes.position = grassBaseGeometry.attributes.position;
   instancedGeometry.attributes.uv = grassBaseGeometry.attributes.uv;
   instancedGeometry.attributes.normal = grassBaseGeometry.attributes.normal;
 
-  const indices = [];
-  const offsets = [];
-  const scales = [];
-  const halfRootAngles = [];
+  const indices: number[] = [];
+  const offsets: number[] = [];
+  const scales: number[] = [];
+  const halfRootAngles: number[] = [];
 
   // Use preset values if provided, otherwise fall back to config defaults
   const instanceCount = qualityPreset ? qualityPreset.instances : config.instances;
@@ -130,37 +143,48 @@ export function createGrassInstances(config, grassBaseGeometry, qualityPreset) {
 // GRASS MATERIAL & MESH
 // =============================================================================
 
-export function createGrass(config, dayConfig, textures, camera, sunDirection, delta, pos, qualityPreset) {
+export function createGrass(
+  config: Config,
+  dayConfig: ModeConfig,
+  textures: GrassTextures,
+  camera: THREE.PerspectiveCamera,
+  sunDirection: THREE.Vector3,
+  delta: number,
+  pos: THREE.Vector2,
+  qualityPreset?: QualityPreset
+): GrassResult {
   const { grassTexture, alphaMap, noiseTexture } = textures;
 
   const grassBaseGeometry = createGrassBaseGeometry(config);
   const instancedGeometry = createGrassInstances(config, grassBaseGeometry, qualityPreset);
 
+  const uniforms: GrassUniforms = {
+    time: { value: 0 },
+    delta: { value: delta },
+    posX: { value: pos.x },
+    posZ: { value: pos.y },
+    radius: { value: config.radius },
+    width: { value: config.width },
+    map: { value: grassTexture },
+    alphaMap: { value: alphaMap },
+    noiseTexture: { value: noiseTexture },
+    sunDirection: { value: sunDirection },
+    cameraPosition: { value: camera.position },
+    ambientStrength: { value: config.ambientStrength },
+    translucencyStrength: { value: config.translucencyStrength },
+    diffuseStrength: { value: config.diffuseStrength },
+    specularStrength: { value: config.specularStrength },
+    lightColour: { value: config.sunColour },
+    specularColour: { value: config.specularColour },
+    grassBrightness: { value: dayConfig.grassBrightness },
+  };
+
   const material = new THREE.RawShaderMaterial({
-    uniforms: {
-      time: { value: 0 },
-      delta: { value: delta },
-      posX: { value: pos.x },
-      posZ: { value: pos.y },
-      radius: { value: config.radius },
-      width: { value: config.width },
-      map: { value: grassTexture },
-      alphaMap: { value: alphaMap },
-      noiseTexture: { value: noiseTexture },
-      sunDirection: { value: sunDirection },
-      cameraPosition: { value: camera.position },
-      ambientStrength: { value: config.ambientStrength },
-      translucencyStrength: { value: config.translucencyStrength },
-      diffuseStrength: { value: config.diffuseStrength },
-      specularStrength: { value: config.specularStrength },
-      lightColour: { value: config.sunColour },
-      specularColour: { value: config.specularColour },
-      grassBrightness: { value: dayConfig.grassBrightness },
-    },
+    uniforms,
     vertexShader: createGrassVertexShader(config.bladeHeight),
     fragmentShader: grassFragmentShader,
     side: THREE.DoubleSide,
-  });
+  }) as THREE.RawShaderMaterial & { uniforms: GrassUniforms };
 
   const mesh = new THREE.Mesh(instancedGeometry, material);
 

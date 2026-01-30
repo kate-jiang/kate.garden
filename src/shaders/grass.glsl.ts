@@ -1,10 +1,10 @@
-import { sharedPrefix } from "./shared.js";
+import { sharedPrefix } from "./shared";
 
 // =============================================================================
 // GRASS SHADERS
 // =============================================================================
 
-export function createGrassVertexShader(bladeHeight) {
+export function createGrassVertexShader(bladeHeight: number): string {
   return (
     sharedPrefix +
     `
@@ -106,7 +106,7 @@ gl_Position = projectionMatrix * modelViewMatrix * vec4(localPosition, 1.0);
   );
 }
 
-export const grassFragmentShader = `
+export const grassFragmentShader: string = `
 precision mediump float;
 uniform vec3 cameraPosition;
 uniform float ambientStrength;
