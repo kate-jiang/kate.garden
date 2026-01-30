@@ -3,12 +3,19 @@ import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-import { config, dayConfig, nightConfig, linkData, qualityPresets, getDeviceTier } from "./config/index.js";
+import {
+  config,
+  dayConfig,
+  nightConfig,
+  linkData,
+  qualityPresets,
+  getDeviceTier,
+} from "./config.js";
 import { createBackgroundScene } from "./scene/background.js";
 import { createGround } from "./scene/ground.js";
 import { createGrass } from "./scene/grass.js";
 import { createParticles } from "./scene/particles.js";
-import { updateNightMode, applyInitialNightMode } from "./systems/nightMode.js";
+import { updateNightMode, applyInitialNightMode } from "./nightMode.js";
 
 // =============================================================================
 // DERIVED VALUES & STATE

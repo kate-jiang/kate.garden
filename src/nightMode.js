@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { lerpValue, lerpVector3 } from "../core/utils.js";
+import { lerpValue, lerpVector3 } from "./utils.js";
 
 // =============================================================================
 // NIGHT MODE TRANSITION
