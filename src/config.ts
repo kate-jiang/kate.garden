@@ -1,11 +1,6 @@
 import * as THREE from "three";
-import type {
-  Config,
-  ModeConfig,
-  LinkDataItem,
-  QualityPresets,
-  DeviceTier,
-} from "@/types";
+import { getGPUTier } from "detect-gpu";
+import type { Config, ModeConfig, LinkDataItem, QualityPresets, DeviceTier } from "@/types";
 
 export const config: Config = {
   // Grass
@@ -143,143 +138,24 @@ export const qualityPresets: QualityPresets = {
   },
 };
 
-// Devices verified to handle high quality well
-const HIGH_TIER_ANDROID: RegExp[] = [
-  // Samsung flagship (2022+)
-  /SM-S9[0-4]/i, // Galaxy S22-S24 series
-  /SM-F9[3-6]/i, // Galaxy Z Fold/Flip 4-6
-
-  // OnePlus
-  /OnePlus.*(1[0-3]|Nord\s*[34])/i, // OnePlus 10-13, Nord 3/4
-
-  // Xiaomi / Redmi / POCO
-  /Xiaomi\s*(1[2-5]|14)/i, // Xiaomi 12-15 series
-  /Redmi\s*(K[56]0|Note\s*1[23])/i, // Redmi K50/K60, Note 12/13 Pro
-  /POCO\s*F[456]/i, // POCO F4/F5/F6
-
-  // Oppo / Realme
-  /OPPO\s*Find\s*X[5-7]/i, // Find X5-X7
-  /Realme\s*GT\s*[2-6]/i, // Realme GT 2-6
-
-  // Vivo / iQOO
-  /vivo\s*X[89]\d|vivo\s*X1\d\d/i, // Vivo X80-X100 series
-  /iQOO\s*(1[12]|Neo\s*[89])/i, // iQOO 11/12, Neo 8/9
-
-  // Honor
-  /Honor\s*(Magic\s*[5-7]|[89]0)/i, // Honor Magic 5-7, 80/90 series
-
-  // Motorola
-  /moto\s*(edge|razr)\s*(40|50|2024)/i, // Edge 40/50, Razr 2024
-
-  // Sony
-  /Xperia\s*[15]\s*(IV|V)/i, // Xperia 1/5 IV/V
-
-  // Asus
-  /ASUS.*ROG.*Phone\s*[78]/i, // ROG Phone 7/8
-  /ASUS.*Zenfone\s*(10|11)/i, // Zenfone 10/11
-
-  // Nothing
-  /Nothing\s*Phone/i, // Nothing Phone 1/2
-];
-
-// Devices known to have WebGL issues (force medium)
-const MEDIUM_TIER_ANDROID: RegExp[] = [
-  // Older Google Pixels (5-7) - Tensor G1/G2 have WebGL quirks
-  // Pixel 8/9 with Tensor G3/G4 handle high quality well
-  /Pixel\s*[5-7]([^0-9]|$)/i,
-
-  // Older Samsung (pre-2022)
-  /SM-[GAN]9\d\d/i, // Galaxy S/Note/A 9xx series
-
-  // Budget lines from any brand
-  /Redmi\s*[0-9][^0-9]/i, // Redmi single-digit (budget)
-  /Galaxy\s*A[0-3]\d/i, // Galaxy A00-A39 (budget)
-  /Realme\s*[0-9][^0-9]/i, // Realme single-digit
-];
-
-export function getGPURenderer(): string | null {
+export async function getDeviceTier(): Promise<DeviceTier> {
   try {
-    const canvas = document.createElement("canvas");
-    const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-    if (!gl) return null;
+    const gpuTier = await getGPUTier({
+      desktopTiers: [0, 15, 30, 60],
+      mobileTiers: [0, 15, 30, 60],
+    });
 
-    const debugInfo = (gl as WebGLRenderingContext).getExtension("WEBGL_debug_renderer_info");
-    if (!debugInfo) return null;
+    if (import.meta.env?.DEV) {
+      console.debug("[quality]", gpuTier);
+    }
 
-    return (gl as WebGLRenderingContext).getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) as string;
+    // Map detect-gpu tiers (0-3) to our tiers
+    if (gpuTier.tier >= 3) return "high";
+    if (gpuTier.tier >= 1) return "medium";
+    return "low";
   } catch {
-    return null;
+    // Fallback: desktop high, mobile medium
+    const isMobile = /Android/i.test(navigator.userAgent);
+    return isMobile ? "medium" : "high";
   }
-}
-
-export function getDeviceTier(): DeviceTier {
-  const ua = navigator.userAgent;
-  const isIOS = /iPhone|iPad/i.test(ua);
-  const isAndroid = /Android/i.test(ua);
-  const gpu = getGPURenderer();
-
-  let tier: DeviceTier = "high";
-
-  // Desktop → high
-  if (!isIOS && !isAndroid) {
-    tier = "high";
-  }
-  // iOS: check for older devices
-  else if (isIOS) {
-    // Extract iOS version from UA (e.g., "CPU iPhone OS 15_0" or "CPU OS 15_0")
-    const iosVersionMatch = ua.match(/OS (\d+)[_\.]/);
-    const iosVersion = iosVersionMatch ? parseInt(iosVersionMatch[1], 10) : 99;
-
-    // iOS 14 and below = older devices (iPhone X and earlier can't go past iOS 16,
-    // iPhone 6s/7 stuck on iOS 15, iPhone 6 and earlier on iOS 12)
-    if (iosVersion <= 14) {
-      tier = "medium";
-    }
-    // Older iPads: check GPU for A8X/A9X/A10X chips
-    // Note: iPad model identifiers (iPad4,x etc.) are NOT present in UA strings,
-    // so we rely on GPU detection instead
-    else if (/iPad/.test(ua) && gpu && /Apple A(8|9|10)X?/i.test(gpu)) {
-      tier = "medium";
-    }
-    // Check GPU for older iPhones (A9/A10 = iPhone 6s/7 era)
-    else if (gpu && /Apple A(9|10)/i.test(gpu)) {
-      tier = "medium";
-    } else {
-      tier = "high";
-    }
-  }
-  // Android
-  else if (isAndroid) {
-    // Check for known problematic devices first
-    if (MEDIUM_TIER_ANDROID.some(re => re.test(ua))) {
-      tier = "medium";
-    }
-    // Check for verified high-tier devices
-    else if (HIGH_TIER_ANDROID.some(re => re.test(ua))) {
-      tier = "high";
-    }
-    // Fallback: GPU detection
-    else if (gpu) {
-      // Older Tensor GPUs have WebGL quirks - force medium
-      // Tensor G1 (Pixel 6): Mali-G78, Tensor G2 (Pixel 7): Mali-G710
-      // Tensor G3/G4 (Pixel 8/9): Mali-G715 handles high quality well
-      if (/Mali-G(78|710)($|[^0-9])/i.test(gpu)) {
-        tier = "medium";
-      }
-      // Latest flagship GPUs - Adreno 7xx/8xx, Mali-G7xx/8xx/9xx
-      else if (/Adreno\s*\(TM\)\s*[789]\d\d|Mali-G[789]\d\d/i.test(gpu)) {
-        tier = "high";
-      } else {
-        tier = "medium"; // Default Android: medium (conservative)
-      }
-    } else {
-      tier = "medium"; // Default Android: medium (conservative)
-    }
-  }
-
-  if (import.meta.env?.DEV) {
-    console.debug("[quality]", { tier, ua, gpu });
-  }
-
-  return tier;
 }

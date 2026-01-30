@@ -826,7 +826,7 @@ scene.add(groundResult.mesh);
 // GRASS
 // =============================================================================
 
-const deviceTier = getDeviceTier();
+const deviceTier = await getDeviceTier();
 const qualityPreset = qualityPresets[deviceTier];
 
 const textures: GrassTextures = { grassTexture, alphaMap, noiseTexture };
