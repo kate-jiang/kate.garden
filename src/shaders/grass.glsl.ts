@@ -41,14 +41,9 @@ return 2.0 * cross(q.xyz, v * q.w + cross(q.xyz, v)) + v;
 }
 
 float placeOnSphere(vec3 v) {
-float theta = acos(clamp(v.z / radius, -1.0, 1.0));
-float sinTheta = sin(theta);
-if (abs(sinTheta) < 0.0001) {
-  return v.y;
-}
-float phi = acos(clamp(v.x / (radius * sinTheta), -1.0, 1.0));
-float sV = radius * sinTheta * sin(phi);
-return sV;
+  // Quadratic approximation of spherical y-coordinate
+  // From y = sqrt(r² - x² - z²) ≈ r - (x² + z²)/(2r) for small displacements
+  return radius - (v.x * v.x + v.z * v.z) / (2.0 * radius);
 }
 
 void main() {
@@ -85,13 +80,9 @@ fractionalPos *= TWO_PI;
 float bladePhase = index * TWO_PI * 17.0; // pseudo-random phase per blade
 float speedVar = 0.95 + 0.1 * fract(index * 127.1); // speed varies 0.95-1.05x
 
-// Primary wind wave
-float noise = 0.5 + 0.5 * sin(fractionalPos.x + time * 2.5 * speedVar + bladePhase);
-float halfAngle = -noise * 0.1;
-
-// Secondary wave at different frequency for complexity
-noise = 0.5 + 0.5 * cos(fractionalPos.y + time * 2.5 * speedVar + bladePhase * 0.7);
-halfAngle -= noise * 0.05;
+// Single wind wave (simplified from dual-wave)
+float noise = 0.5 + 0.5 * sin(fractionalPos.x + fractionalPos.y * 0.5 + time * 2.5 * speedVar + bladePhase);
+float halfAngle = -noise * 0.12;
 
 direction = normalize(vec4(sin(halfAngle), 0.0, -sin(halfAngle), cos(halfAngle)));
 
