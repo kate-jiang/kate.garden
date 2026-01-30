@@ -3,14 +3,7 @@ import { FontLoader, Font } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-import {
-  config,
-  dayConfig,
-  nightConfig,
-  linkData,
-  qualityPresets,
-  getDeviceTier,
-} from "@/config";
+import { config, dayConfig, nightConfig, linkData, qualityPresets, getDeviceTier } from "@/config";
 import { createBackgroundScene } from "@/scene/background";
 import { createGround } from "@/scene/ground";
 import { createGrass } from "@/scene/grass";
@@ -28,6 +21,19 @@ import type {
 // =============================================================================
 // DERIVED VALUES & STATE
 // =============================================================================
+
+const deviceTier = await getDeviceTier();
+const qualityPreset = qualityPresets[deviceTier];
+
+// // Show lite version button for medium/low device tiers
+// if (deviceTier !== "high") {
+//   const liteVersionBtn = document.getElementById("lite-version");
+//   if (liteVersionBtn) {
+//     liteVersionBtn.classList.remove("hidden");
+//     // Fade in after a short delay
+//     setTimeout(() => liteVersionBtn.classList.add("visible"), 600);
+//   }
+// }
 
 let textGroupRef: THREE.Group | null = null;
 let textMaterialRef: THREE.MeshPhongMaterial | null = null;
@@ -125,7 +131,7 @@ controls.enableDamping = true;
 controls.enablePan = false;
 controls.enableZoom = false;
 controls.enableRotate = true;
-controls.autoRotate = true;
+controls.autoRotate = deviceTier === "high";
 controls.minDistance = config.minDistance;
 controls.maxDistance = config.maxDistance;
 controls.autoRotateSpeed = config.autoRotateSpeed;
@@ -826,9 +832,6 @@ scene.add(groundResult.mesh);
 // GRASS
 // =============================================================================
 
-const deviceTier = await getDeviceTier();
-const qualityPreset = qualityPresets[deviceTier];
-
 const textures: GrassTextures = { grassTexture, alphaMap, noiseTexture };
 const { mesh: grass, material: grassMaterial } = createGrass(
   config,
@@ -903,7 +906,8 @@ function createLinkMeshes(
 
   // Compute total row width: sum of all link widths + gaps between them
   const totalWidth =
-    linkData.reduce((sum, item) => sum + (item.width ?? 0), 0) + (linkData.length - 1) * config.linkGap;
+    linkData.reduce((sum, item) => sum + (item.width ?? 0), 0) +
+    (linkData.length - 1) * config.linkGap;
 
   // Second pass: create meshes and hitboxes with accumulated positioning
   // currentX tracks the left edge of each link
