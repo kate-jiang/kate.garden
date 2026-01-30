@@ -4,13 +4,14 @@ import * as THREE from "three";
 // WIND PARTICLES
 // =============================================================================
 
-export function createParticles(config, dayConfig) {
+export function createParticles(config, dayConfig, qualityPreset) {
+  const particleCount = qualityPreset?.particleCount ?? config.particleCount;
   const geometry = new THREE.BufferGeometry();
-  const positions = new Float32Array(config.particleCount * 3);
-  const velocities = new Float32Array(config.particleCount * 3);
-  const sizes = new Float32Array(config.particleCount);
+  const positions = new Float32Array(particleCount * 3);
+  const velocities = new Float32Array(particleCount * 3);
+  const sizes = new Float32Array(particleCount);
 
-  for (let i = 0; i < config.particleCount; i++) {
+  for (let i = 0; i < particleCount; i++) {
     const i3 = i * 3;
     positions[i3] = Math.random() * 120 - 60;
     positions[i3 + 1] = Math.random() * 15 - 3;

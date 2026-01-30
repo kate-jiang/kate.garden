@@ -113,7 +113,6 @@ uniform float ambientStrength;
 uniform float diffuseStrength;
 uniform float specularStrength;
 uniform float translucencyStrength;
-uniform float shininess;
 uniform vec3 lightColour;
 uniform vec3 sunDirection;
 uniform sampler2D map;
@@ -136,6 +135,18 @@ float e = 0.14;
 return clamp((x * (a * x + b)) / (x * (c * x + d) + e), 0.0, 1.0);
 }
 
+// Fast power functions using iterative squaring
+// More efficient than pow() on mobile GPUs
+float pow16(float x) {
+  x *= x; x *= x; x *= x; x *= x;  // 4 multiplies
+  return x;
+}
+
+float pow64(float x) {
+  x *= x; x *= x; x *= x; x *= x; x *= x; x *= x;  // 6 multiplies
+  return x;
+}
+
 void main() {
 if (texture2D(alphaMap, vUv).r < 0.15) discard;
 
@@ -143,7 +154,10 @@ vec3 normal;
 if (gl_FrontFacing) normal = normalize(vNormal);
 else normal = normalize(-vNormal);
 
-vec3 textureColour = pow(texture2D(map, vUv).rgb, vec3(2.2));
+// Gamma linearization: pow(x, 2.2) -> x * x (gamma 2.0 approximation)
+vec3 textureColour = texture2D(map, vUv).rgb;
+textureColour *= textureColour;
+
 vec3 mixColour = idx > 0.75 ? vec3(0.2, 0.8, 0.06) : vec3(0.5, 0.8, 0.08);
 textureColour = mix(0.1 * mixColour, textureColour, 0.75);
 
@@ -160,7 +174,8 @@ vec3 skyLight = sky * vec3(0.12, 0.29, 0.55);
 
 vec3 viewDirection = normalize(cameraPosition - vPosition);
 vec3 halfwayDir = normalize(lightDir + viewDirection);
-float spec = pow(max(dot(normal, halfwayDir), 0.0), shininess);
+
+float spec = pow64(max(dot(normal, halfwayDir), 0.0));
 vec3 specular = spec * specularColour * lightColour;
 
 vec3 diffuseTranslucency = vec3(0);
@@ -169,7 +184,7 @@ float dotViewLight = dot(-lightDir, viewDirection);
 if (dotNormalLight <= 0.0) {
   diffuseTranslucency = lightTimesTexture * translucencyStrength * -dotNormalLight;
   if (dotViewLight > 0.0) {
-  forwardTranslucency = lightTimesTexture * translucencyStrength * pow(dotViewLight, 16.0);
+    forwardTranslucency = lightTimesTexture * translucencyStrength * pow16(dotViewLight);
   }
 }
 
@@ -177,6 +192,9 @@ vec3 col = 0.3 * skyLight * textureColour + ambientStrength * ambient + diffuseS
 col = mix(0.35 * vec3(0.1, 0.25, 0.02), col, frc);
 col *= grassBrightness;
 col = ACESFilm(col);
-col = pow(col, vec3(0.4545));
+
+// Gamma correction: pow(x, 0.4545) -> sqrt (gamma 2.0 approximation)
+col = sqrt(col);
+
 gl_FragColor = vec4(col, 1.0);
 }`;

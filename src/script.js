@@ -3,7 +3,7 @@ import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-import { config, dayConfig, nightConfig, linkData } from "./config/index.js";
+import { config, dayConfig, nightConfig, linkData, qualityPresets, getDeviceTier } from "./config/index.js";
 import { createBackgroundScene } from "./scene/background.js";
 import { createGround } from "./scene/ground.js";
 import { createGrass } from "./scene/grass.js";
@@ -813,6 +813,9 @@ scene.add(groundResult.mesh);
 // GRASS
 // =============================================================================
 
+const deviceTier = getDeviceTier();
+const qualityPreset = qualityPresets[deviceTier];
+
 const textures = { grassTexture, alphaMap, noiseTexture };
 const { mesh: grass, material: grassMaterial } = createGrass(
   config,
@@ -821,7 +824,8 @@ const { mesh: grass, material: grassMaterial } = createGrass(
   camera,
   sunDirection,
   delta,
-  pos
+  pos,
+  qualityPreset
 );
 scene.add(grass);
 
@@ -834,7 +838,7 @@ const {
   material: particleMaterial,
   velocities: particleVelocities,
   geometry: particleGeometry,
-} = createParticles(config, dayConfig);
+} = createParticles(config, dayConfig, qualityPreset);
 scene.add(particles);
 
 // =============================================================================

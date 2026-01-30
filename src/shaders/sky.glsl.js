@@ -11,6 +11,8 @@ gl_Position = vec4(position, 1.0);
 `;
 
 export const skyFragmentShader = `
+precision highp float;
+
 varying vec2 vUv;
 uniform vec2 resolution;
 uniform vec3 sunDirection;
@@ -89,7 +91,10 @@ return pow(radius / dist, intensity);
 }
 
 float hash(vec2 p, float seed) {
-return fract(sin(dot(p + seed * 13.5, vec2(127.1, 311.7))) * 43758.5453123);
+// Mobile-friendly hash - avoids sin() with large multipliers which cause precision issues
+vec3 p3 = fract(vec3(p.xyx + seed) * 0.1031);
+p3 += dot(p3, p3.yzx + 33.33);
+return fract((p3.x + p3.y) * p3.z);
 }
 
 float noise(vec2 p, float seed) {
@@ -125,7 +130,7 @@ float cloudNoise(vec2 p, float time, float seed) {
 float getCloudLayer(vec3 rayDir, float time, float seed, float height) {
 if (rayDir.y < 0.15) return 0.0;
 float heightFactor = smoothstep(0.15, height, rayDir.y) * (1.0 - smoothstep(height, 0.6, rayDir.y));
-vec2 cloudPos = vec2(rayDir.x, rayDir.z) / rayDir.y * (height * 4.0);
+vec2 cloudPos = vec2(rayDir.x, rayDir.z) / max(rayDir.y, 0.15) * (height * 4.0);
 float density = cloudNoise(cloudPos, time, seed);
 density = smoothstep(0.6, 0.9, density);
 return density * heightFactor;
