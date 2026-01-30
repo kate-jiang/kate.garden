@@ -64,7 +64,6 @@ Exports typed configuration objects:
 - `nightConfig: ModeConfig` - Night mode colors, lighting intensities
 - `linkData: LinkDataItem[]` - Array of link labels, URLs, and actions
 - `qualityPresets: QualityPresets` - Device-tier quality settings (high/medium/low)
-- `getDeviceTier(): DeviceTier` - Detects device capability from UA/GPU
 
 ### nightMode.ts
 

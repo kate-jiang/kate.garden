@@ -1,6 +1,5 @@
 import * as THREE from "three";
-import { getGPUTier } from "detect-gpu";
-import type { Config, ModeConfig, LinkDataItem, QualityPresets, DeviceTier } from "@/types";
+import type { Config, ModeConfig, LinkDataItem } from "@/types";
 
 export const config: Config = {
   // Grass
@@ -116,46 +115,3 @@ export const linkData: LinkDataItem[] = [
   { label: "code", url: "https://github.com/kate-jiang" },
 ];
 
-// =============================================================================
-// QUALITY PRESETS & DEVICE DETECTION
-// =============================================================================
-
-export const qualityPresets: QualityPresets = {
-  high: {
-    instances: 90000,
-    particleCount: 5000,
-    grassCenter: { x: 0, z: 10 },
-  },
-  medium: {
-    instances: 40000,
-    particleCount: 2000,
-    grassCenter: { x: -10, z: 10 },
-  },
-  low: {
-    instances: 15000,
-    particleCount: 500,
-    grassCenter: { x: -10, z: 10 },
-  },
-};
-
-export async function getDeviceTier(): Promise<DeviceTier> {
-  try {
-    const gpuTier = await getGPUTier({
-      desktopTiers: [0, 15, 30, 60],
-      mobileTiers: [0, 15, 30, 60],
-    });
-
-    if (import.meta.env?.DEV) {
-      console.debug("[quality]", gpuTier);
-    }
-
-    // Map detect-gpu tiers (0-3) to our tiers
-    if (gpuTier.tier >= 3) return "high";
-    if (gpuTier.tier >= 1) return "medium";
-    return "low";
-  } catch {
-    // Fallback: desktop high, mobile medium
-    const isMobile = /Android/i.test(navigator.userAgent);
-    return isMobile ? "medium" : "high";
-  }
-}

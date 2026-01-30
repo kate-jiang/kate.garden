@@ -1,9 +1,41 @@
+// =============================================================================
+// EARLY DEVICE CHECK & REDIRECT
+// =============================================================================
+// This runs before Three.js imports to avoid loading heavy assets on slow devices
+
+import { getGPUTier } from "detect-gpu";
+
+async function getDeviceTier(): Promise<DeviceTier> {
+  try {
+    const gpuTier = await getGPUTier({
+      desktopTiers: [0, 15, 30, 60],
+      mobileTiers: [0, 15, 30, 60],
+    });
+
+    if (gpuTier.tier >= 3) return "high";
+    return "low";
+  } catch {
+    // Fallback: android low
+    return /Android/i.test(navigator.userAgent) ? "low" : "high";
+  }
+}
+
+const deviceTier = await getDeviceTier();
+if (deviceTier !== "high") {
+  window.location.replace("/lite.html");
+  throw new Error("Redirecting to lite version");
+}
+
+// =============================================================================
+// MAIN APPLICATION
+// =============================================================================
+
 import * as THREE from "three";
 import { FontLoader, Font } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-import { config, dayConfig, nightConfig, linkData, qualityPresets, getDeviceTier } from "@/config";
+import { config, dayConfig, nightConfig, linkData } from "@/config";
 import { createBackgroundScene } from "@/scene/background";
 import { createGround } from "@/scene/ground";
 import { createGrass } from "@/scene/grass";
@@ -16,14 +48,14 @@ import type {
   Track,
   LinkDataItem,
   GrassTextures,
+  DeviceTier,
 } from "@/types";
 
 // =============================================================================
 // DERIVED VALUES & STATE
 // =============================================================================
 
-const deviceTier = await getDeviceTier();
-const qualityPreset = qualityPresets[deviceTier];
+// Device tier already checked at top - only "high" reaches here
 
 // // Show lite version button for medium/low device tiers
 // if (deviceTier !== "high") {
@@ -131,7 +163,7 @@ controls.enableDamping = true;
 controls.enablePan = false;
 controls.enableZoom = false;
 controls.enableRotate = true;
-controls.autoRotate = deviceTier === "high";
+controls.autoRotate = true;
 controls.minDistance = config.minDistance;
 controls.maxDistance = config.maxDistance;
 controls.autoRotateSpeed = config.autoRotateSpeed;
@@ -840,8 +872,7 @@ const { mesh: grass, material: grassMaterial } = createGrass(
   camera,
   sunDirection,
   delta,
-  pos,
-  qualityPreset
+  pos
 );
 scene.add(grass);
 
@@ -854,7 +885,7 @@ const {
   material: particleMaterial,
   velocities: particleVelocities,
   geometry: particleGeometry,
-} = createParticles(config, dayConfig, qualityPreset);
+} = createParticles(config, dayConfig);
 scene.add(particles);
 
 // =============================================================================

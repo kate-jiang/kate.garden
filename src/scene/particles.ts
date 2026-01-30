@@ -1,16 +1,12 @@
 import * as THREE from "three";
-import type { Config, ModeConfig, QualityPreset, ParticlesResult } from "@/types";
+import type { Config, ModeConfig, ParticlesResult } from "@/types";
 
 // =============================================================================
 // WIND PARTICLES
 // =============================================================================
 
-export function createParticles(
-  config: Config,
-  dayConfig: ModeConfig,
-  qualityPreset?: QualityPreset
-): ParticlesResult {
-  const particleCount = qualityPreset?.particleCount ?? config.particleCount;
+export function createParticles(config: Config, dayConfig: ModeConfig): ParticlesResult {
+  const particleCount = config.particleCount;
   const geometry = new THREE.BufferGeometry();
   const positions = new Float32Array(particleCount * 3);
   const velocities = new Float32Array(particleCount * 3);

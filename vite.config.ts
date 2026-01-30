@@ -7,7 +7,13 @@ export default defineConfig({
     host: true
   },
   build: {
-    outDir: 'dist'
+    outDir: 'dist',
+    rollupOptions: {
+      input: {
+        main: new URL('index.html', import.meta.url).pathname,
+        lite: new URL('lite.html', import.meta.url).pathname,
+      },
+    },
   },
   resolve: {
     alias: {

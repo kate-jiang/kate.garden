@@ -1,13 +1,6 @@
 import * as THREE from "three";
 import { createGrassVertexShader, grassFragmentShader } from "@/shaders";
-import type {
-  Config,
-  ModeConfig,
-  QualityPreset,
-  GrassResult,
-  GrassTextures,
-  GrassUniforms,
-} from "@/types";
+import type { Config, ModeConfig, GrassResult, GrassTextures, GrassUniforms } from "@/types";
 
 // =============================================================================
 // GRASS GEOMETRY
@@ -84,8 +77,7 @@ export function createGrassBaseGeometry(config: Config): THREE.PlaneGeometry {
 
 export function createGrassInstances(
   config: Config,
-  grassBaseGeometry: THREE.PlaneGeometry,
-  qualityPreset?: QualityPreset
+  grassBaseGeometry: THREE.PlaneGeometry
 ): THREE.InstancedBufferGeometry {
   const instancedGeometry = new THREE.InstancedBufferGeometry();
   instancedGeometry.index = grassBaseGeometry.index;
@@ -98,20 +90,16 @@ export function createGrassInstances(
   const scales: number[] = [];
   const halfRootAngles: number[] = [];
 
-  // Use preset values if provided, otherwise fall back to config defaults
-  const instanceCount = qualityPreset ? qualityPreset.instances : config.instances;
-  const centerX = qualityPreset ? qualityPreset.grassCenter.x : 0;
-  const centerZ = qualityPreset ? qualityPreset.grassCenter.z : 0;
   const maxRadius = config.width / 2;
 
-  for (let i = 0; i < instanceCount; i++) {
-    indices.push(i / instanceCount);
+  for (let i = 0; i < config.instances; i++) {
+    indices.push(i / config.instances);
 
     // Radial center-weighted distribution
     const angle = Math.random() * Math.PI * 2;
     const r = Math.pow(Math.random(), 0.7) * maxRadius; // bias toward center
-    const x = centerX + Math.cos(angle) * r;
-    const z = centerZ + Math.sin(angle) * r;
+    const x = Math.cos(angle) * r;
+    const z = Math.sin(angle) * r;
 
     offsets.push(x, 0, z);
     const bladeAngle = Math.PI - Math.random() * (2 * Math.PI);
@@ -150,13 +138,12 @@ export function createGrass(
   camera: THREE.PerspectiveCamera,
   sunDirection: THREE.Vector3,
   delta: number,
-  pos: THREE.Vector2,
-  qualityPreset?: QualityPreset
+  pos: THREE.Vector2
 ): GrassResult {
   const { grassTexture, alphaMap, noiseTexture } = textures;
 
   const grassBaseGeometry = createGrassBaseGeometry(config);
-  const instancedGeometry = createGrassInstances(config, grassBaseGeometry, qualityPreset);
+  const instancedGeometry = createGrassInstances(config, grassBaseGeometry);
 
   const uniforms: GrassUniforms = {
     time: { value: 0 },
