@@ -10,66 +10,42 @@ interface Track {
 }
 
 // =============================================================================
-// CONTENT OVERLAY (ABOUT & MUSIC)
+// MODAL (native dialog)
 // =============================================================================
 
-const contentOverlay = document.getElementById("content-overlay") as HTMLElement;
-const contentClose = document.getElementById("content-close") as HTMLElement;
+const modal = document.getElementById("modal") as HTMLDialogElement;
+const modalClose = document.getElementById("modal-close") as HTMLElement;
 const aboutContent = document.getElementById("about-content") as HTMLElement;
 const musicContent = document.getElementById("music-content") as HTMLElement;
 
-function showOverlay(contentType: "about" | "music"): void {
-  aboutContent.style.display = "none";
-  musicContent.style.display = "none";
+function showModal(contentType: "about" | "music"): void {
+  aboutContent.classList.toggle("active", contentType === "about");
+  musicContent.classList.toggle("active", contentType === "music");
+  modal.showModal();
 
-  if (contentType === "about") {
-    aboutContent.style.display = "block";
-  } else if (contentType === "music") {
-    musicContent.style.display = "block";
+  if (contentType === "music") {
     setTimeout(() => {
-      const activeItem = playlistItems.querySelector(".playlist-item.active");
-      if (activeItem) {
-        activeItem.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+      playlistItems.querySelector(".playlist-item.active")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 100);
   }
-
-  contentOverlay.classList.add("visible");
-  document.body.classList.add("modal-open");
 }
 
-function hideOverlay(): void {
-  contentOverlay.classList.remove("visible");
-  document.body.classList.remove("modal-open");
-}
+modalClose.addEventListener("click", () => modal.close());
 
-contentClose.addEventListener("click", (e) => {
-  e.preventDefault();
-  hideOverlay();
-});
-
-contentOverlay.addEventListener("click", (e) => {
-  if (e.target === contentOverlay) {
-    e.preventDefault();
-    hideOverlay();
-  }
+modal.addEventListener("click", (e) => {
+  if (e.target === modal) modal.close();
 });
 
 // =============================================================================
 // LINK CLICK HANDLERS
 // =============================================================================
 
-document.querySelectorAll(".lite-links a").forEach((link) => {
+document.querySelectorAll<HTMLAnchorElement>(".lite-links a[data-action]").forEach((link) => {
   link.addEventListener("click", (e) => {
-    const action = (link as HTMLElement).dataset.action;
-    if (action === "showAbout") {
-      e.preventDefault();
-      showOverlay("about");
-    } else if (action === "showMusic") {
-      e.preventDefault();
-      showOverlay("music");
-    }
-    // External links (photo, code) will work normally
+    e.preventDefault();
+    const action = link.dataset.action;
+    if (action === "showAbout") showModal("about");
+    else if (action === "showMusic") showModal("music");
   });
 });
 
@@ -359,10 +335,7 @@ audioToggle.addEventListener("click", (e) => {
 });
 
 // Now playing click opens music panel
-nowPlaying.addEventListener("click", (e) => {
-  e.preventDefault();
-  showOverlay("music");
-});
+nowPlaying.addEventListener("click", () => showModal("music"));
 
 // Initialize
 initPlayer();
