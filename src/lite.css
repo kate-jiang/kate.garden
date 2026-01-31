@@ -320,6 +320,7 @@ body {
   position: absolute;
   top: 10px;
   right: 12px;
+  z-index: 1;
   width: 32px;
   height: 32px;
   background: transparent;
@@ -607,11 +608,11 @@ body {
 
 @media (max-width: 480px) {
   .lite-links {
-    gap: 24px;
+    gap: 18px;
   }
 
   .lite-links a {
-    font-size: 16px;
+    font-size: 20px;
   }
 
   #now-playing {
