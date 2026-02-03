@@ -188,8 +188,9 @@ function getIntersectedMeshes(): THREE.Intersection[] {
 function updateHoverStates(intersects: THREE.Intersection[]): void {
   const intersectedNames = new Set(intersects.map(i => i.object.name));
 
-  clickableMeshes.forEach(mesh => {
-    if (!mesh.name) return;
+  // Iterate over visual meshes only (hitboxes don't animate)
+  meshByUuid.forEach(mesh => {
+    if (!mesh.name || mesh.userData.isHitbox) return;
 
     const state = hoverState.get(mesh.uuid);
     const isHovered = intersectedNames.has(mesh.name);
@@ -952,6 +953,7 @@ function createLinkMeshes(
     // Center geometry so it scales from center
     const centerX = -width / 2;
     geometry.translate(centerX - bbox.min.x, -maxDescender, 1);
+    geometry.computeBoundingBox(); // Update bounding box after translation
 
     const linkMesh = new THREE.Mesh(geometry, textMaterial);
     linkMesh.castShadow = true;
@@ -967,7 +969,7 @@ function createLinkMeshes(
     item.light = linkLight;
 
     textMesh.add(linkMesh);
-    registerClickableMesh(linkMesh);
+    meshByUuid.set(linkMesh.uuid, linkMesh);
 
     const linkBox = geometry.boundingBox!;
     const linkW = linkBox.max.x - linkBox.min.x;
@@ -976,11 +978,12 @@ function createLinkMeshes(
       new THREE.PlaneGeometry(linkW + 1, linkH + 0.8),
       new THREE.MeshBasicMaterial({ visible: false })
     );
-    // Center hitbox on the link
-    linkHitbox.position.set(currentX + width / 2, -2.5, 0.5);
+    // Center hitbox on the link (mesh y + geometry center)
+    linkHitbox.position.set(currentX + width / 2, (linkBox.min.y + linkBox.max.y) / 2 - 2.5, 0.5);
     linkHitbox.name = item.label;
     linkHitbox.userData.url = item.url;
     linkHitbox.userData.action = item.action;
+    linkHitbox.userData.isHitbox = true;
     textMesh.add(linkHitbox);
     registerClickableMesh(linkHitbox);
 
@@ -1032,7 +1035,7 @@ fontLoader.load("/fonts/helvetiker_regular.typeface.json", function (font: Font)
   textMesh.name = "floatingText";
   textMesh.userData.url = null;
   textGroup.add(textMesh);
-  registerClickableMesh(textMesh);
+  meshByUuid.set(textMesh.uuid, textMesh);
 
   // Create hitbox for main text
   const textBox = textGeometry.boundingBox!;
@@ -1042,10 +1045,11 @@ fontLoader.load("/fonts/helvetiker_regular.typeface.json", function (font: Font)
     new THREE.PlaneGeometry(textWidth + 1, textHeight + 1),
     new THREE.MeshBasicMaterial({ visible: false })
   );
-  // Position in local space: centered on text geometry
-  textHitbox.position.set(0, textHeight / 2, 1.5);
+  // Position in local space: centered on text geometry's bounding box
+  textHitbox.position.set(0, (textBox.min.y + textBox.max.y) / 2, 1.5);
   textHitbox.name = "floatingText";
   textHitbox.userData.url = null;
+  textHitbox.userData.isHitbox = true;
   textMesh.add(textHitbox);
   registerClickableMesh(textHitbox);
 
@@ -1138,7 +1142,7 @@ function updateParticles(dt: number): void {
 function updateHoverAnimations(): void {
   hoverState.forEach((state, uuid) => {
     const mesh = meshByUuid.get(uuid);
-    if (mesh) {
+    if (mesh && !mesh.userData.isHitbox) {
       state.current += (state.target - state.current) * config.hoverEase;
       mesh.scale.setScalar(state.current);
     }
