@@ -35,12 +35,12 @@ import { FontLoader, Font } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
-import { config, dayConfig, nightConfig, linkData } from "@/config";
-import { createBackgroundScene } from "@/scene/background";
-import { createGround } from "@/scene/ground";
 import { createGrass } from "@/scene/grass";
+import { createGround } from "@/scene/ground";
 import { createParticles } from "@/scene/particles";
-import { updateNightMode, applyInitialNightMode } from "@/nightMode";
+import { createBackgroundScene } from "@/scene/background";
+import { updateNightMode, applyInitialNightMode } from "@/scene/night";
+import { config, dayConfig, nightConfig, linkData } from "@/config";
 import type {
   HoverState,
   NightModeState,
@@ -54,18 +54,6 @@ import type {
 // =============================================================================
 // DERIVED VALUES & STATE
 // =============================================================================
-
-// Device tier already checked at top - only "high" reaches here
-
-// // Show lite version button for medium/low device tiers
-// if (deviceTier !== "high") {
-//   const liteVersionBtn = document.getElementById("lite-version");
-//   if (liteVersionBtn) {
-//     liteVersionBtn.classList.remove("hidden");
-//     // Fade in after a short delay
-//     setTimeout(() => liteVersionBtn.classList.add("visible"), 600);
-//   }
-// }
 
 let textGroupRef: THREE.Group | null = null;
 let textMaterialRef: THREE.MeshPhongMaterial | null = null;
@@ -488,7 +476,7 @@ const playlist: Track[] = [
   {
     title: "Children's Corner, L. 113: I",
     artist: "Claude Debussy, kate",
-    src: "/music/childrens.mp3",
+    src: "/music/childrens_corner.mp3",
     duration: "2:38",
   },
 ];
@@ -992,7 +980,7 @@ function createLinkMeshes(
   });
 }
 
-fontLoader.load("/fonts/helvetiker_regular.typeface.json", function (font: Font) {
+fontLoader.load("/helvetiker.json", function (font: Font) {
   // Create a group to hold everything - this handles position and camera-facing
   const textGroup = new THREE.Group();
   textGroup.position.set(0, config.textYPosition, config.textZPosition);
@@ -1294,7 +1282,7 @@ document.addEventListener(
 
 // Apply initial night mode
 syncNightModeState();
-applyInitialNightMode(nightModeState, nightModeRefs, dayConfig, nightConfig);
+applyInitialNightMode(nightModeState, nightModeRefs, nightConfig);
 syncFromNightModeState();
 
 animate();

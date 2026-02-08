@@ -1,10 +1,15 @@
 import * as THREE from "three";
-import { lerpValue, lerpVector3 } from "@/utils";
 import type { ModeConfig, NightModeState, NightModeRefs } from "@/types";
 
-// =============================================================================
-// NIGHT MODE TRANSITION
-// =============================================================================
+function lerpValue(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
+}
+
+function lerpVector3(target: THREE.Vector3, a: THREE.Vector3, b: THREE.Vector3, t: number): void {
+  target.x = lerpValue(a.x, b.x, t);
+  target.y = lerpValue(a.y, b.y, t);
+  target.z = lerpValue(a.z, b.z, t);
+}
 
 export function updateNightMode(
   dt: number,
@@ -20,25 +25,25 @@ export function updateNightMode(
     return;
   }
 
-  // Animate transition
+  // Transition progress
   const direction = state.nightTransitionTarget > state.nightTransition ? 1 : -1;
   state.nightTransition = Math.max(0, Math.min(1, state.nightTransition + direction * 0.6 * dt));
 
-  // Ease in-out cubic for smooth feel
+  // Ease in-out cubic
   const t = state.nightTransition;
   const easedT = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
-  // Dramatically accelerate clouds and particles during transition - peaks in the middle, eases at edges
-  const speedCurve = Math.pow(Math.sin(t * Math.PI), 2); // gentler bell curve
+  // Ramp clouds and particles during transition
+  const speedCurve = Math.pow(Math.sin(t * Math.PI), 2);
   state.cloudTimeOffset += dt * 100 * speedCurve;
-  state.particleSpeedBoost = 8 * speedCurve; // 8x speed boost at peak
+  state.particleSpeedBoost = 8 * speedCurve;
 
-  // Interpolate sun
+  // Sun
   const elevation = lerpValue(dayConfig.elevation, nightConfig.elevation, easedT);
   const azimuth = lerpValue(dayConfig.azimuth, nightConfig.azimuth, easedT);
   state.sunDirection.set(Math.sin(azimuth), Math.sin(elevation), -Math.cos(azimuth));
 
-  // Interpolate sky shader uniforms
+  // Sky shader
   lerpVector3(
     refs.backgroundMaterial.uniforms.skyColour.value,
     dayConfig.skyColour,
@@ -77,7 +82,7 @@ export function updateNightMode(
   );
   refs.backgroundMaterial.uniforms.starIntensity.value = easedT;
 
-  // Interpolate lighting
+  // Lighting
   refs.ambientLight.intensity = lerpValue(
     dayConfig.ambientIntensity,
     nightConfig.ambientIntensity,
@@ -94,7 +99,7 @@ export function updateNightMode(
     easedT
   );
 
-  // Interpolate particle opacity, color, and speed (sweep away at night)
+  // Particles
   refs.particleMaterial.opacity = lerpValue(
     dayConfig.particleOpacity,
     nightConfig.particleOpacity,
@@ -109,14 +114,13 @@ export function updateNightMode(
     easedT
   );
 
-  // Interpolate tone mapping exposure
   refs.renderer.toneMappingExposure = lerpValue(
     dayConfig.toneMappingExposure,
     nightConfig.toneMappingExposure,
     easedT
   );
 
-  // Interpolate text material (warm glow at night)
+  // Text
   if (refs.textMaterialRef) {
     const dayTextColor = new THREE.Color(dayConfig.textColor);
     const nightTextColor = new THREE.Color(nightConfig.textColor);
@@ -133,14 +137,14 @@ export function updateNightMode(
     );
   }
 
-  // Interpolate grass brightness
+  // Grass
   refs.grassMaterial.uniforms.grassBrightness.value = lerpValue(
     dayConfig.grassBrightness,
     nightConfig.grassBrightness,
     easedT
   );
 
-  // Interpolate text-specific lighting for night readability
+  // Text lights
   refs.textLight.intensity = lerpValue(
     dayConfig.textLightIntensity,
     nightConfig.textLightIntensity,
@@ -153,11 +157,9 @@ export function updateNightMode(
   );
 }
 
-// Apply initial night mode state if loaded from localStorage
 export function applyInitialNightMode(
   state: NightModeState,
   refs: NightModeRefs,
-  dayConfig: ModeConfig,
   nightConfig: ModeConfig
 ): void {
   if (state.isNightMode) {
@@ -185,14 +187,12 @@ export function applyInitialNightMode(
     refs.renderer.toneMappingExposure = nightConfig.toneMappingExposure;
     refs.grassMaterial.uniforms.grassBrightness.value = nightConfig.grassBrightness;
 
-    // Set text material (if already loaded)
     if (refs.textMaterialRef) {
       refs.textMaterialRef.color.set(nightConfig.textColor);
       refs.textMaterialRef.emissive.set(nightConfig.textEmissive);
       refs.textMaterialRef.emissiveIntensity = nightConfig.textEmissiveIntensity;
     }
 
-    // Set text-specific lighting for night readability
     refs.textLight.intensity = nightConfig.textLightIntensity;
     refs.rimLight.intensity = nightConfig.rimLightIntensity;
   }

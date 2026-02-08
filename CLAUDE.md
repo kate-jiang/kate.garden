@@ -68,7 +68,7 @@ Exports typed configuration objects:
 ### nightMode.ts
 
 - `updateNightMode(dt, state, refs, dayConfig, nightConfig): void` - Animates transition each frame
-- `applyInitialNightMode(state, refs, dayConfig, nightConfig): void` - Sets initial state from localStorage
+- `applyInitialNightMode(state, refs, nightConfig): void` - Sets initial state from localStorage
 
 Transition interpolates: sky colors, fog, clouds, sun position, star intensity, lighting, particles, text materials, grass brightness, tone mapping exposure. Clouds and particles accelerate dramatically mid-transition.
 
@@ -130,7 +130,7 @@ OrbitControls: auto-rotation (-0.06 speed), distance locked at 50, polar angle 1
 ## Asset Dependencies
 
 Required in `/public`:
-- `/fonts/helvetiker_regular.typeface.json` - Text geometry font
+- `/helvetiker.json` - Text geometry font
 - `/textures/blade_diffuse.jpg` - Grass color
 - `/textures/blade_alpha.jpg` - Grass transparency
 - `/textures/perlinFbm.jpg` - Terrain noise

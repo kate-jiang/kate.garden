@@ -117,7 +117,7 @@ const playlist: Track[] = [
   {
     title: "Children's Corner, L. 113: I",
     artist: "Claude Debussy, kate",
-    src: "/music/childrens.mp3",
+    src: "/music/childrens_corner.mp3",
     duration: "2:38",
   },
 ];
