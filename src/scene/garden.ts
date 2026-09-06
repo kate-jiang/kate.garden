@@ -23,7 +23,7 @@ export async function createGarden(options: {
   canvas: HTMLCanvasElement;
   getNightMode(): boolean;
   signal: AbortSignal;
-  onAction(action: SiteAction): void;
+  onAction(action: SiteAction, trigger: HTMLElement): void;
   onGesture(): void;
   onError(error: unknown): void;
 }): Promise<Garden> {
@@ -108,9 +108,9 @@ export async function createGarden(options: {
         targets: text.targets,
         onGesture,
         onHover: text.setHovered,
-        onAction(action) {
+        onAction(action, trigger) {
           if (action.type === "animate") text.triggerAnimation();
-          else onAction(action);
+          else onAction(action, trigger);
         },
       })
     );

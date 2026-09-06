@@ -39,6 +39,7 @@ export function bindPlayerView(options: {
   const rows = player.playlist.map((track, index) => {
     const row = document.createElement("button");
     row.type = "button";
+    row.tabIndex = 0;
     row.className = "playlist-item";
     const info = document.createElement("span");
     info.className = "playlist-item-info";
