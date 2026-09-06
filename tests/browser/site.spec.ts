@@ -60,6 +60,10 @@ test("garden renders, routes pointer input, and persists theme choice", async ({
   await page.getByRole("button", { name: "Close", exact: true }).click();
   await expect(page.locator("#webgl")).toBeFocused();
   await expect(page.getByRole("navigation", { name: "Main navigation" })).toHaveCount(0);
+  for (const label of ["about", "music", "photo", "code"]) {
+    await page.keyboard.press("Tab");
+    await expect(page.locator("#webgl").getByText(label, { exact: true })).toBeFocused();
+  }
   await page.keyboard.press("Tab");
   await expect(page.getByRole("button", { name: "Toggle night mode" })).toBeFocused();
   await page.keyboard.press("Enter");
@@ -147,7 +151,9 @@ test("garden disposal cancels frames and allows a fresh instance", async ({ page
     const first = await createGarden(options);
     await new Promise(request);
     const active = pending.size;
+    const focusTargets = canvas.children.length;
     first.dispose();
+    const disposedTargets = canvas.children.length;
     await new Promise(request);
     const stopped = pending.size;
     const second = await createGarden(options);
@@ -155,8 +161,10 @@ test("garden disposal cancels frames and allows a fresh instance", async ({ page
     second.dispose();
     await new Promise(request);
     canvas.remove();
-    return { active, stopped, final: pending.size };
+    return { active, stopped, final: pending.size, focusTargets, disposedTargets };
   });
+  expect(result.focusTargets).toBe(4);
+  expect(result.disposedTargets).toBe(0);
   expect(result.active).toBeGreaterThan(0);
   expect(result.stopped).toBe(0);
   expect(result.final).toBe(0);

@@ -43,7 +43,7 @@ export function createInteraction(options: {
   canvas: HTMLCanvasElement;
   camera: THREE.Camera;
   targets: readonly InteractionTarget[];
-  onAction(action: InteractionTarget["action"]): void;
+  onAction(action: InteractionTarget["action"], trigger: HTMLElement): void;
   onHover(targets: Set<InteractionTarget>): void;
   onGesture(): void;
 }) {
@@ -55,6 +55,41 @@ export function createInteraction(options: {
   const byHitbox = new Map(targets.map(target => [target.hitbox, target]));
   let pendingHover = 0;
   let enabled = true;
+  let pointerTargets: InteractionTarget[] = [];
+  const focusTargets = new Map<HTMLElement, InteractionTarget>();
+  function updateHover() {
+    const focused = focusTargets.get(document.activeElement as HTMLElement);
+    onHover(new Set(enabled ? (focused ? [focused] : pointerTargets) : []));
+  }
+  // Canvas fallback controls provide native tab stops without visible DOM overlays.
+  for (const target of targets) {
+    if (target.action.type === "animate") continue;
+    const control = document.createElement(target.action.type === "link" ? "a" : "button");
+    control.textContent = target.visual.name;
+    control.tabIndex = 0;
+    if (control instanceof HTMLAnchorElement && target.action.type === "link") {
+      control.href = target.action.url;
+      control.target = "_blank";
+      control.rel = "noopener noreferrer";
+    } else if (control instanceof HTMLButtonElement) {
+      control.type = "button";
+      control.setAttribute("aria-haspopup", "dialog");
+    }
+    control.addEventListener("focus", updateHover, { signal: events.signal });
+    control.addEventListener("blur", updateHover, { signal: events.signal });
+    control.addEventListener(
+      "click",
+      event => {
+        event.preventDefault();
+        if (!enabled) return;
+        onGesture();
+        onAction(target.action, control);
+      },
+      { signal: events.signal }
+    );
+    focusTargets.set(control, target);
+    canvas.append(control);
+  }
   function hits() {
     raycaster.setFromCamera(pointer, camera);
     return raycaster
@@ -71,7 +106,8 @@ export function createInteraction(options: {
   function reset() {
     cancelAnimationFrame(pendingHover);
     pendingHover = 0;
-    onHover(new Set());
+    pointerTargets = [];
+    updateHover();
     canvas.style.cursor = "default";
   }
   canvas.addEventListener(
@@ -83,9 +119,9 @@ export function createInteraction(options: {
       canvas.setPointerCapture(event.pointerId);
       onGesture();
       updatePointer(event);
-      const hovered = hits();
-      onHover(new Set(hovered));
-      canvas.style.cursor = hovered.length ? "pointer" : "default";
+      pointerTargets = hits();
+      updateHover();
+      canvas.style.cursor = pointerTargets.length ? "pointer" : "default";
     },
     { signal: events.signal }
   );
@@ -100,9 +136,9 @@ export function createInteraction(options: {
         pendingHover = requestAnimationFrame(() => {
           pendingHover = 0;
           if (!enabled || gesture.active) return;
-          const hovered = hits();
-          onHover(new Set(hovered));
-          canvas.style.cursor = hovered.length ? "pointer" : "default";
+          pointerTargets = hits();
+          updateHover();
+          canvas.style.cursor = pointerTargets.length ? "pointer" : "default";
         });
       }
     },
@@ -114,7 +150,7 @@ export function createInteraction(options: {
       if (enabled && gesture.end(event.pointerId, event.clientX, event.clientY)) {
         updatePointer(event);
         const target = hits()[0];
-        if (target) onAction(target.action);
+        if (target) onAction(target.action, canvas);
       }
       if (event.pointerType === "touch") reset();
     },
@@ -148,12 +184,14 @@ export function createInteraction(options: {
   return {
     setEnabled(value: boolean) {
       enabled = value;
+      for (const control of focusTargets.keys()) control.inert = !enabled;
       gesture.cancel();
       reset();
     },
     dispose() {
       events.abort();
-      cancelAnimationFrame(pendingHover);
+      for (const control of focusTargets.keys()) control.remove();
+      focusTargets.clear();
       reset();
     },
   };

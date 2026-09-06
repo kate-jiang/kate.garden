@@ -199,7 +199,6 @@ body {
   color: #fff;
 }
 #modal-close:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.7);
   outline-offset: 2px;
 }
 [hidden] {
@@ -210,7 +209,7 @@ body[data-page="lite"] .garden-only {
   display: none !important;
 }
 :focus-visible {
-  outline: 2px solid #b8f839;
+  outline: 2px solid rgba(255, 255, 255, 0.7);
   outline-offset: 4px;
 }
 #now-playing {

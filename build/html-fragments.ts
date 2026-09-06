@@ -63,8 +63,8 @@ export function htmlFragments(): Plugin {
         const navigation = links
           .map(({ label, action }) =>
             action.type === "link"
-              ? `<a href="${escape(action.url)}" target="_blank" rel="noopener noreferrer">${escape(label)}</a>`
-              : `<button type="button" data-panel="${action.panel}">${escape(label)}</button>`
+              ? `<a href="${escape(action.url)}" target="_blank" rel="noopener noreferrer" tabindex="0">${escape(label)}</a>`
+              : `<button type="button" tabindex="0" data-panel="${action.panel}">${escape(label)}</button>`
           )
           .join("\n");
         html = html.replace(

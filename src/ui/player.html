@@ -9,6 +9,7 @@
   <span class="time-current">0:00</span>
   <input
     type="range"
+    tabindex="0"
     class="progress-bar"
     aria-label="Playback position"
     min="0"
@@ -20,12 +21,12 @@
 </div>
 
 <div class="player-controls">
-  <button class="control-btn prev-btn" aria-label="Previous track">
+  <button class="control-btn prev-btn" aria-label="Previous track" tabindex="0">
     <svg viewBox="0 0 24 24" fill="currentColor">
       <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
     </svg>
   </button>
-  <button class="control-btn play-pause-btn" aria-label="Play">
+  <button class="control-btn play-pause-btn" aria-label="Play" tabindex="0">
     <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
       <path d="M8 5v14l11-7z" />
     </svg>
@@ -33,7 +34,7 @@
       <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
     </svg>
   </button>
-  <button class="control-btn next-btn" aria-label="Next track">
+  <button class="control-btn next-btn" aria-label="Next track" tabindex="0">
     <svg viewBox="0 0 24 24" fill="currentColor">
       <path d="M7 6v12l8.5-6z" />
       <path d="M17 6h2v12h-2z" />

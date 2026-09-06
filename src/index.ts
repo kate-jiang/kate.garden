@@ -61,7 +61,7 @@ async function start() {
       canvas,
       getNightMode: night.get,
       signal: lifetime.signal,
-      onAction: action => ui.handleAction(action, canvas),
+      onAction: ui.handleAction,
       onGesture: ui.resumeAudio,
       onError: fallback,
     });
