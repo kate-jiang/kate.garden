@@ -186,17 +186,21 @@ body {
   z-index: 1;
   width: 32px;
   height: 32px;
+  display: grid;
+  place-items: center;
   background: transparent;
   border: none;
   border-radius: 50%;
-  font-size: 24px;
   color: rgba(255, 255, 255, 0.5);
   cursor: pointer;
   transition: color 0.2s ease;
-  line-height: 1;
 }
 #modal-close:hover {
   color: #fff;
+}
+#modal-close:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 2px;
 }
 [hidden] {
   display: none !important;
