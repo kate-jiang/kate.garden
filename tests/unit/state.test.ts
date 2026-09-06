@@ -5,21 +5,77 @@ import { createPreference } from "../../src/services/preferences";
 import { createPointerGesture } from "../../src/scene/interaction";
 import { fetchViewCount } from "../../src/services/views";
 
-test("only the high device tier enters the garden", async () => {
-  for (const [tier, expected] of [
-    [0, false],
-    [1, false],
-    [2, false],
-    [3, true],
-  ] as const)
-    assert.equal(await shouldUseGarden(async () => ({ tier })), expected);
-  assert.equal(
-    await shouldUseGarden(async () => {
-      throw new Error("GPU unavailable");
-    }),
-    false
-  );
-  assert.equal(await shouldUseGarden(() => new Promise(() => {}), 1), false);
+const safari =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.6.2 Safari/605.1.15";
+
+for (const userAgent of ["", safari]) {
+  test(`only high benchmark tiers enter the garden (${userAgent ? "Safari" : "other"})`, async () => {
+    for (const [tier, expected] of [
+      [0, false],
+      [1, false],
+      [2, false],
+      [3, true],
+    ] as const)
+      assert.equal(
+        await shouldUseGarden(async () => ({ tier, type: "BENCHMARK" }), 100, userAgent),
+        expected
+      );
+    for (const type of ["WEBGL_UNSUPPORTED", "BLOCKLISTED", "SSR"] as const)
+      assert.equal(await shouldUseGarden(async () => ({ tier: 0, type }), 100, userAgent), false);
+  });
+}
+
+test("unknown GPU detection defaults only Apple Safari to the garden", async () => {
+  for (const [userAgent, expected] of [
+    [safari, true],
+    [
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1",
+      true,
+    ],
+    [
+      "Mozilla/5.0 (iPad; CPU OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1",
+      true,
+    ],
+    [
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      false,
+    ],
+    [
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/140.0.0.0 Mobile/15E148 Safari/604.1",
+      false,
+    ],
+    [
+      "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/140.0.0.0 Mobile Safari/537.36",
+      false,
+    ],
+    ["", false],
+  ] as const) {
+    assert.equal(
+      await shouldUseGarden(
+        async () => ({ tier: 1, type: "FALLBACK", gpu: "apple gpu (Apple GPU)" }),
+        100,
+        userAgent
+      ),
+      expected,
+      userAgent
+    );
+    assert.equal(
+      await shouldUseGarden(
+        async () => {
+          throw new Error("GPU unavailable");
+        },
+        100,
+        userAgent
+      ),
+      expected,
+      userAgent
+    );
+    assert.equal(
+      await shouldUseGarden(() => new Promise(() => {}), 1, userAgent),
+      expected,
+      userAgent
+    );
+  }
 });
 
 test("preferences validate saved values and survive unavailable storage", context => {
