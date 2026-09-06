@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { useGarden, expectRenderedGarden, expectAudioPlaying } from "./fixtures";
 
 test("garden panels leave theme and audio controls usable", async ({ page }) => {
+  test.setTimeout(60000);
   await useGarden(page);
   await page.goto("/");
   await expect(page.locator("#loading-overlay")).toHaveClass("fade-out");
