@@ -17,8 +17,18 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "types": ["node", "vite/client"]
   },
-  "include": ["src/**/*.ts"],
+  "include": [
+    "src/**/*.ts",
+    "build/**/*.ts",
+    "functions/**/*.ts",
+    "tests/**/*.ts",
+    "vite.config.ts",
+    "playwright.config.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

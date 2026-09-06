@@ -1,10 +1,8 @@
+import { disposeObject } from "./resources";
 import * as THREE from "three";
 import { groundVertexPrefix } from "@/shaders";
-import type { Config, GroundResult } from "@/types";
-
-// =============================================================================
-// GROUND MESH
-// =============================================================================
+import type { Config } from "./config";
+import type { GroundResult } from "./types";
 
 export function createGround(
   config: Config,
@@ -34,9 +32,6 @@ export function createGround(
     shininess: 10,
   });
 
-  // Shader reference to be captured
-  let groundShader: THREE.WebGLProgramParametersWithUniforms | null = null;
-
   groundMaterial.onBeforeCompile = function (shader) {
     shader.uniforms.delta = { value: delta };
     shader.uniforms.posX = { value: pos.x };
@@ -61,17 +56,15 @@ export function createGround(
       "#include <begin_vertex>",
       `vec3 transformed = vec3(pos);`
     );
-    groundShader = shader;
   };
 
   const mesh = new THREE.Mesh(groundGeometry, groundMaterial);
   mesh.receiveShadow = true;
   mesh.geometry.computeVertexNormals();
 
-  // Return a getter for the shader since it's captured async in onBeforeCompile
   return {
     mesh,
     material: groundMaterial,
-    getShader: () => groundShader,
+    dispose: () => disposeObject(mesh),
   };
 }
