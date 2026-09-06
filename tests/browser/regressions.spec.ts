@@ -1,6 +1,38 @@
 import { test, expect } from "@playwright/test";
 import { useGarden, expectRenderedGarden, expectAudioPlaying } from "./fixtures";
 
+for (const width of [390, 1280]) {
+  test(`dialog close icon is centered with neutral keyboard focus at ${width}px`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto("/lite.html");
+    const about = page.getByRole("button", { name: "about", exact: true });
+    await about.focus();
+    await about.press("Enter");
+    const close = page.getByRole("button", { name: "Close", exact: true });
+    await expect(close).toBeFocused();
+    await expect(close).toHaveCSS("outline-style", "solid");
+    await expect(close).toHaveCSS("outline-width", "2px");
+    await expect(close).toHaveCSS("outline-color", "rgba(255, 255, 255, 0.7)");
+    await expect
+      .poll(() =>
+        close.evaluate(button => {
+          const outer = button.getBoundingClientRect();
+          const icon = button.querySelector("svg")!.getBoundingClientRect();
+          return Math.max(
+            Math.abs(icon.x + icon.width / 2 - (outer.x + outer.width / 2)),
+            Math.abs(icon.y + icon.height / 2 - (outer.y + outer.height / 2))
+          );
+        })
+      )
+      .toBeLessThan(0.5);
+    await close.press("Enter");
+    await expect(page.getByRole("dialog")).not.toBeVisible();
+    await expect(about).toBeFocused();
+  });
+}
+
 test("garden panels leave theme and audio controls usable", async ({ page }) => {
   test.setTimeout(60000);
   await useGarden(page);
