@@ -1,10 +1,9 @@
+import { disposeObject } from "./resources";
 import * as THREE from "three";
 import { createGrassVertexShader, grassFragmentShader } from "@/shaders";
-import type { Config, ModeConfig, GrassResult, GrassTextures, GrassUniforms } from "@/types";
-
-// =============================================================================
-// GRASS GEOMETRY
-// =============================================================================
+import type { Config, ModeConfig } from "./config";
+import type { GrassResult, GrassTextures } from "./types";
+import type { GrassUniforms } from "./uniforms";
 
 export function createGrassBaseGeometry(config: Config): THREE.PlaneGeometry {
   const grassBaseGeometry = new THREE.PlaneGeometry(
@@ -71,10 +70,6 @@ export function createGrassBaseGeometry(config: Config): THREE.PlaneGeometry {
   return grassBaseGeometry;
 }
 
-// =============================================================================
-// GRASS INSTANCING
-// =============================================================================
-
 export function createGrassInstances(
   config: Config,
   grassBaseGeometry: THREE.PlaneGeometry
@@ -127,10 +122,6 @@ export function createGrassInstances(
   return instancedGeometry;
 }
 
-// =============================================================================
-// GRASS MATERIAL & MESH
-// =============================================================================
-
 export function createGrass(
   config: Config,
   dayConfig: ModeConfig,
@@ -175,5 +166,5 @@ export function createGrass(
 
   const mesh = new THREE.Mesh(instancedGeometry, material);
 
-  return { mesh, material };
+  return { mesh, material, dispose: () => disposeObject(mesh) };
 }

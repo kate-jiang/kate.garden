@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import type * as THREE from "three";
 import type { IUniform } from "three";
 
 export interface SkyUniforms extends Record<string, IUniform<unknown>> {
@@ -36,13 +36,4 @@ export interface GrassUniforms extends Record<string, IUniform<unknown>> {
   lightColour: IUniform<THREE.Vector3>;
   specularColour: IUniform<THREE.Vector3>;
   grassBrightness: IUniform<number>;
-}
-
-export interface GroundUniforms extends Record<string, IUniform<unknown>> {
-  delta: IUniform<number>;
-  posX: IUniform<number>;
-  posZ: IUniform<number>;
-  radius: IUniform<number>;
-  width: IUniform<number>;
-  noiseTexture: IUniform<THREE.Texture>;
 }

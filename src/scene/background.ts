@@ -1,10 +1,9 @@
+import { disposeObject } from "./resources";
 import * as THREE from "three";
 import { skyVertexShader, skyFragmentShader } from "@/shaders";
-import type { Config, ModeConfig, BackgroundSceneResult, SkyUniforms } from "@/types";
-
-// =============================================================================
-// BACKGROUND SCENE (SKY)
-// =============================================================================
+import type { Config, ModeConfig } from "./config";
+import type { BackgroundSceneResult } from "./types";
+import type { SkyUniforms } from "./uniforms";
 
 export function createBackgroundScene(
   config: Config,
@@ -41,5 +40,5 @@ export function createBackgroundScene(
   const mesh = new THREE.Mesh(geometry, material);
   scene.add(mesh);
 
-  return { scene, material, mesh };
+  return { scene, material, mesh, dispose: () => disposeObject(scene) };
 }

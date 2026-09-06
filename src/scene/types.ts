@@ -1,28 +1,23 @@
-import * as THREE from "three";
-import type { SkyUniforms, GrassUniforms } from "@/types/uniforms";
+import type * as THREE from "three";
+import type { SkyUniforms, GrassUniforms } from "./uniforms";
 
 export interface BackgroundSceneResult {
+  dispose(): void;
   scene: THREE.Scene;
   material: THREE.ShaderMaterial & { uniforms: SkyUniforms };
   mesh: THREE.Mesh;
 }
 
 export interface GroundResult {
+  dispose(): void;
   mesh: THREE.Mesh;
   material: THREE.MeshPhongMaterial;
-  getShader: () => THREE.WebGLProgramParametersWithUniforms | null;
 }
 
 export interface GrassResult {
+  dispose(): void;
   mesh: THREE.Mesh;
   material: THREE.RawShaderMaterial & { uniforms: GrassUniforms };
-}
-
-export interface ParticlesResult {
-  mesh: THREE.Points;
-  material: THREE.PointsMaterial;
-  velocities: Float32Array;
-  geometry: THREE.BufferGeometry;
 }
 
 export interface GrassTextures {
