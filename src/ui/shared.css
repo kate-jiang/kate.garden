@@ -126,12 +126,12 @@ body {
   display: none;
 }
 #about-content a {
-  font-weight: 500;
+  font-weight: 600;
   color: #fff;
-  text-decoration: dotted underline;
+  text-decoration: none;
 }
 #about-content a:hover {
-  color: #b8f839;
+  color: #efefef;
 }
 #about-content h1 {
   font-size: 28px;
