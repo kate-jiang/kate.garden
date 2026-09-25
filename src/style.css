@@ -81,7 +81,7 @@ body.night-mode #now-playing {
 }
 
 body.night-mode #about-content a:hover {
-  color: #a8d5ff;
+  color: #ddd;
 }
 
 body.night-mode #about-content p.secondary {
