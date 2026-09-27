@@ -1,4 +1,3 @@
-import { shouldUseGarden } from "./device";
 import { createPreference } from "./services/preferences";
 import { fetchViewCount } from "./services/views";
 import { createSiteUI } from "./ui/site";
@@ -50,12 +49,8 @@ function fallback(error?: unknown) {
 }
 async function start() {
   try {
-    if (!(await shouldUseGarden())) {
-      fallback();
-      return;
-    }
-    if (lifetime.signal.aborted) return;
     const { createGarden } = await import("./scene/garden");
+    if (lifetime.signal.aborted) return;
     const canvas = requireElement<HTMLCanvasElement>(document, "#webgl");
     garden = await createGarden({
       canvas,

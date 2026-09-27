@@ -75,16 +75,6 @@ test("garden renders, routes pointer input, and persists theme choice", async ({
   expect(errors).toEqual([]);
 });
 
-test("rejected devices reach lite without requesting garden code", async ({ page }) => {
-  const requests: string[] = [];
-  page.on("request", request => requests.push(request.url()));
-  await useGarden(page, false);
-  await page.goto("/");
-  await expect(page).toHaveURL(/\/lite.html$/);
-  await expect(page.getByRole("button", { name: "music", exact: true })).toBeVisible();
-  expect(requests.filter(url => /three|\/scene\//.test(url))).toEqual([]);
-});
-
 for (const asset of ["helvetiker.json", "textures/blade_diffuse.jpg"]) {
   test(`missing ${asset} falls back to usable lite`, async ({ page }) => {
     await useGarden(page);

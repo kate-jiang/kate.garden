@@ -34,13 +34,7 @@ export async function expectRenderedGarden(page: Page) {
     .toBeGreaterThan(0);
 }
 
-export async function useGarden(page: Page, enabled = true) {
-  await page.route(/\/src\/device\.ts(?:\?.*)?$/, route =>
-    route.fulfill({
-      contentType: "text/javascript",
-      body: `export async function shouldUseGarden() { return ${enabled}; }`,
-    })
-  );
+export async function useGarden(page: Page) {
   // Interaction checks use fewer instances; full-density screenshots are reviewed separately.
   await page.route(/\/src\/scene\/config\.ts(?:\?.*)?$/, async route => {
     const response = await route.fetch();
